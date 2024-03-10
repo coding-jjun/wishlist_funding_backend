@@ -10,7 +10,6 @@ import {
 import { User } from './user.entity';
 import { Comment } from './comment.entity';
 import { FundTheme } from '../enums/fundtheme.enum';
-import { Min } from 'class-validator';
 
 @Entity()
 export class Funding {
@@ -40,11 +39,9 @@ export class Funding {
   fundPubl: boolean;
 
   @Column('int')
-  @Min(0)
   fundGoal: number;
 
   @Column('int', { default: 0 })
-  @Min(0)
   fundSum: number;
 
   @OneToMany(() => Comment, (comment) => comment.funding)

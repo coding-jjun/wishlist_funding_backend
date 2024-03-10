@@ -8,6 +8,8 @@ import {
   Put,
 } from '@nestjs/common';
 import { FundingService } from './funding.service';
+import { FundingCreateDto } from './dto/funding-create.dto';
+import { FundingUpdateDto } from './dto/funding-update.dto';
 
 @Controller('api/fundings')
 export class FundingController {
@@ -17,7 +19,7 @@ export class FundingController {
   findAll() {}
 
   @Post()
-  create(@Body() createFundingDto /*:CreateFundingDto*/) {}
+  create(@Body() fundingCreateDto: FundingCreateDto) {}
 
   @Get(':id')
   findOne(@Param('id') id: number) {
@@ -25,8 +27,8 @@ export class FundingController {
   }
 
   @Put(':id')
-  update(@Param('id') id: number, updateFundingDto /*:UpdateFundingDto*/) {
-    return this.fundingService.update(id, updateFundingDto);
+  update(@Param('id') id: number, fundingUpdateDto: FundingUpdateDto) {
+    return this.fundingService.update(id, fundingUpdateDto);
   }
 
   @Delete(':id')
