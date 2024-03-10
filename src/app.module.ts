@@ -18,7 +18,7 @@ import { RollingPaperModule } from './features/rolling-paper/rolling-paper.modul
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.local.env'],
+      envFilePath: ['.env'],
       // cache: true,
       expandVariables: true,
     }),
