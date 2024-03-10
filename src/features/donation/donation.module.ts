@@ -4,7 +4,7 @@ import { DonationService } from './donation.service';
 import { RollingPaperService } from '../rolling-paper/rolling-paper.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Donation } from 'src/entities/donation.entity';
-import { RollingPaper } from 'src/entities/rollingPaper.entity';
+import { RollingPaper } from 'src/entities/rolling-paper.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Donation, RollingPaper])],

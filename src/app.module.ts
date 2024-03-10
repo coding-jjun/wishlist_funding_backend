@@ -13,7 +13,7 @@ import { Comment } from './entities/comment.entity';
 import { UserController } from './features/user/user.controller';
 import { UserService } from './features/user/user.service';
 import { Donation } from './entities/donation.entity';
-import { RollingPaper } from './entities/rollingPaper.entity';
+import { RollingPaper } from './entities/rolling-paper.entity';
 import { DonationModule } from './features/donation/donation.module';
 import { RollingPaperModule } from './features/rolling-paper/rolling-paper.module';
 
