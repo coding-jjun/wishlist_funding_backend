@@ -8,8 +8,8 @@ import {
   Put,
 } from '@nestjs/common';
 import { FundingService } from './funding.service';
-import { FundingCreateDto } from './dto/funding-create.dto';
-import { FundingUpdateDto } from './dto/funding-update.dto';
+import { CreateFundingDto } from './dto/create-funding.dto';
+import { UpdateFundingDto } from './dto/update-funding.dto';
 import { Funding } from 'src/entities/funding.entity';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 
@@ -23,7 +23,7 @@ export class FundingController {
   }
 
   @Post()
-  create(@Body() fundingCreateDto: FundingCreateDto): CommonResponse {
+  create(@Body() fundingCreateDto: CreateFundingDto): CommonResponse {
     const funding = this.fundingService.create(fundingCreateDto, '');
     return {
       timestamp: new Date(Date.now()),
@@ -38,7 +38,7 @@ export class FundingController {
   }
 
   @Put(':id')
-  update(@Param('id') id: number, fundingUpdateDto: FundingUpdateDto) {
+  update(@Param('id') id: number, fundingUpdateDto: UpdateFundingDto) {
     return this.fundingService.update(id, fundingUpdateDto);
   }
 

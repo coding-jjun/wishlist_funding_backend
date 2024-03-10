@@ -1,4 +1,4 @@
-import { FriendStatus } from "src/enums/friendStatus.enum";
+import { FriendStatus } from "src/enums/friend-status.enum";
 import { Column, CreateDateColumn, Entity, PrimaryColumn } from "typeorm";
 
 @Entity()
