@@ -5,8 +5,8 @@ import { UserModule } from './features/user/user.module';
 import { RollingPaperModule } from './features/rolling-paper/rolling-paper.module';
 
 @Module({
-  imports: [UserModule],
-  controllers: [AppController, RollingPaperModule],
+  imports: [UserModule, RollingPaperModule],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
