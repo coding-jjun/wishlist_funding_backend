@@ -16,6 +16,8 @@ import { DonationModule } from './features/donation/donation.module';
 import { RollingPaperModule } from './features/rolling-paper/rolling-paper.module';
 import { readFileSync } from 'fs';
 import { Friend } from './entities/friend.entity';
+import { Notification } from './entities/notification.entity';
+import { CommentModule } from './features/comment/comment.module';
 
 @Module({
   imports: [
@@ -29,9 +31,9 @@ import { Friend } from './entities/friend.entity';
       type: 'postgres',
       host: process.env.DB_HOST,
       port: parseInt(process.env.DB_PORT) || 5432,
-      password: process.env.DB_DEV_PASSWORD,
-      username: process.env.DB_DEV_USERNAME,
-      database: process.env.DB_DEV_DATABASE,
+      password: process.env.DB_DEV_1_PASSWORD,
+      username: process.env.DB_DEV_1_USERNAME,
+      database: process.env.DB_DEV_1_DATABASE,
       synchronize: true,
       logging: true,
       entities: [User, Funding, Comment, Donation, RollingPaper, Notification, Friend],
@@ -50,6 +52,7 @@ import { Friend } from './entities/friend.entity';
     RollingPaperModule,
     FriendModule,
     NotificationModule,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
