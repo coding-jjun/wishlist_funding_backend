@@ -14,6 +14,8 @@ export class NotificationService {
 
     async findAllByUser(userId: number): Promise<Notification[]> {
         const notifications = await this.notificationRepository.createQueryBuilder('notification')
+            .where('notification.recvId = :userId', { userId })
+            .getMany();
 
         return notifications;
     }
