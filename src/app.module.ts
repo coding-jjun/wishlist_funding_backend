@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { NotificationModule } from './features/notification/notification.module';
 import { UserModule } from './features/user/user.module';
 import { FundingModule } from './features/funding/funding.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
