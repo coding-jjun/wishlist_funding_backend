@@ -1,22 +1,36 @@
-import { Controller, Delete, Get, Post, Put } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Post,
+    Put,
+} from '@nestjs/common';
 import { FundingService } from './funding.service';
 
-@Controller('fundings')
+@Controller('api/fundings')
 export class FundingController {
-    constructor(private service: FundingService) {}
+    constructor(private fundingService: FundingService) {}
 
     @Get()
-    getAll() {}
+    findAll() {}
 
     @Post()
-    create() {}
+    create(@Body() createFundingDto /*:CreateFundingDto*/) {}
 
-    @Get('<id>')
-    getDetail() {}
+    @Get(':id')
+    findOne(@Param('id') id: number) {
+        return this.fundingService.findOne(id);
+    }
 
-    @Put('<id>')
-    update() {}
+    @Put(':id')
+    update(@Param('id') id: number, updateFundingDto /*:UpdateFundingDto*/) {
+        return this.fundingService.update(id, updateFundingDto);
+    }
 
-    @Delete('<id>')
-    delete() {}
+    @Delete(':id')
+    remove(@Param('id') id: number) {
+        return this.fundingService.remove(id);
+    }
 }
