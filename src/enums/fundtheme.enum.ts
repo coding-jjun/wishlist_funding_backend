@@ -1,5 +1,5 @@
 export enum FundTheme {
-    Birthday = "Birthday",
-    Anniversary = "Anniversary",
-    Donation = "Donation",
+  Birthday = 'Birthday',
+  Anniversary = 'Anniversary',
+  Donation = 'Donation',
 }

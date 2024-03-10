@@ -4,9 +4,9 @@ import { Comment } from './comment.entity';
 
 @Entity()
 export class User {
-    @OneToMany(() => Funding, (funding) => funding.fundUser)
-    fundings: Funding[];
+  @OneToMany(() => Funding, (funding) => funding.fundUser)
+  fundings: Funding[];
 
-    @OneToMany(() => Comment, (comment) => comment.author)
-    comments: Comment[];
+  @OneToMany(() => Comment, (comment) => comment.author)
+  comments: Comment[];
 }
