@@ -24,7 +24,7 @@ export class FundingController {
 
   @Post()
   create(@Body() fundingCreateDto: FundingCreateDto): CommonResponse {
-    const funding = this.fundingService.create(fundingCreateDto, "");
+    const funding = this.fundingService.create(fundingCreateDto, '');
     return {
       timestamp: new Date(Date.now()),
       message: '성공적으로 생성했습니다.',
