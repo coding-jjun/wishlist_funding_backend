@@ -7,37 +7,45 @@ import { UpdateNotificationDto } from './dto/updateNotification.dto';
 
 @Injectable()
 export class NotificationService {
-    constructor(
-        @InjectRepository(Notification)
-        private notificationRepository: Repository<Notification>,
-    ) {}
+  constructor(
+    @InjectRepository(Notification)
+    private notificationRepository: Repository<Notification>,
+  ) {}
 
-    async findAllByUser(userId: number): Promise<Notification[]> {
-        const notifications = await this.notificationRepository.createQueryBuilder('notification')
-            .where('notification.recvId = :userId', { userId })
-            .getMany();
+  async findAllByUser(userId: number): Promise<Notification[]> {
+    const notifications = await this.notificationRepository
+      .createQueryBuilder('notification')
+      .where('notification.recvId = :userId', { userId })
+      .getMany();
 
-        return notifications;
+    return notifications;
+  }
+
+  async createNotification(
+    createNotificationDto: CreateNotificationDto,
+  ): Promise<Notification> {
+    const noti = new Notification();
+
+    noti.sendId = createNotificationDto.sendId;
+    noti.recvId = createNotificationDto.recvId;
+    noti.notiType = createNotificationDto.notiType;
+    noti.reqType = createNotificationDto.reqType;
+    noti.subId = createNotificationDto.subId;
+
+    return await this.notificationRepository.save(noti);
+  }
+
+  async updateNotification(
+    notiId: number,
+    updateNotificationDto: UpdateNotificationDto,
+  ): Promise<Notification> {
+    const noti = await this.notificationRepository.findOne({
+      where: { notiId },
+    });
+    if (noti) {
+      noti.reqType = updateNotificationDto.reqType;
+      await this.notificationRepository.save(noti);
+      return noti;
     }
-
-    async createNotification(createNotificationDto: CreateNotificationDto): Promise<Notification> {
-        const noti = new Notification();
-
-        noti.sendId = createNotificationDto.sendId;
-        noti.recvId = createNotificationDto.recvId;
-        noti.notiType = createNotificationDto.notiType;
-        noti.reqType = createNotificationDto.reqType;
-        noti.subId = createNotificationDto.subId;
-
-        return await this.notificationRepository.save(noti);
-    }
-
-    async updateNotification(notiId: number, updateNotificationDto: UpdateNotificationDto): Promise<Notification> {
-        const noti = await this.notificationRepository.findOne({ where: { notiId }});
-        if (noti) {
-            noti.reqType = updateNotificationDto.reqType;
-            await this.notificationRepository.save(noti);
-            return noti;
-        }
-    }
+  }
 }

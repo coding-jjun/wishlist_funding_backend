@@ -4,6 +4,6 @@ import { RollingPaperService } from './rolling-paper.service';
 
 @Module({
   controllers: [RollingPaperController],
-  providers: [RollingPaperService]
+  providers: [RollingPaperService],
 })
 export class RollingPaperModule {}

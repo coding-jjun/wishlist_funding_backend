@@ -37,12 +37,8 @@ import { RollingPaperModule } from './features/rolling-paper/rolling-paper.modul
     FundingModule,
     DonationModule,
     RollingPaperModule,
-
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
-
-
-

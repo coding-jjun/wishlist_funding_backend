@@ -1,19 +1,19 @@
-import { IsNotEmpty } from "class-validator";
-import { NotiType, ReqType } from "src/enums/notification.enum";
+import { IsNotEmpty } from 'class-validator';
+import { NotiType, ReqType } from 'src/enums/notification.enum';
 
 export class CreateNotificationDto {
-	@IsNotEmpty()
-	recvId: number;
+  @IsNotEmpty()
+  recvId: number;
 
-	@IsNotEmpty()
-	sendId: number;
+  @IsNotEmpty()
+  sendId: number;
 
-	@IsNotEmpty()
-	notiType: NotiType;
+  @IsNotEmpty()
+  notiType: NotiType;
 
-    @IsNotEmpty()
-    reqType: ReqType;
+  @IsNotEmpty()
+  reqType: ReqType;
 
-    @IsNotEmpty()
-    subId: number;
+  @IsNotEmpty()
+  subId: number;
 }
