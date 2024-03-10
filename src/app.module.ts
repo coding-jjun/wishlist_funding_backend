@@ -3,12 +3,15 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { NotificationModule } from './features/notification/notification.module';
 import { UserModule } from './features/user/user.module';
+import { FriendModule } from './features/friend/friend.module';
 import { FundingModule } from './features/funding/funding.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { User } from './entities/user.entity';
 import { Funding } from './entities/funding.entity';
 import { Comment } from './entities/comment.entity';
+import { UserController } from './features/user/user.controller';
+import { UserService } from './features/user/user.service';
 import { Donation } from './entities/donation.entity';
 import { RollingPaper } from './entities/rolling-paper.entity';
 import { DonationModule } from './features/donation/donation.module';
@@ -37,6 +40,7 @@ import { RollingPaperModule } from './features/rolling-paper/rolling-paper.modul
     FundingModule,
     DonationModule,
     RollingPaperModule,
+    FriendModule,
   ],
   controllers: [AppController],
   providers: [AppService],
