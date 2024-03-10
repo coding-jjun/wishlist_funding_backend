@@ -1,6 +1,6 @@
 import { IsDate, IsDateString, Min } from 'class-validator';
 import { Funding } from 'src/entities/funding.entity';
-import { FundTheme } from 'src/enums/fundtheme.enum';
+import { FundTheme } from 'src/enums/fundTheme.enum';
 
 export class FundingCreateDto {
   fundTitle: string;
