@@ -8,6 +8,8 @@ import { ConfigModule } from '@nestjs/config';
 import { User } from './entities/user.entity';
 import { Funding } from './entities/funding.entity';
 import { Comment } from './entities/comment.entity';
+import { UserController } from './features/user/user.controller';
+import { UserService } from './features/user/user.service';
 
 @Module({
   imports: [
