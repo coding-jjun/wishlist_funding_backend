@@ -4,21 +4,21 @@ import { Notification } from 'src/entities/notification.entity';
 import { NotiType, ReqType } from 'src/enums/notification.enum';
 import { UpdateNotificationDto } from './dto/updateNotification.dto';
 
-@Controller('notification')
+@Controller('api/notification')
 export class NotificationController {
     constructor (
         private notificationService: NotificationService,
         // private appGateWay: AppGateWay,
     ) {}
 
-    @Get(':userId')
+    @Get('/:userId')
     findAllByUser(
         @Param('userId', ParseIntPipe) userId: number,
     ): Promise<Notification[]> {
         return this.notificationService.findAllByUser(userId);
     }
 
-    @Put(':notiId')
+    @Put('/:notiId')
     async update(
         @Param('notiId', ParseIntPipe) notiId: number,
         @Body() updateNotificationDto: UpdateNotificationDto,
