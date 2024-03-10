@@ -10,7 +10,7 @@ import { User } from './entities/user.entity';
 import { Funding } from './entities/funding.entity';
 import { Comment } from './entities/comment.entity';
 import { Donation } from './entities/donation.entity';
-import { RollingPaper } from './entities/rollingPaper.entity';
+import { RollingPaper } from './entities/rolling-paper.entity';
 import { DonationModule } from './features/donation/donation.module';
 import { RollingPaperModule } from './features/rolling-paper/rolling-paper.module';
 
