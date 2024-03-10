@@ -17,11 +17,17 @@ export class User {
     @Column({ unique: true })
     userPhone: string;
 
+    @Column()
+    userEmail: string;
+
     @Column('date')
     userBirth: Date;
 
-    @Column()
+    @Column({ unique: true })
     accId: number;
+
+    @Column()
+    userImg: number;
 
     @CreateDateColumn()
     regAt: Date;

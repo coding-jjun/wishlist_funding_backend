@@ -20,6 +20,11 @@ export class UpdateUserDto {
     userBirth: Date;
 
     @IsNotEmpty()
+    userEmail: string;
+
+    @IsNotEmpty()
     accId: number;
 
+    @IsNotEmpty()
+    userImg: number;
 }

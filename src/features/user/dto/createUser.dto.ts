@@ -17,4 +17,8 @@ export class CreateUserDto {
     userBirth: Date;
 
     accId: number;
+
+    userEmail: string;
+
+    userImg: number;
 }

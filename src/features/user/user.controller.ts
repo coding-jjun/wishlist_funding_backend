@@ -15,10 +15,17 @@ export class UserController {
         return await this.userService.getUserInfo(req.user);
     }
 
-    @Get('/:userId/fundings')
-    async getUserFunding(
-        @Param('userId', ParseIntPipe) id: number,
-    ): Promise<Funding[]> {
-        return await this.fundingService.getUserFundings(userId);
-    }
+    // @Get('/:userId/fundings')
+    // async getUserFunding(
+    //     @Param('userId', ParseIntPipe) id: number,
+    // ): Promise<Funding[]> {
+    //     return await this.fundingService.getUserFundings(userId);
+    // }
+
+    // @Get('/:userId/account')
+    // async getUserAccount(
+    //     @Param('userId', ParseIntPipe) userId: number,
+    // ) {
+    //     return await this.userService.getUserAccount(userId);
+    // }
 }
