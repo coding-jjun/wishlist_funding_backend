@@ -14,7 +14,7 @@ export class RollingPaper {
 
   // @OneToOne(() => Image, img => img.imgId)
   // @JoinColumn({ name: 'rollImg' })
-  // rollImg: Image;
+  // rollImg: string;
 
   @Column({ default: '축하해요' })
   rollMsg: string;
