@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { Comment } from './comment.entity';
-import { FundTheme } from '../enums/fundTheme.enum';
+import { FundTheme } from 'src/enums/fundtheme.enum';
 
 @Entity()
 export class Funding {
