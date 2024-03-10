@@ -9,7 +9,7 @@ import {
 import { NotificationService } from './notification.service';
 import { Notification } from 'src/entities/notification.entity';
 import { NotiType, ReqType } from 'src/enums/notification.enum';
-import { UpdateNotificationDto } from './dto/updateNotification.dto';
+import { UpdateNotificationDto } from './dto/update-notification.dto';
 
 @Controller('api/notification')
 export class NotificationController {

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Funding } from 'src/entities/funding.entity';
 import { Repository } from 'typeorm';
-import { FundingCreateDto } from './dto/funding-create.dto';
+import { CreateFundingDto } from './dto/create-funding.dto';
 import { User } from 'src/entities/user.entity';
 
 @Injectable()
@@ -23,7 +23,7 @@ export class FundingService {
     return this.fundingRepository.findBy({ fundId });
   }
 
-  create(fundingCreateDto: FundingCreateDto, accessToken: string): Funding {
+  create(fundingCreateDto: CreateFundingDto, accessToken: string): Funding {
     // TODO - accessToken -> User 객체로 변환하기
     const user = this.userRepository.find()[0];
     let funding = new Funding(

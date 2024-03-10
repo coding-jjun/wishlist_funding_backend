@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Donation } from 'src/entities/donation.entity';
-import { RollingPaper } from 'src/entities/rollingPaper.entity';
+import { RollingPaper } from 'src/entities/rolling-paper.entity';
 import { CreateDonationDto } from './dto/create-donation.dto';
 import { CreateGuestDto } from './dto/create-guest.dto';
 
