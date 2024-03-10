@@ -9,8 +9,10 @@ import { ConfigModule } from '@nestjs/config';
 import { User } from './entities/user.entity';
 import { Funding } from './entities/funding.entity';
 import { Comment } from './entities/comment.entity';
-import { UserController } from './features/user/user.controller';
-import { UserService } from './features/user/user.service';
+import { Donation } from './entities/donation.entity';
+import { RollingPaper } from './entities/rollingPaper.entity';
+import { DonationModule } from './features/donation/donation.module';
+import { RollingPaperModule } from './features/rolling-paper/rolling-paper.module';
 
 @Module({
   imports: [
@@ -29,12 +31,18 @@ import { UserService } from './features/user/user.service';
       database: process.env.DB_DEV_DATABASE,
       synchronize: true,
       logging: true,
-      entities: [User, Funding, Comment],
+      entities: [User, Funding, Comment, Donation, RollingPaper],
     }),
     UserModule,
     FundingModule,
+    DonationModule,
+    RollingPaperModule,
+
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
+
+
+
