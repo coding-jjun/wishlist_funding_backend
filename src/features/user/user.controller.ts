@@ -2,7 +2,7 @@ import { Controller, Get, ParseIntPipe, Request } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from 'src/entities/user.entity';
 
-@Controller('user')
+@Controller('api/user')
 export class UserController {
     constructor(
         private readonly userService: UserService,
