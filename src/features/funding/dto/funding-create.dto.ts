@@ -1,12 +1,13 @@
 import { IsDate, IsDateString, Min } from 'class-validator';
+import { Funding } from 'src/entities/funding.entity';
 import { FundTheme } from 'src/enums/fundtheme.enum';
 
 export class FundingCreateDto {
   fundTitle: string;
   fundCont: string;
   fundImg: string[];
-  fundTheme: FundTheme;
-  fundPubl: boolean;
+  fundTheme?: FundTheme;
+  fundPubl?: boolean;
 
   @Min(0)
   fundGoal: number;
@@ -14,8 +15,8 @@ export class FundingCreateDto {
   // TODO - FundAddressDto
   // fundAddr: AddressDto
 
-  @IsDateString()
-  endAt: string;
+  @IsDate()
+  endAt: Date;
 
   // TODO - GiftCreateDto
   // gifts: GiftCreateDto[]

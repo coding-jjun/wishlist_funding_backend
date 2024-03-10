@@ -13,6 +13,24 @@ import { FundTheme } from '../enums/fundtheme.enum';
 
 @Entity()
 export class Funding {
+  constructor(
+    fundUser: User,
+    fundTitle: string,
+    fundCont: string,
+    fundGoal: number,
+    endAt: Date,
+    fundTheme?: FundTheme,
+    fundPubl?: boolean,
+  ) {
+    this.fundUser = fundUser;
+    this.fundTitle = fundTitle;
+    this.fundCont = fundCont;
+    this.fundGoal = fundGoal;
+    this.endAt = endAt;
+    this.fundTheme = fundTheme;
+    this.fundPubl = fundPubl;
+  }
+
   @PrimaryGeneratedColumn()
   fundId: number;
 
