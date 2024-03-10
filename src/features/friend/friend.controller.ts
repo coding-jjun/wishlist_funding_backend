@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FriendService } from './friend.service';
 import { FriendRequestDto } from './dto/friendRequest.dto';
 
-@Controller('friend')
+@Controller('api/friend')
 export class FriendController {
     constructor (private readonly friendService: FriendService) {}
 
