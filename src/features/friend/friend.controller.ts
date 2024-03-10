@@ -1,4 +1,31 @@
-import { Controller } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { FriendService } from './friend.service';
+import { FriendRequestDto } from './dto/friendRequest.dto';
 
 @Controller('friend')
-export class FriendController {}
+export class FriendController {
+    constructor (private readonly friendService: FriendService) {}
+
+    // @Get('/:userId')
+    // getFriends(
+    //     @Param('userId') userId: number
+    // ): Promise<{ result, total}> {
+    //     return this.friendService.getFriends(userId);
+    // }
+
+    // @Post('/')
+    // createFriend(
+    //     @Body() body: FriendRequestDto
+    // ): Promise<{ result }> {
+    //     return this.friendService.createFriend(body);
+    // }
+
+    // @Delete('/')
+    // deleteFriend(
+    //     @Body() body: FriendRequestDto
+    // ): Promise<{ result }> {
+    //     return this.friendService.deleteFriend(body);
+    // }
+
+}
