@@ -13,7 +13,7 @@ import { FundingUpdateDto } from './dto/funding-update.dto';
 import { Funding } from 'src/entities/funding.entity';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 
-@Controller('api/fundings')
+@Controller('api/funding')
 export class FundingController {
   constructor(private fundingService: FundingService) {}
 
