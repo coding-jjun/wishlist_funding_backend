@@ -16,7 +16,9 @@ import { DonationModule } from './features/donation/donation.module';
 import { RollingPaperModule } from './features/rolling-paper/rolling-paper.module';
 import { readFileSync } from 'fs';
 import { Friend } from './entities/friend.entity';
-
+import { Notification } from './entities/notification.entity';
+import { GratitudeModule } from './features/gratitude/gratitude.module';
+import { Gratitude } from './entities/gratitude.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -34,7 +36,7 @@ import { Friend } from './entities/friend.entity';
       database: process.env.DB_DEV_DATABASE,
       synchronize: true,
       logging: true,
-      entities: [User, Funding, Comment, Donation, RollingPaper, Notification, Friend],
+      entities: [User, Funding, Comment, Donation, RollingPaper, Notification, Friend, Gratitude],
       ssl: {
         ca: readFileSync('global-bundle.pem'),
       },
@@ -50,6 +52,7 @@ import { Friend } from './entities/friend.entity';
     RollingPaperModule,
     FriendModule,
     NotificationModule,
+    GratitudeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
