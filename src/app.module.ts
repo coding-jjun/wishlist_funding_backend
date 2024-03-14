@@ -18,6 +18,7 @@ import { readFileSync } from 'fs';
 import { Friend } from './entities/friend.entity';
 import { Gratitude } from './entities/gratitude.entity';
 import { GratitudeModule } from './features/gratitude/gratitude.module';
+import { Image } from './entities/image.entity';
 
 @Module({
   imports: [
@@ -36,7 +37,7 @@ import { GratitudeModule } from './features/gratitude/gratitude.module';
       database: process.env.DB_DEV_DATABASE,
       synchronize: true,
       logging: true,
-      entities: [User, Funding, Comment, Donation, RollingPaper, Notification, Friend, Gratitude],
+      entities: [User, Funding, Comment, Donation, RollingPaper, Notification, Friend, Gratitude, Image],
       ssl: {
         ca: readFileSync('global-bundle.pem'),
       },
