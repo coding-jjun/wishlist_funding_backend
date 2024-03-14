@@ -3,6 +3,7 @@ import {
   Column,
   Entity,
   PrimaryGeneratedColumn,
+  Index
 } from 'typeorm';
 
 @Entity()
@@ -21,4 +22,8 @@ export class Image {
   
   @Column('int')
   subId: number;
+
+  @Index('subId_imgType_index', { unique: true })
+  subIdImgTypeIndex: [number, ImageType];
+
 }
