@@ -5,6 +5,8 @@ import { Donation } from 'src/entities/donation.entity';
 import { RollingPaper } from 'src/entities/rolling-paper.entity';
 import { CreateDonationDto } from './dto/create-donation.dto';
 import { CreateGuestDto } from './dto/create-guest.dto';
+import { Funding } from 'src/entities/funding.entity';
+import { User } from 'src/entities/user.entity';
 
 @Injectable()
 export class DonationService {
@@ -15,11 +17,13 @@ export class DonationService {
     @InjectRepository(RollingPaper)
     private readonly rollingPaperRepo: Repository<RollingPaper>,
 
-    // @InjectRepository(Funding)
-    // private readonly fundingRepo: Repository<Funding>,
+    @InjectRepository(Funding)
+    private readonly fundingRepo: Repository<Funding>,
 
-    // @InjectRepository(User)
-    // private readonly userRepo: Repository<User>,
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
+    
+    // private readonly imgService : ImageService
   ) {}
 
   async getAllDonations(): Promise<Donation[]> {
@@ -27,14 +31,14 @@ export class DonationService {
     // TODO: donation paging 처리
     const result = await this.donationRepo
       .createQueryBuilder('d')
-      // .leftJoinAndSelect('d.fund', 'f')
+      .leftJoinAndSelect('d.fund', 'f')
       // .leftJoinAndSelect('d.user', 'u')
       .select([
         'd.donId',
         'd.orderId',
         'd.donAmnt',
         'd.regAt',
-        // 'f.fundId'
+        'f.fundId'
       ])
       // .where('u.userId = :userId', { userId })
       .getMany();
@@ -44,12 +48,12 @@ export class DonationService {
   async getOneDonation(orderId: string) {
     const result = await this.donationRepo
       .createQueryBuilder('d')
-      // .leftJoinAndSelect('d.fund', 'f')
+      .leftJoinAndSelect('d.fund', 'f')
       .select([
         'd.orderId',
         'd.donAmnt',
         'd.regAt',
-        // 'f.fundId'
+        'f.fundId'
       ])
       .where('d.orderId = :orderId', { orderId })
       .getOne();
@@ -57,50 +61,46 @@ export class DonationService {
     return result;
   }
 
-  async createOrFindDonator(userId: number, guest: CreateGuestDto) {
-    //: Promise<Donation>
+  async createOrFindDonator(userId: number, guest: CreateGuestDto): Promise<User> {
     if (guest !== null) {
       const { userNick, userPhone, accBank, accNum } = guest;
       // const user = new User();
+      // const address = new Address();
       // user.userNick = userNick;
       // user.userPhone = userPhone;
-      // user.accBank = accBank;
-      // user.accNum = accNum;
-      // await this.userRepo.save(user);
-      // return user;
+      // user.accId = 1;
+      // return await this.userRepo.save(user);
     }
     // return await this.userRepo.findOne({ where: { userId } });
   }
 
   async updateFundingSum(fundId: number, donAmnt: number) {
-    //: Promise<Funding>
-    // const funding = await this.fundingRepo.findOne({ where: { fundId } });
-    // funding.fundSum += createDonationDto.donAmnt;
+    const funding = await this.fundingRepo.findOne({ where: { fundId } });
+    funding.fundSum += donAmnt;
     // TODO 펀딩 목표금액 달성 확인 후 Notification
-    // await this.fundingsRepo.save(funding);
-    // return funding;
+    return await this.fundingRepo.save(funding);
   }
 
   async createRollingPaper(rollId: number, rollMsg: string, rollImg: string) {
     const rollingPaper = new RollingPaper();
     rollingPaper.rollId = rollId;
     rollingPaper.rollMsg = rollMsg;
-    // rollingPaper.rollImg = rollImg
-    await this.rollingPaperRepo.save(rollingPaper);
+    // TODO create RolllingPaper Image
+    return await this.rollingPaperRepo.save(rollingPaper);
   }
 
   // CREATE
   async createDonation(fundId: number, createDonationDto: CreateDonationDto) {
-    // const userId = 1;
+    const userId = 1;
     const donAmnt = createDonationDto.donAmnt;
 
     // const user = await this.createOrFindDonator(userId, createDonationDto.guest);
-    // const funding = await this.updateFundingSum(fundId, donAmnt);
+    const funding = await this.updateFundingSum(fundId, donAmnt);
 
     // CREATE donation
     const donation = new Donation();
     // donation.user = user;
-    // donation.funding = funding;
+    donation.funding = funding;
 
     const orderId = require('order-id')('key').generate();
     donation.orderId = orderId;
