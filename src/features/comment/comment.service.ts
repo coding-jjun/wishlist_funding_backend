@@ -3,7 +3,7 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { Comment } from 'src/entities/comment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Equal, Repository } from 'typeorm';
 import { Funding } from 'src/entities/funding.entity';
 
 @Injectable()
@@ -23,9 +23,16 @@ export class CommentService {
    * @returns Comment[]
    */
   async findMany(fundId: number): Promise<Comment[]> {
-    return this.commentRepository.findBy({
-      funding: await this.fundingRepository.findOneBy({ fundId }),
-      isDel: false,
+    return this.commentRepository.find({
+      relations: {
+        funding: true,
+      },
+      where: {
+        funding: {
+          fundId,
+        },
+        isDel: false,
+      },
     });
   }
 

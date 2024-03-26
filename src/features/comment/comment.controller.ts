@@ -6,13 +6,15 @@ import {
   Patch,
   Param,
   Delete,
+  Logger,
+  Query,
 } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 
-@Controller('comment')
+@Controller('api/comment')
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
@@ -26,15 +28,16 @@ export class CommentController {
 
   /**
    * 댓글 조회
-   * @param id fundId로, 펀딩에 딸린 모든 댓글을 요청한다
+   * @param fundId 펀딩에 딸린 모든 댓글을 요청한다
    * @returns Comment[]
    */
   @Get()
-  findMany(@Param('fundId') id: string): CommonResponse {
+  async findMany(@Query('fundId') fundId: string): Promise<CommonResponse> {
+    Logger.log(`fundId: ${fundId}`);
     return {
       timestamp: new Date(Date.now()),
       message: 'success',
-      data: this.commentService.findMany(+id),
+      data: await this.commentService.findMany(parseInt(fundId)),
     };
   }
 
