@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Equal, Repository } from 'typeorm';
 import { Funding } from 'src/entities/funding.entity';
 import { GetCommentDto } from './dto/get-comment.dto';
+import { User } from 'src/entities/user.entity';
 
 function convertToGetCommentDto(comment: Comment): GetCommentDto {
   const { comId, content, regAt, isMod, authorId } = comment;
@@ -17,10 +18,24 @@ export class CommentService {
   constructor(
     @InjectRepository(Comment) private commentRepository: Repository<Comment>,
     @InjectRepository(Funding) private fundingRepository: Repository<Funding>,
+    @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
-  create(createCommentDto: CreateCommentDto) {
-    return 'This action adds a new comment';
+  async create(createCommentDto: CreateCommentDto): Promise<GetCommentDto> {
+    let { fundId, authorId, content } = createCommentDto;
+
+    const where = { fundId };
+    const funding = await this.fundingRepository.find({ where })[0];
+    const author = await this.userRepository.find()[0];
+
+    let newComment: Comment = new Comment();
+    newComment.funding = funding;
+    newComment.fundId = fundId;
+    newComment.author = author;
+    newComment.authorId = authorId;
+    newComment.content = content;
+
+    return this.commentRepository.save(newComment);
   }
 
   /**

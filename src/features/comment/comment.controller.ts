@@ -22,8 +22,12 @@ export class CommentController {
    * 댓글 생성
    */
   @Post()
-  create(@Body() createCommentDto: CreateCommentDto) {
-    return this.commentService.create(createCommentDto);
+  async create(@Body() createCommentDto: CreateCommentDto): Promise<CommonResponse> {
+    return {
+      timestamp: new Date(Date.now()),
+      message: "success",
+      data: await this.commentService.create(createCommentDto)
+    };
   }
 
   /**
