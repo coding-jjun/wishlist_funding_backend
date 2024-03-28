@@ -5,6 +5,12 @@ import { Comment } from 'src/entities/comment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Equal, Repository } from 'typeorm';
 import { Funding } from 'src/entities/funding.entity';
+import { GetCommentDto } from './dto/get-comment.dto';
+
+function convertToGetCommentDto(comment: Comment): GetCommentDto {
+  const { comId, content, regAt, isMod, authorId } = comment;
+  return { comId, content, regAt, isMod, authorId } as GetCommentDto;
+}
 
 @Injectable()
 export class CommentService {
@@ -22,18 +28,12 @@ export class CommentService {
    * @param fundId comId가 아닌, 펀딩Id라는 점 유의.
    * @returns Comment[]
    */
-  async findMany(fundId: number): Promise<Comment[]> {
-    return this.commentRepository.find({
-      relations: {
-        funding: true,
-      },
-      where: {
-        funding: {
-          fundId,
-        },
-        isDel: false,
-      },
-    });
+  async findMany(fundId: number): Promise<GetCommentDto[]> {
+    const where = { funding: { fundId } };
+
+    return this.commentRepository
+      .find({ where })
+      .then((comments) => comments.map(convertToGetCommentDto));
   }
 
   update(id: number, updateCommentDto: UpdateCommentDto) {
