@@ -26,7 +26,9 @@ export class CommentService {
 
     const where = { fundId };
     const funding = await this.fundingRepository.find({ where })[0];
-    const author = await this.userRepository.find()[0];
+    const author = await this.userRepository.find({
+      where: { userId: authorId },
+    })[0];
 
     let newComment: Comment = new Comment();
     newComment.funding = funding;
