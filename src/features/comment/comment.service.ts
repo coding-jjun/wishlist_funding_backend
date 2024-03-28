@@ -35,7 +35,9 @@ export class CommentService {
     newComment.authorId = authorId;
     newComment.content = content;
 
-    return this.commentRepository.save(newComment);
+    await this.commentRepository.save(newComment);
+
+    return convertToGetCommentDto(newComment);
   }
 
   /**
