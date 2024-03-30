@@ -41,15 +41,15 @@ export class CommentController {
    * @returns Comment[]
    */
   @Get()
-  async findMany(@Query('fundId') fundId: string): Promise<CommonResponse> {
+  async findMany(@Query('fundId') fundId: number): Promise<CommonResponse> {
     Logger.log(`fundId: ${fundId}`);
     if (!fundId) {
-      throw new HttpException('no `fundId` query', HttpStatus.BAD_REQUEST);
+      throw new HttpException('`fundId` query is invalid', HttpStatus.BAD_REQUEST);
     }
     return {
       timestamp: new Date(Date.now()),
       message: 'success',
-      data: await this.commentService.findMany(parseInt(fundId)),
+      data: await this.commentService.findMany(fundId),
     };
   }
 
