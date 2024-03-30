@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { Comment } from 'src/entities/comment.entity';
@@ -25,10 +25,16 @@ export class CommentService {
     let { fundId, authorId, content } = createCommentDto;
 
     const where = { fundId };
-    const funding = await this.fundingRepository.find({ where })[0];
-    const author = await this.userRepository.find({
+    const funding = await this.fundingRepository.findOne({ where });
+    if (!funding) {
+      throw new HttpException('funding does not exist', HttpStatus.NOT_FOUND);
+    }
+    const author = await this.userRepository.findOne({
       where: { userId: authorId },
-    })[0];
+    });
+    if (!author) {
+      throw new HttpException('author does not exist', HttpStatus.NOT_FOUND);
+    }
 
     let newComment: Comment = new Comment();
     newComment.funding = funding;
