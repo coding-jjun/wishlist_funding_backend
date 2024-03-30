@@ -8,13 +8,18 @@ import {
   Delete,
   Logger,
   Query,
+  HttpException,
+  HttpStatus,
+  UseFilters,
 } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
+import { CommonExceptionFilter } from 'src/common-exception/common-exception.filter';
 
 @Controller('api/comment')
+@UseFilters(CommonExceptionFilter)
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
@@ -38,6 +43,9 @@ export class CommentController {
   @Get()
   async findMany(@Query('fundId') fundId: string): Promise<CommonResponse> {
     Logger.log(`fundId: ${fundId}`);
+    if (!fundId) {
+      throw new HttpException('no `fundId` query', HttpStatus.BAD_REQUEST);
+    }
     return {
       timestamp: new Date(Date.now()),
       message: 'success',
