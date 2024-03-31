@@ -16,7 +16,7 @@ function convertToGetCommentDto(comment: Comment): GetCommentDto {
     regAt,
     isMod,
     authorId,
-    authorName: author ? author.userName : null,
+    authorName: author.userName,
   } as GetCommentDto;
 }
 
@@ -76,6 +76,7 @@ export class CommentService {
     const { content } = updateCommentDto;
 
     const comment = await this.commentRepository.findOne({
+      relations: { author: true },
       where: { comId, fundId },
     });
     if (!comment) {

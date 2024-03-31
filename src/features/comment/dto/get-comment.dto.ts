@@ -4,5 +4,5 @@ export class GetCommentDto {
   regAt: Date;
   isMod: boolean;
   authorId: number;
-  authorName: string | null;
+  authorName: string;
 }
