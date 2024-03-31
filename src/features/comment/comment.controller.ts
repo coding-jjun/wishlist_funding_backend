@@ -71,15 +71,22 @@ export class CommentController {
     return {
       timestamp: new Date(Date.now()),
       message: 'success',
-      data: await this.commentService.update(fundId, comId, updateCommentDto)
+      data: await this.commentService.update(fundId, comId, updateCommentDto),
     } as CommonResponse;
   }
 
   /**
    * 댓글 삭제
    */
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.commentService.remove(+id);
+  @Delete()
+  async remove(
+    @Query('fundId') fundId: number,
+    @Query('comId') comId: number,
+  ): Promise<CommonResponse> {
+    return {
+      timestamp: new Date(Date.now()),
+      message: 'success',
+      data: await this.commentService.remove(fundId, comId),
+    };
   }
 }

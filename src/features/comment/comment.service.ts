@@ -16,7 +16,7 @@ function convertToGetCommentDto(comment: Comment): GetCommentDto {
     regAt,
     isMod,
     authorId,
-    authorName: author.userName,
+    authorName: author ? author.userName : '',
   } as GetCommentDto;
 }
 
@@ -90,7 +90,19 @@ export class CommentService {
     return convertToGetCommentDto(comment);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} comment`;
+  /**
+   * soft delete
+   */
+  async remove(fundId: number, comId: number) {
+    const comment = await this.commentRepository.findOne({
+      where: { comId, fundId },
+    });
+    if (!comment) {
+      throw new HttpException('comment not found!', HttpStatus.NOT_FOUND);
+    }
+    comment.isDel = true;
+    this.commentRepository.save(comment);
+
+    return convertToGetCommentDto(comment);
   }
 }
