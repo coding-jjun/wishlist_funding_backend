@@ -36,7 +36,15 @@ import { CommentModule } from './features/comment/comment.module';
       database: process.env.DB_DEV_1_DATABASE,
       synchronize: true,
       logging: true,
-      entities: [User, Funding, Comment, Donation, RollingPaper, Notification, Friend],
+      entities: [
+        User,
+        Funding,
+        Comment,
+        Donation,
+        RollingPaper,
+        Notification,
+        Friend,
+      ],
       ssl: {
         ca: readFileSync('global-bundle.pem'),
       },

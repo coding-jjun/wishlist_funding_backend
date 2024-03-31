@@ -17,14 +17,14 @@ export class Comment {
   @ManyToOne(() => Funding, (funding) => funding.comments)
   @JoinColumn({ name: 'fundId' })
   funding: Funding;
-  
+
   @Column()
   fundId: number;
 
   @ManyToOne(() => User, (user) => user.comments)
   @JoinColumn({ name: 'authorId' })
   author: User;
-  
+
   @Column()
   authorId: number;
 
