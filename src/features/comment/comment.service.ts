@@ -9,8 +9,15 @@ import { GetCommentDto } from './dto/get-comment.dto';
 import { User } from 'src/entities/user.entity';
 
 function convertToGetCommentDto(comment: Comment): GetCommentDto {
-  const { comId, content, regAt, isMod, authorId } = comment;
-  return { comId, content, regAt, isMod, authorId } as GetCommentDto;
+  const { comId, content, regAt, isMod, authorId, author } = comment;
+  return {
+    comId,
+    content,
+    regAt,
+    isMod,
+    authorId,
+    authorName: author ? author.userName : null,
+  } as GetCommentDto;
 }
 
 @Injectable()
@@ -57,12 +64,29 @@ export class CommentService {
     const where = { funding: { fundId } };
 
     return this.commentRepository
-      .find({ where })
+      .find({ where, relations: { author: true } })
       .then((comments) => comments.map(convertToGetCommentDto));
   }
 
-  update(id: number, updateCommentDto: UpdateCommentDto) {
-    return `This action updates a #${id} comment`;
+  async update(
+    fundId: number,
+    comId: number,
+    updateCommentDto: UpdateCommentDto,
+  ): Promise<GetCommentDto> {
+    const { content } = updateCommentDto;
+
+    const comment = await this.commentRepository.findOne({
+      where: { comId, fundId },
+    });
+    if (!comment) {
+      throw new HttpException('comment not found!', HttpStatus.NOT_FOUND);
+    }
+    comment.content = content;
+    comment.isMod = true;
+
+    this.commentRepository.save(comment);
+
+    return convertToGetCommentDto(comment);
   }
 
   remove(id: number) {

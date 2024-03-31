@@ -11,6 +11,7 @@ import {
   HttpException,
   HttpStatus,
   UseFilters,
+  Put,
 } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -27,11 +28,13 @@ export class CommentController {
    * 댓글 생성
    */
   @Post()
-  async create(@Body() createCommentDto: CreateCommentDto): Promise<CommonResponse> {
+  async create(
+    @Body() createCommentDto: CreateCommentDto,
+  ): Promise<CommonResponse> {
     return {
       timestamp: new Date(Date.now()),
-      message: "success",
-      data: await this.commentService.create(createCommentDto)
+      message: 'success',
+      data: await this.commentService.create(createCommentDto),
     };
   }
 
@@ -44,7 +47,10 @@ export class CommentController {
   async findMany(@Query('fundId') fundId: number): Promise<CommonResponse> {
     Logger.log(`fundId: ${fundId}`);
     if (!fundId) {
-      throw new HttpException('`fundId` query is invalid', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '`fundId` query is invalid',
+        HttpStatus.BAD_REQUEST,
+      );
     }
     return {
       timestamp: new Date(Date.now()),
@@ -56,9 +62,17 @@ export class CommentController {
   /**
    * 댓글 수정
    */
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCommentDto: UpdateCommentDto) {
-    return this.commentService.update(+id, updateCommentDto);
+  @Put()
+  async update(
+    @Query('fundId') fundId: number,
+    @Query('comId') comId: number,
+    @Body() updateCommentDto: UpdateCommentDto,
+  ): Promise<CommonResponse> {
+    return {
+      timestamp: new Date(Date.now()),
+      message: 'success',
+      data: await this.commentService.update(fundId, comId, updateCommentDto)
+    } as CommonResponse;
   }
 
   /**
