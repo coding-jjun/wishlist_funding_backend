@@ -61,7 +61,7 @@ export class DonationService {
     return result;
   }
 
-  async createOrFindDonator(userId: number, guest: CreateGuestDto): Promise<User> {
+  async createOrFindDonator(userId: number, guest: CreateGuestDto){
     if (guest !== null) {
       const { userNick, userPhone, accBank, accNum } = guest;
       // const user = new User();
