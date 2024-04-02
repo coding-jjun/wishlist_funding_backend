@@ -16,6 +16,8 @@ import { DonationModule } from './features/donation/donation.module';
 import { RollingPaperModule } from './features/rolling-paper/rolling-paper.module';
 import { readFileSync } from 'fs';
 import { Friend } from './entities/friend.entity';
+import { Notification } from './entities/notification.entity';
+import { CommentModule } from './features/comment/comment.module';
 import { Gratitude } from './entities/gratitude.entity';
 import { GratitudeModule } from './features/gratitude/gratitude.module';
 import { Image } from './entities/image.entity';
@@ -33,11 +35,21 @@ import { Image } from './entities/image.entity';
       host: process.env.DB_HOST,
       port: parseInt(process.env.DB_PORT) || 5432,
       password: process.env.DB_DEV_PASSWORD,
-      username: process.env.DB_DEV_USERNAME,
-      database: process.env.DB_DEV_DATABASE,
+      username: process.env.DB_DEV_1_USERNAME,
+      database: process.env.DB_DEV_1_DATABASE,
       synchronize: true,
       logging: true,
-      entities: [User, Funding, Comment, Donation, RollingPaper, Notification, Friend, Gratitude, Image],
+      entities: [
+        User,
+        Funding,
+        Comment,
+        Donation,
+        RollingPaper,
+        Notification,
+        Friend,
+        Gratitude,
+        Image,
+      ],
       ssl: {
         ca: readFileSync('global-bundle.pem'),
       },
@@ -53,7 +65,8 @@ import { Image } from './entities/image.entity';
     RollingPaperModule,
     FriendModule,
     NotificationModule,
-    GratitudeModule
+    CommentModule,
+    GratitudeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
