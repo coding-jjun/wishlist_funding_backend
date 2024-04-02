@@ -16,7 +16,6 @@ import { DonationModule } from './features/donation/donation.module';
 import { RollingPaperModule } from './features/rolling-paper/rolling-paper.module';
 import { readFileSync } from 'fs';
 import { Friend } from './entities/friend.entity';
-import { Notification } from './entities/notification.entity';
 import { CommentModule } from './features/comment/comment.module';
 import { Gratitude } from './entities/gratitude.entity';
 import { GratitudeModule } from './features/gratitude/gratitude.module';
