@@ -21,7 +21,7 @@ import { CommentModule } from './features/comment/comment.module';
 import { Gratitude } from './entities/gratitude.entity';
 import { GratitudeModule } from './features/gratitude/gratitude.module';
 import { Image } from './entities/image.entity';
-
+import { Notification } from './entities/notification.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
