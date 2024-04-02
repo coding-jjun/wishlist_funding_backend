@@ -10,4 +10,7 @@ export class CreateDonationDto {
 
   @IsNotEmpty()
   rollMsg: string;
+
+  @IsNotEmpty()
+  rollImg: string;
 }

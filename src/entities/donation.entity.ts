@@ -1,3 +1,4 @@
+import { DonationStatus } from 'src/enums/donation-status.enum';
 import {
   Column,
   Entity,
@@ -20,6 +21,13 @@ export class Donation {
   // @ManyToOne(() => User)
   // @JoinColumn({ name: 'userId', referencedColumnName: 'userId' })
   // user: User;
+
+  @Column({
+    type: 'enum',
+    enum: DonationStatus,
+    default: DonationStatus.Donated,
+  })
+  donationStatus: DonationStatus;
 
   @Column()
   orderId: string;

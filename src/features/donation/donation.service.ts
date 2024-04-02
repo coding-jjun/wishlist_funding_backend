@@ -81,10 +81,11 @@ export class DonationService {
     // return funding;
   }
 
-  async createRollingPaper(rollId: number, rollMsg: string) {
+  async createRollingPaper(rollId: number, rollMsg: string, rollImg: string) {
     const rollingPaper = new RollingPaper();
     rollingPaper.rollId = rollId;
     rollingPaper.rollMsg = rollMsg;
+    // rollingPaper.rollImg = rollImg
     await this.rollingPaperRepo.save(rollingPaper);
   }
 
@@ -107,7 +108,8 @@ export class DonationService {
 
     const result = await this.donationRepo.save(donation);
 
-    this.createRollingPaper(result.donId, createDonationDto.rollMsg);
+    // return 값 미정
+    this.createRollingPaper(result.donId, createDonationDto.rollMsg, createDonationDto.rollImg);
 
     console.log(result);
     return result;

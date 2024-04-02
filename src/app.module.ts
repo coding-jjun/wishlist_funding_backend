@@ -18,6 +18,9 @@ import { readFileSync } from 'fs';
 import { Friend } from './entities/friend.entity';
 import { Notification } from './entities/notification.entity';
 import { CommentModule } from './features/comment/comment.module';
+import { Gratitude } from './entities/gratitude.entity';
+import { GratitudeModule } from './features/gratitude/gratitude.module';
+import { Image } from './entities/image.entity';
 
 @Module({
   imports: [
@@ -44,6 +47,8 @@ import { CommentModule } from './features/comment/comment.module';
         RollingPaper,
         Notification,
         Friend,
+        Gratitude,
+        Image,
       ],
       ssl: {
         ca: readFileSync('global-bundle.pem'),
@@ -61,6 +66,7 @@ import { CommentModule } from './features/comment/comment.module';
     FriendModule,
     NotificationModule,
     CommentModule,
+    GratitudeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
