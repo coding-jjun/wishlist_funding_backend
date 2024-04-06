@@ -1,4 +1,5 @@
 import { DonationStatus } from 'src/enums/donation-status.enum';
+import { Funding } from 'src/entities/funding.entity'
 import {
   Column,
   Entity,
@@ -14,9 +15,9 @@ export class Donation {
   @PrimaryGeneratedColumn()
   donId: number;
 
-  // @ManyToOne(() => Fund)
-  // @JoinColumn({ name: 'fundId', referencedColumnName: 'fundId' })
-  // funding: Funding;
+  @ManyToOne(() => Funding)
+  @JoinColumn({ name: 'fundId', referencedColumnName: 'fundId' })
+  funding: Funding;
 
   // @ManyToOne(() => User)
   // @JoinColumn({ name: 'userId', referencedColumnName: 'userId' })

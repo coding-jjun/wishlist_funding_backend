@@ -26,16 +26,17 @@ export class FundingController {
   @Get()
   async findAll(
     @Query('fundPublFilter', new DefaultValuePipe('both')) fundPublFilter: 'all' | 'friends' | 'both',
-    @Query('fundThemes', new DefaultValuePipe([FundTheme.Anniversary, FundTheme.Birthday, FundTheme.Donation])) fundThemes: FundTheme[],
+    @Query('fundThemes', new DefaultValuePipe([FundTheme.Anniversary, FundTheme.Birthday, FundTheme.Donation])) fundThemes: FundTheme | FundTheme[],
     @Query('status', new DefaultValuePipe('ongoing')) status: 'ongoing' | 'ended',
     @Query('sort', new DefaultValuePipe('endAtDesc')) sort: 'endAtAsc' | 'endAtDesc' | 'regAtAsc' | 'regAtDesc',
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
-    @Query('lastFundId', new DefaultValuePipe(undefined), ParseIntPipe) lastFundId?: number,
+    @Query('lastFundId', new DefaultValuePipe(0), ParseIntPipe) lastFundId?: number,
     @Query('lastEndAt', new DefaultValuePipe(undefined)) lastEndAt?: string,
   ): Promise<CommonResponse> {
     try {
+      const themesArray = Array.isArray(fundThemes) ? fundThemes : [fundThemes];
       const lastEndAtDate = lastEndAt ? new Date(lastEndAt) : undefined;
-      const data = await this.fundingService.findAll(fundPublFilter, fundThemes, status, sort, limit, lastFundId, lastEndAtDate);
+      const data = await this.fundingService.findAll(fundPublFilter, themesArray, status, sort, limit, lastFundId, lastEndAtDate);
 
       return { timestamp: new Date(), message: 'Success', data };
     } catch (error) {
