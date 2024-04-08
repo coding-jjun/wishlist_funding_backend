@@ -37,9 +37,16 @@ export class FundingController {
     return this.fundingService.findOne(id);
   }
 
-  @Put(':id')
-  update(@Param('id') id: number, fundingUpdateDto: UpdateFundingDto) {
-    return this.fundingService.update(id, fundingUpdateDto);
+  @Put(':fundid')
+  async update(
+    @Param('id') id: number,
+    fundingUpdateDto: UpdateFundingDto,
+  ): Promise<CommonResponse> {
+    return {
+      timestamp: new Date(Date.now()),
+      message: 'success',
+      data: await this.fundingService.update(id, fundingUpdateDto),
+    };
   }
 
   @Delete(':id')
