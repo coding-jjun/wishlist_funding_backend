@@ -50,7 +50,13 @@ export class FundingController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: number) {
-    return this.fundingService.remove(id);
+  async remove(@Param('id') id: number): Promise<CommonResponse> {
+    await this.fundingService.remove(id);
+
+    return {
+      timestamp: new Date(Date.now()),
+      message: '성공적으로 삭제되었습니다.',
+      data: null,
+    };
   }
 }
