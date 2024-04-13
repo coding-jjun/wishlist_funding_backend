@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Funding } from 'src/entities/funding.entity';
-import { Repository,Like, MoreThan } from 'typeorm';
+import { Repository,Like, MoreThan, Brackets } from 'typeorm';
 import { CreateFundingDto } from './dto/create-funding.dto';
 import { User } from 'src/entities/user.entity';
 import { FundTheme } from 'src/enums/fund-theme.enum';
+import { FriendStatus } from 'src/enums/friend-status.enum';
+import { Friend } from 'src/entities/friend.entity';
 
 @Injectable()
 export class FundingService {
@@ -14,9 +16,13 @@ export class FundingService {
 
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    
+    @InjectRepository(Friend)
+    private friendRepository: Repository<Friend>,
   ) {}
 
   async findAll(
+    userId: number,
     fundPublFilter: 'all' | 'friends' | 'both',
     fundThemes: FundTheme[],
     status: 'ongoing' | 'ended',
@@ -24,18 +30,29 @@ export class FundingService {
     limit: number,  
     lastFundId?: number, // 마지막으로 로드된 항목의 id 값
     lastEndAtDate?: Date, // 마지막으로 로드된 항목의 endAt 값
-  ): Promise<Funding[]> {
+  ): Promise<{ fundings: Funding[], count: number, lastFundId: number}> {
     const queryBuilder = await this.fundingRepository.createQueryBuilder('funding');
 
+    const friendIds = await this.friendRepository.createQueryBuilder('friend')
+    .where('friend.status = :status', { status: FriendStatus.Friend })
+    .andWhere(new Brackets(qb => {
+      qb.where('friend.userId = :userId', { userId })
+        .orWhere('friend.friendId = :userId', { userId });
+    }))
+    .select('CASE WHEN friend.userId = :userId THEN friend.friendId ELSE friend.userId END', 'friendId')
+    .setParameter('userId', userId)
+    .getRawMany();
+
+    const friendIdsArray = friendIds.map(friend => friend.friendId);
+
     if (fundPublFilter === 'all') {
-      queryBuilder.andWhere('funding.fundPubl = :publ', { publ: true });
+      queryBuilder.andWhere('funding.fundPubl = :publ AND funding.fundUser NOT IN (:...ids)', { publ: true, ids: friendIdsArray });
     } else if (fundPublFilter === 'friends') {
       // 친구 공개 로직 구현 (예시 코드에는 단순화됨)
-      queryBuilder.andWhere('funding.fundPubl = :publ', { publ: false });
-    } 
-    // else {
-    //   queryBuilder.andWhere('funding.fundPubli = ')
-    // }
+      queryBuilder.andWhere('funding.fundUser IN (:...ids)', { ids: friendIdsArray });
+    } else if (fundPublFilter === 'both') {
+      queryBuilder.andWhere('(funding.fundPubl = :publ OR funding.fundUser IN (:...ids))', { publ: true, ids: friendIdsArray });
+    }
 
     if (fundThemes && fundThemes.length > 0) {
       queryBuilder.andWhere('funding.fundTheme IN (:...themes)', { themes: fundThemes });
@@ -51,25 +68,38 @@ export class FundingService {
     switch (sort) {
       case 'endAtAsc':
         queryBuilder.orderBy('funding.endAt', 'ASC').addOrderBy('funding.fundId', 'ASC');
+        if (lastEndAtDate && lastFundId) {
+          queryBuilder.andWhere('(funding.endAt > :lastEndAtDate OR (funding.endAt = :lastEndAtDate AND funding.fundId > :lastFundId))', { lastEndAtDate, lastFundId });
+        }
         break;
       case 'endAtDesc':
         queryBuilder.orderBy('funding.endAt', 'DESC').addOrderBy('funding.fundId', 'ASC');
+        if (lastEndAtDate && lastFundId) {
+          queryBuilder.andWhere('(funding.endAt < :lastEndAtDate OR (funding.endAt = :lastEndAtDate And funding.fundId > :lastFundId))', { lastEndAtDate, lastFundId });
+        }
         break;
       case 'regAtAsc':
         queryBuilder.orderBy('funding.regAt', 'ASC').addOrderBy('funding.fundId', 'ASC');
+        if (lastEndAtDate && lastFundId) {
+          queryBuilder.andWhere('(funding.regAt > :lastEndAtDate OR (funding.regAt = :lastEndAtDate AND funding.fundId > :lastFundId))', { lastEndAtDate, lastFundId });
+        }
         break;
       case 'regAtDesc':
         queryBuilder.orderBy('funding.regAt', 'DESC').addOrderBy('funding.fundId', 'ASC');
+        if (lastEndAtDate && lastFundId) {
+          queryBuilder.andWhere('(funding.regAt < :lastEndAtDate OR (funding.regAt = :lastEndAtDate AND funding.fundId > :lastFundId))', { lastEndAtDate, lastFundId });
+        }
         break;
-    }
-    
-    if (lastEndAtDate && lastFundId) {
-      queryBuilder.andWhere('(funding.endAt <= :lastEndAtDate AND funding.fundId > :lastFundId)', { lastEndAtDate, lastFundId });
     }
 
     queryBuilder.take(limit);
-    
-    return queryBuilder.getMany();
+    const fundings = await queryBuilder.getMany();
+
+    return {
+      fundings: fundings,
+      count: fundings.length,
+      lastFundId: fundings[fundings.length - 1]?.fundId,
+    };
   }
 
   findOne(fundId: number): Promise<Funding[]> {

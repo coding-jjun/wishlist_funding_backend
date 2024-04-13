@@ -23,8 +23,9 @@ import { FundTheme } from 'src/enums/fund-theme.enum';
 export class FundingController {
   constructor(private fundingService: FundingService) {}
 
-  @Get()
+  @Get('/user/:userId')
   async findAll(
+    @Param('userId') userId: number,
     @Query('fundPublFilter', new DefaultValuePipe('both')) fundPublFilter: 'all' | 'friends' | 'both',
     @Query('fundThemes', new DefaultValuePipe([FundTheme.Anniversary, FundTheme.Birthday, FundTheme.Donation])) fundThemes: FundTheme | FundTheme[],
     @Query('status', new DefaultValuePipe('ongoing')) status: 'ongoing' | 'ended',
@@ -36,7 +37,7 @@ export class FundingController {
     try {
       const themesArray = Array.isArray(fundThemes) ? fundThemes : [fundThemes];
       const lastEndAtDate = lastEndAt ? new Date(lastEndAt) : undefined;
-      const data = await this.fundingService.findAll(fundPublFilter, themesArray, status, sort, limit, lastFundId, lastEndAtDate);
+      const data = await this.fundingService.findAll(userId, fundPublFilter, themesArray, status, sort, limit, lastFundId, lastEndAtDate);
 
       return { timestamp: new Date(), message: 'Success', data };
     } catch (error) {
