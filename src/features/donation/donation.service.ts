@@ -27,12 +27,12 @@ export class DonationService {
   ) {}
 
   async getAllDonations(): Promise<Donation[]> {
-    const userId = 1;
+    const tmpUserId = 1
     // TODO: donation paging 처리
     const result = await this.donationRepo
       .createQueryBuilder('d')
       .leftJoinAndSelect('d.fund', 'f')
-      // .leftJoinAndSelect('d.user', 'u')
+      .leftJoinAndSelect('d.user', 'u')
       .select([
         'd.donId',
         'd.orderId',
@@ -40,7 +40,7 @@ export class DonationService {
         'd.regAt',
         'f.fundId'
       ])
-      // .where('u.userId = :userId', { userId })
+      .where('u.userId = :userId', { tmpUserId })
       .getMany();
     return result;
   }
@@ -64,14 +64,15 @@ export class DonationService {
   async createOrFindDonator(userId: number, guest: CreateGuestDto){
     if (guest !== null) {
       const { userNick, userPhone, accBank, accNum } = guest;
-      // const user = new User();
+      const user = new User();
+      // TODO 주소관련 정보
       // const address = new Address();
-      // user.userNick = userNick;
-      // user.userPhone = userPhone;
-      // user.accId = 1;
-      // return await this.userRepo.save(user);
+      user.userNick = userNick;
+      user.userPhone = userPhone;
+      user.accId = 1;
+      return await this.userRepo.save(user);
     }
-    // return await this.userRepo.findOne({ where: { userId } });
+    return await this.userRepo.findOne({ where: { userId } });
   }
 
   async updateFundingSum(fundId: number, donAmnt: number) {
@@ -91,15 +92,15 @@ export class DonationService {
 
   // CREATE
   async createDonation(fundId: number, createDonationDto: CreateDonationDto) {
-    const userId = 1;
+    const tmpUserId = 1;
     const donAmnt = createDonationDto.donAmnt;
-
-    // const user = await this.createOrFindDonator(userId, createDonationDto.guest);
+    
+    const user = await this.createOrFindDonator(tmpUserId, createDonationDto.guest);
     const funding = await this.updateFundingSum(fundId, donAmnt);
 
     // CREATE donation
     const donation = new Donation();
-    // donation.user = user;
+    donation.user = user;
     donation.funding = funding;
 
     const orderId = require('order-id')('key').generate();

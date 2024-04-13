@@ -11,7 +11,7 @@ import {
 import { DonationService } from './donation.service';
 import { CreateDonationDto } from './dto/create-donation.dto';
 
-@Controller('/api/donation')
+@Controller('api/donation')
 export class DonationController {
   constructor(private donationService: DonationService) {}
 
