@@ -34,8 +34,8 @@ import { Notification } from './entities/notification.entity';
       host: process.env.DB_HOST,
       port: parseInt(process.env.DB_PORT) || 5432,
       password: process.env.DB_DEV_PASSWORD,
-      username: process.env.DB_DEV_1_USERNAME,
-      database: process.env.DB_DEV_1_DATABASE,
+      username: process.env.DB_DEV_USERNAME,
+      database: process.env.DB_DEV_DATABASE,
       synchronize: true,
       logging: true,
       entities: [
