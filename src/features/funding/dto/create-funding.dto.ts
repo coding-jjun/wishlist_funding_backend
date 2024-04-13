@@ -15,7 +15,7 @@ export class CreateFundingDto {
   // TODO - FundAddressDto
   // fundAddr: AddressDto
 
-  @IsDate()
+  @IsDateString()
   endAt: Date;
 
   // TODO - GiftCreateDto
