@@ -69,8 +69,8 @@ export class Funding {
    * TODO - timestamptz를 사용할지, 일반 date를 사용할지 결정해야함.
    * timestamptz는 시간 & 타임존을 포함하고 date는 말 그대로 날짜만 저장함
    */
-  // @Column("date")
-  @Column('timestamptz')
+  @Column("date")
+  // @Column('timestamptz')
   endAt: Date;
 
   @CreateDateColumn()
