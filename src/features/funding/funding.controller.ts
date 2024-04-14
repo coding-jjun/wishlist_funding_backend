@@ -8,6 +8,7 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
+  ParseUUIDPipe,
   Post,
   Put,
   Query,
@@ -58,9 +59,13 @@ export class FundingController {
     };
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: number) {
-    return await this.fundingService.findOne(id);
+  @Get(':fundUuid')
+  async findOne(@Param('fundUuid', ParseUUIDPipe) fundUuid: string): Promise<CommonResponse> {
+    return {
+      timestamp: new Date(Date.now()),
+      message: '성공적으로 찾았습니다.',
+      data: await this.fundingService.findOne(fundUuid),
+    };
   }
 
   @Put(':id')
