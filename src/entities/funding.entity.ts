@@ -2,6 +2,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Generated,
+  Index,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -34,8 +36,10 @@ export class Funding {
   @PrimaryGeneratedColumn()
   fundId: number;
 
-  // @PrimaryGeneratedColumn("uuid")
-  // fundUuid: string;
+  @Index()
+  @Column()
+  @Generated("uuid")
+  fundUuid: string;
 
   @ManyToOne(() => User, (user) => user.fundings)
   fundUser: User;
