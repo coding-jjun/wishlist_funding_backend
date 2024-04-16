@@ -102,8 +102,12 @@ export class FundingService {
     };
   }
 
-  findOne(fundId: number): Promise<Funding[]> {
-    return this.fundingRepository.findBy({ fundId });
+  findOne(fundUuid: string): Promise<Funding> {
+    return this.fundingRepository.findOne({
+      where: {
+        fundUuid
+      }
+    });
   }
 
   create(fundingCreateDto: CreateFundingDto, accessToken: string): Funding {
