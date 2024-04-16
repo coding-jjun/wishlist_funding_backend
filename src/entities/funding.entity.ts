@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -38,6 +39,7 @@ export class Funding {
   // fundUuid: string;
 
   @ManyToOne(() => User, (user) => user.fundings)
+  @JoinColumn({ name: 'fundUser' })
   fundUser: User;
 
   @Column('varchar')
