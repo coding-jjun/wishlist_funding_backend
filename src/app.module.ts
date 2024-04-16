@@ -21,6 +21,8 @@ import { Gratitude } from './entities/gratitude.entity';
 import { GratitudeModule } from './features/gratitude/gratitude.module';
 import { Image } from './entities/image.entity';
 import { Notification } from './entities/notification.entity';
+import { TokenModule } from './features/open-bank/token/token.module';
+import { OpenBankToken } from './entities/open-bank-token.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -48,6 +50,7 @@ import { Notification } from './entities/notification.entity';
         Friend,
         Gratitude,
         Image,
+        OpenBankToken
       ],
       ssl: {
         ca: readFileSync('global-bundle.pem'),
@@ -66,6 +69,7 @@ import { Notification } from './entities/notification.entity';
     NotificationModule,
     CommentModule,
     GratitudeModule,
+    TokenModule,
   ],
   controllers: [AppController],
   providers: [AppService],
