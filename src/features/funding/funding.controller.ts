@@ -51,11 +51,10 @@ export class FundingController {
 
   @Post()
   async create(@Body() fundingCreateDto: CreateFundingDto): Promise<CommonResponse> {
-    const funding = await this.fundingService.create(fundingCreateDto, '');
     return {
       timestamp: new Date(Date.now()),
       message: '성공적으로 생성했습니다.',
-      data: funding,
+      data: await this.fundingService.create(fundingCreateDto, ''),
     };
   }
 
