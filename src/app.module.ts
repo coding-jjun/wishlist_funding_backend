@@ -19,6 +19,13 @@ import { Friend } from './entities/friend.entity';
 import { Address } from './entities/address.entity';
 import { AddressModule } from './features/address/address.module';
 
+import { CommentModule } from './features/comment/comment.module';
+import { Gratitude } from './entities/gratitude.entity';
+import { GratitudeModule } from './features/gratitude/gratitude.module';
+import { Image } from './entities/image.entity';
+import { Notification } from './entities/notification.entity';
+import { TokenModule } from './features/open-bank/token/token.module';
+import { OpenBankToken } from './entities/open-bank-token.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -44,7 +51,11 @@ import { AddressModule } from './features/address/address.module';
         RollingPaper, 
         Notification, 
         Friend, 
-        Address],
+        Address,
+        Gratitude,
+        Image,
+        OpenBankToken
+      ],
       ssl: {
         ca: readFileSync('global-bundle.pem'),
       },
@@ -61,6 +72,9 @@ import { AddressModule } from './features/address/address.module';
     FriendModule,
     NotificationModule,
     AddressModule,
+    CommentModule,
+    GratitudeModule,
+    TokenModule,
   ],
   controllers: [AppController],
   providers: [AppService],

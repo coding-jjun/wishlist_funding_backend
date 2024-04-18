@@ -9,7 +9,7 @@ export class Friend {
   @PrimaryColumn()
   friendId: number;
 
-  @Column({ type: 'bit varying', default: '01', nullable: false, width: 2, comment: '00:친구, 01: 요청, 10:거절, 11:차단' })
+  @Column({ type: 'enum', enum: FriendStatus, default: FriendStatus.Requested, nullable: false })
   status: FriendStatus;
 
   @CreateDateColumn()
