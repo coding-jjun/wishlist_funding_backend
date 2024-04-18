@@ -11,9 +11,9 @@ export enum NotiType {
 
 export enum ReqType {
   // NotiType이 IncomingFollow인 경우
-  NotResponse = 'NotResponse', // 요청에 응답하지 않은 상태
-  Accept = 'Accept', // 요청을 수락한 상태
-  Refuse = 'Refuse', // 요청을 거절한 상태
+  NotResponse = '00', // 요청에 응답하지 않은 상태
+  Accept = '01', // 요청을 수락한 상태
+  Refuse = '02', // 요청을 거절한 상태
 
   // NotiType이 WriteGratitude인 경우
   UnWritten = '03', // 감사인사를 작성하지 않은 상태
