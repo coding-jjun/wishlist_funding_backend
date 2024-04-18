@@ -16,6 +16,9 @@ import { DonationModule } from './features/donation/donation.module';
 import { RollingPaperModule } from './features/rolling-paper/rolling-paper.module';
 import { readFileSync } from 'fs';
 import { Friend } from './entities/friend.entity';
+import { Address } from './entities/address.entity';
+import { AddressModule } from './features/address/address.module';
+
 import { CommentModule } from './features/comment/comment.module';
 import { Gratitude } from './entities/gratitude.entity';
 import { GratitudeModule } from './features/gratitude/gratitude.module';
@@ -41,13 +44,14 @@ import { OpenBankToken } from './entities/open-bank-token.entity';
       synchronize: true,
       logging: true,
       entities: [
-        User,
-        Funding,
-        Comment,
+        User, 
+        Funding, 
+        Comment, 
         Donation,
-        RollingPaper,
-        Notification,
-        Friend,
+        RollingPaper, 
+        Notification, 
+        Friend, 
+        Address,
         Gratitude,
         Image,
         OpenBankToken
@@ -67,6 +71,7 @@ import { OpenBankToken } from './entities/open-bank-token.entity';
     RollingPaperModule,
     FriendModule,
     NotificationModule,
+    AddressModule,
     CommentModule,
     GratitudeModule,
     TokenModule,
