@@ -4,13 +4,18 @@ import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Account } from 'src/entities/account.entity';
+import { Image } from 'src/entities/image.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    // private readonly accountRepository: Repository<Account>,
+    @InjectRepository(Account)
+    private readonly accRepository: Repository<Account>,
+    @InjectRepository(Image)
+    private readonly imgRepository: Repository<Image>,
   ) {}
 
   // 사용자 정보 조회
@@ -28,8 +33,14 @@ export class UserService {
     user.userName = createUserDto.userName;
     user.userPhone = createUserDto.userPhone;
     user.userBirth = createUserDto.userBirth;
-    if (createUserDto.accId) {
-      user.accId = createUserDto.accId;
+    user.userEmail = createUserDto.userEmail;
+    if (createUserDto.userAcc) {
+      const account = await this.accRepository.findOneBy({ accId: createUserDto.userAcc });
+      user.account = account;
+    }
+    if (createUserDto.userImg) {
+      const image = await this.imgRepository.findOneBy({ imgId: createUserDto.userImg });
+      user.image = image;
     }
 
     return await this.userRepository.save(user);
@@ -44,11 +55,14 @@ export class UserService {
     user.userPhone = updateUserDto.userPhone;
     user.userBirth = updateUserDto.userBirth;
     user.userEmail = updateUserDto.userEmail;
-    if (updateUserDto.accId) {
-      user.accId = updateUserDto.accId;
+    if (updateUserDto.userAcc) {
+      const account = await this.accRepository.findOneBy({ accId: updateUserDto.userAcc });
+      user.account = account;
     }
-    user.userImg = updateUserDto.userImg;
-
+    if (updateUserDto.userImg) {
+      const image = await this.imgRepository.findOneBy({ imgId: updateUserDto.userImg });
+      user.image = image;
+    }
     return await this.userRepository.save(user);
   }
 

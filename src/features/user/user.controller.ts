@@ -9,9 +9,22 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get('/')
-  async getUser(@Request() req): Promise<User> {
-    return await this.userService.getUserInfo(req.user);
+  @Get('/:userId')
+  async getUser(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<CommonResponse> {
+    try {
+      return {
+        timestamp: new Date(),
+        message: 'success',
+        data : await this.userService.getUserInfo(userId),
+      };
+    } catch (error) {
+      throw new HttpException(
+        'Failed to get user info',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
   // @Get('/:userId/fundings')
