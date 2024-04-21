@@ -28,11 +28,11 @@ export class DonationService {
   ) {}
 
   async getAllDonations(): Promise<Donation[]> {
-    const tmpUserId = 1
+    const userId = 1
     // TODO: donation paging 처리
     const result = await this.donationRepo
       .createQueryBuilder('d')
-      .leftJoinAndSelect('d.fund', 'f')
+      .leftJoinAndSelect('d.funding', 'f')
       .leftJoinAndSelect('d.user', 'u')
       .select([
         'd.donId',
@@ -41,7 +41,7 @@ export class DonationService {
         'd.regAt',
         'f.fundId'
       ])
-      .where('u.userId = :userId', { tmpUserId })
+      .where('u.userId = :userId', { userId })
       .getMany();
     return result;
   }
@@ -49,7 +49,7 @@ export class DonationService {
   async getOneDonation(orderId: string) {
     const result = await this.donationRepo
       .createQueryBuilder('d')
-      .leftJoinAndSelect('d.fund', 'f')
+      .leftJoinAndSelect('d.funding', 'f')
       .select([
         'd.orderId',
         'd.donAmnt',
