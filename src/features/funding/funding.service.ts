@@ -102,11 +102,15 @@ export class FundingService {
     };
   }
 
-  findOne(fundId: number): Promise<Funding[]> {
-    return this.fundingRepository.findBy({ fundId });
+  findOne(fundUuid: string): Promise<Funding> {
+    return this.fundingRepository.findOne({
+      where: {
+        fundUuid
+      }
+    });
   }
 
-  create(fundingCreateDto: CreateFundingDto, accessToken: string): Funding {
+  create(fundingCreateDto: CreateFundingDto, accessToken: string): Promise<Funding> {
     // TODO - accessToken -> User 객체로 변환하기
     const user = this.userRepository.find()[0];
     let funding = new Funding(
@@ -119,8 +123,7 @@ export class FundingService {
       fundingCreateDto.fundPubl,
     );
 
-    this.fundingRepository.save(funding);
-    return funding;
+    return this.fundingRepository.save(funding);
   }
 
   update(id: number, updateFundingDto) {}

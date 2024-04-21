@@ -8,6 +8,7 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
+  ParseUUIDPipe,
   Post,
   Put,
   Query,
@@ -50,17 +51,20 @@ export class FundingController {
 
   @Post()
   async create(@Body() fundingCreateDto: CreateFundingDto): Promise<CommonResponse> {
-    const funding = await this.fundingService.create(fundingCreateDto, '');
     return {
       timestamp: new Date(Date.now()),
       message: '성공적으로 생성했습니다.',
-      data: funding,
+      data: await this.fundingService.create(fundingCreateDto, ''),
     };
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: number) {
-    return await this.fundingService.findOne(id);
+  @Get(':fundUuid')
+  async findOne(@Param('fundUuid', ParseUUIDPipe) fundUuid: string): Promise<CommonResponse> {
+    return {
+      timestamp: new Date(Date.now()),
+      message: '성공적으로 찾았습니다.',
+      data: await this.fundingService.findOne(fundUuid),
+    };
   }
 
   @Put(':id')
