@@ -45,13 +45,24 @@ export class FundingService {
 
     const friendIdsArray = friendIds.map(friend => friend.friendId);
 
-    if (fundPublFilter === 'all') {
-      queryBuilder.andWhere('funding.fundPubl = :publ AND funding.fundUser NOT IN (:...ids)', { publ: true, ids: friendIdsArray });
-    } else if (fundPublFilter === 'friends') {
-      // 친구 공개 로직 구현 (예시 코드에는 단순화됨)
-      queryBuilder.andWhere('funding.fundUser IN (:...ids)', { ids: friendIdsArray });
-    } else if (fundPublFilter === 'both') {
-      queryBuilder.andWhere('(funding.fundPubl = :publ OR funding.fundUser IN (:...ids))', { publ: true, ids: friendIdsArray });
+    if (friendIdsArray.length > 0) { // 친구 목록이 있는 경우
+      if (fundPublFilter === 'all') {
+          queryBuilder.andWhere('funding.fundPubl = :publ AND funding.fundUser NOT IN (:...ids)', { publ: true, ids: friendIdsArray });
+      } else if (fundPublFilter === 'friends') {
+          queryBuilder.andWhere('funding.fundUser IN (:...ids)', { ids: friendIdsArray });
+      } else if (fundPublFilter === 'both') {
+          queryBuilder.andWhere('(funding.fundPubl = :publ OR funding.fundUser IN (:...ids))', { publ: true, ids: friendIdsArray });
+      }
+    } else { // 친구 목록이 비어 있는 경우
+      if (fundPublFilter === 'all') {
+          queryBuilder.andWhere('funding.fundPubl = :publ', { publ: true });
+      } else if (fundPublFilter === 'friends') {
+          // 친구가 없으면 친구에 의한 펀딩은 결과 없음
+          queryBuilder.andWhere('1=0');
+      } else if (fundPublFilter === 'both') {
+          // 친구가 없어도 공개 펀딩은 조회
+          queryBuilder.andWhere('funding.fundPubl = :publ', { publ: true });
+      }
     }
 
     if (fundThemes && fundThemes.length > 0) {
