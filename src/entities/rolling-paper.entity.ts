@@ -17,6 +17,9 @@ export class RollingPaper {
   @JoinColumn({ name: 'donId', referencedColumnName: 'donId' })
   donation: Donation;
 
+  @Column()
+  fundId: number;
+
   // @OneToOne(() => Image, img => img.imgId)
   // @JoinColumn({ name: 'rollImg' })
   // rollImg: string;
