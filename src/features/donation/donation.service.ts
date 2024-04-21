@@ -70,7 +70,7 @@ export class DonationService {
       // const address = new Address();
       user.userNick = userNick;
       user.userPhone = userPhone;
-      user.accId = 1;
+      // user.accId = 1;
       return await this.userRepo.save(user);
     }
     return await this.userRepo.findOne({ where: { userId } });
