@@ -81,9 +81,9 @@ export class DonationService {
     // return funding;
   }
 
-  async createRollingPaper(rollId: number, rollMsg: string) {
+  async createRollingPaper(donation: Donation, rollMsg: string, rollImg: string){
     const rollingPaper = new RollingPaper();
-    rollingPaper.rollId = rollId;
+    rollingPaper.donation = donation;
     rollingPaper.rollMsg = rollMsg;
     await this.rollingPaperRepo.save(rollingPaper);
   }
