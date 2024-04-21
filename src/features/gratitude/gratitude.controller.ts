@@ -17,14 +17,13 @@ export class GratitudeController {
     };
   }
 
-  @Post('/:gratId')
-  createGratitude(@Param('gratId') gratId: number,
-                  @Body() createGratitudeDto: GratitudeDto): CommonResponse {
-    const data = this.gratitudeService.createGratitude(gratId, createGratitudeDto);
+  @Post('/:fundUuid')
+  async createGratitude(@Param('fundUuid') fundUuid: string,
+                  @Body() createGratitudeDto: GratitudeDto): Promise<CommonResponse> {
     return {
       timestamp: new Date(Date.now()),
-      message: 'success',
-      data: data,
+      message: '감사인사 생성 성공!',
+      data: await this.gratitudeService.createGratitude(fundUuid, createGratitudeDto)
     };
   }
 
