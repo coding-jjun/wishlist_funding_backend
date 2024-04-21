@@ -16,9 +16,17 @@ import { DonationModule } from './features/donation/donation.module';
 import { RollingPaperModule } from './features/rolling-paper/rolling-paper.module';
 import { readFileSync } from 'fs';
 import { Friend } from './entities/friend.entity';
-import { Notification } from './entities/notification.entity';
-import { GratitudeModule } from './features/gratitude/gratitude.module';
+import { Address } from './entities/address.entity';
+import { AddressModule } from './features/address/address.module';
+
+import { CommentModule } from './features/comment/comment.module';
 import { Gratitude } from './entities/gratitude.entity';
+import { GratitudeModule } from './features/gratitude/gratitude.module';
+import { Image } from './entities/image.entity';
+import { Notification } from './entities/notification.entity';
+import { TokenModule } from './features/open-bank/token/token.module';
+import { OpenBankToken } from './entities/open-bank-token.entity';
+import { Account } from './entities/account.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -36,7 +44,20 @@ import { Gratitude } from './entities/gratitude.entity';
       database: process.env.DB_DEV_DATABASE,
       synchronize: true,
       logging: true,
-      entities: [User, Funding, Comment, Donation, RollingPaper, Notification, Friend, Gratitude],
+      entities: [
+        User, 
+        Funding, 
+        Comment, 
+        Donation,
+        RollingPaper, 
+        Notification, 
+        Friend, 
+        Address,
+        Gratitude,
+        Image,
+        OpenBankToken,
+        Account,
+      ],
       ssl: {
         ca: readFileSync('global-bundle.pem'),
       },
@@ -52,7 +73,10 @@ import { Gratitude } from './entities/gratitude.entity';
     RollingPaperModule,
     FriendModule,
     NotificationModule,
+    AddressModule,
+    CommentModule,
     GratitudeModule,
+    TokenModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -16,6 +16,6 @@ export enum ReqType {
   Refuse = '02', // 요청을 거절한 상태
 
   // NotiType이 WriteGratitude인 경우
-  UnWritten = '00', // 감사인사를 작성하지 않은 상태
-  Written = '01', // 감사인사를 작성한 상태
+  UnWritten = '03', // 감사인사를 작성하지 않은 상태
+  Written = '04', // 감사인사를 작성한 상태
 }
