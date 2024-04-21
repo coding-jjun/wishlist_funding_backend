@@ -13,7 +13,7 @@ export class RollingPaper {
   @PrimaryGeneratedColumn()
   rollId: number;
 
-  @OneToOne(() => Donation)
+  @OneToOne(() => Donation, {cascade: true})
   @JoinColumn({ name: 'donId', referencedColumnName: 'donId' })
   donation: Donation;
 
