@@ -7,6 +7,7 @@ import { CreateDonationDto } from './dto/create-donation.dto';
 import { CreateGuestDto } from './dto/create-guest.dto';
 import { Funding } from 'src/entities/funding.entity';
 import { User } from 'src/entities/user.entity';
+import { ResponseDonationDTO } from './dto/response-donation.dto';
 
 @Injectable()
 export class DonationService {
@@ -75,8 +76,7 @@ export class DonationService {
     return await this.userRepo.findOne({ where: { userId } });
   }
 
-  async updateFundingSum(fundId: number, donAmnt: number) {
-    const funding = await this.fundingRepo.findOne({ where: { fundId } });
+  async updateFundingSum(funding: Funding, donAmnt: number) {
     funding.fundSum += donAmnt;
     // TODO 펀딩 목표금액 달성 확인 후 Notification
     return await this.fundingRepo.save(funding);
@@ -91,29 +91,29 @@ export class DonationService {
   }
 
   // CREATE
-  async createDonation(fundId: number, createDonationDto: CreateDonationDto) {
+  async createDonation(fundUuid: string, createDonationDto: CreateDonationDto) {
     const tmpUserId = 1;
     const donAmnt = createDonationDto.donAmnt;
     
     const user = await this.createOrFindDonator(tmpUserId, createDonationDto.guest);
-    const funding = await this.updateFundingSum(fundId, donAmnt);
 
-    // CREATE donation
+    const funding = await this.fundingRepo.findOne({ where: {fundUuid}})
+
+    const updateFunding = await this.updateFundingSum(funding, donAmnt);
+
     const donation = new Donation();
     donation.user = user;
-    donation.funding = funding;
+    donation.funding = updateFunding;
 
     const orderId = require('order-id')('key').generate();
     donation.orderId = orderId;
     donation.donAmnt = donAmnt;
 
-    const result = await this.donationRepo.save(donation);
+    const savedDonation = await this.donationRepo.save(donation);
 
-    // return 값 미정
-    this.createRollingPaper(result.donId, createDonationDto.rollMsg, createDonationDto.rollImg);
-
-    console.log(result);
-    return result;
+    const rollingPaper = await this.createRollingPaper(savedDonation, createDonationDto.rollMsg, createDonationDto.rollImg);
+    
+    return new ResponseDonationDTO(savedDonation, rollingPaper.rollId);
     // TODO 후원 등록 완료 Notification
   }
 
