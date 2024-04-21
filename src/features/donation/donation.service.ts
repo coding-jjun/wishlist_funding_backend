@@ -82,10 +82,11 @@ export class DonationService {
     return await this.fundingRepo.save(funding);
   }
 
-  async createRollingPaper(donation: Donation, rollMsg: string, rollImg: string){
+  async createRollingPaper(fundId:number, donation: Donation, rollMsg: string, rollImg: string){
     const rollingPaper = new RollingPaper();
     rollingPaper.donation = donation;
     rollingPaper.rollMsg = rollMsg;
+    rollingPaper.fundId = fundId;
     // TODO create RolllingPaper Image
     return await this.rollingPaperRepo.save(rollingPaper);
   }
@@ -111,7 +112,7 @@ export class DonationService {
 
     const savedDonation = await this.donationRepo.save(donation);
 
-    const rollingPaper = await this.createRollingPaper(savedDonation, createDonationDto.rollMsg, createDonationDto.rollImg);
+    const rollingPaper = await this.createRollingPaper(funding.fundId, savedDonation, createDonationDto.rollMsg, createDonationDto.rollImg);
     
     return new ResponseDonationDTO(savedDonation, rollingPaper.rollId);
     // TODO 후원 등록 완료 Notification
