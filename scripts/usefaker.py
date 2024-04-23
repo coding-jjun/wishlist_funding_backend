@@ -5,39 +5,55 @@ from dotenv import load_dotenv
 from pprint import pprint
 from faker import Faker
 from datetime import date
-
-load_dotenv()
-fake = Faker()
+from argparse import ArgumentParser
 
 
-with psycopg2.connect(
-    host=os.getenv("DB_HOST"),
-    user=os.getenv("DB_DEV_USERNAME"),
-    password=os.getenv("DB_DEV_PASSWORD"),
-    dbname=os.getenv("DB_DEV_DATABASE"),
-) as conn:
-    with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-        # postgresql은 double quote `"`를 붙여주지 않으면 기본으로 소문자화 된다.
-        QUERY = """
-            INSERT INTO funding ("fundTitle", "fundCont", "fundTheme", "fundGoal", "endAt", "fundUser")
-            VALUES (%s, %s, %s, %s, %s, %s);"""
+def exec_insertion(
+    connection, tablename: str, **kwargs
+) -> None:
+    COLUMNS = str(tuple(kwargs.keys())).replace("'", "\"")
+    VALUES = tuple(kwargs.values())
 
-        fund_title = fake.paragraph(nb_sentences=1)
-        fund_cont = fake.paragraph(nb_sentences=2)
-        fund_theme = fake.word(ext_word_list=["Birthday", "Anniversary", "Donation"])
-        fund_goal = fake.random_int(min=1000, max=100_000_000)
-        end_at = fake.future_date(end_date=date(2055, 3, 29)).strftime("%Y-%m-%d")
-        fund_user = 1
+    with connection.cursor() as cur:
+        QUERY = f"INSERT INTO {tablename} {COLUMNS} VALUES ({("%s," * len(kwargs))[:-1]})"
 
-        cur.execute(
-            QUERY, (fund_title, fund_cont, fund_theme, fund_goal, end_at, fund_user)
-        )
-        conn.commit()
+        print(QUERY)
+        cur.execute(QUERY, VALUES)
 
-    with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-        QUERY = "SELECT * FROM funding;"
+    connection.commit()
 
-        cur.execute(QUERY)
 
-        for data in cur.fetchall():
-            pprint(data)
+if __name__ == "__main__":
+    load_dotenv()
+    fake = Faker()
+
+    # parser = ArgumentParser(
+    #     prog="giftogether dummy data generator",
+    #     description="이 프로그램은 더미 데이터를 쉽게, 많이 넣기 위해 만들어졌습니다.",
+    #     epilog="^___________^b",
+    # )
+    # parser.add_argument("--table", type=str, help="테이블 이름", required=True)
+    # parser.add_argument(
+    #     "--number", type=int, help="더미 데이터 개수", required=False, default=10
+    # )
+
+    # args = parser.parse_args()
+    # ARG_TABLE = args.table
+    # ARG_NUMBER = args.number
+
+
+    with psycopg2.connect(
+        host=os.getenv("DB_HOST"),
+        user=os.getenv("DB_DEV_USERNAME"),
+        password=os.getenv("DB_DEV_PASSWORD"),
+        dbname=os.getenv("DB_DEV_DATABASE"),
+    ) as conn:
+        kwargs = {
+            "fundTitle": fake.paragraph(nb_sentences=1),
+            "fundCont" : fake.paragraph(nb_sentences=2),
+            "fundTheme" : fake.word(ext_word_list=["Birthday", "Anniversary", "Donation"]),
+            "fundGoal" : fake.random_int(min=1000, max=100_000_000),
+            "endAt" : fake.future_date(end_date=date(2055, 3, 29)).strftime("%Y-%m-%d"),
+            "fundUser" : 1
+        }
+        exec_insertion(conn, "funding", **kwargs)
