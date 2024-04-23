@@ -2,7 +2,6 @@ import psycopg2
 import psycopg2.extras
 import os
 from dotenv import load_dotenv
-from pprint import pprint
 from faker import Faker
 from datetime import date
 from argparse import ArgumentParser
@@ -15,45 +14,137 @@ def exec_insertion(
     VALUES = tuple(kwargs.values())
 
     with connection.cursor() as cur:
-        QUERY = f"INSERT INTO {tablename} {COLUMNS} VALUES ({("%s," * len(kwargs))[:-1]})"
+        QUERY = f"INSERT INTO \"{tablename}\" {COLUMNS} VALUES ({("%s," * len(kwargs))[:-1]})"
 
         print(QUERY)
         cur.execute(QUERY, VALUES)
 
-    connection.commit()
-
-
 if __name__ == "__main__":
     load_dotenv()
-    fake = Faker()
+    fake = Faker(["en_US", "ko_KR", "ja_JP", "cs_CZ"])
 
-    # parser = ArgumentParser(
-    #     prog="giftogether dummy data generator",
-    #     description="이 프로그램은 더미 데이터를 쉽게, 많이 넣기 위해 만들어졌습니다.",
-    #     epilog="^___________^b",
-    # )
-    # parser.add_argument("--table", type=str, help="테이블 이름", required=True)
-    # parser.add_argument(
-    #     "--number", type=int, help="더미 데이터 개수", required=False, default=10
-    # )
+    parser = ArgumentParser(
+        prog="giftogether dummy data generator",
+        description="이 프로그램은 더미 데이터를 쉽게, 많이 넣기 위해 만들어졌습니다.",
+        epilog="^___________^b",
+    )
+    parser.add_argument("--table", type=str, help="테이블 이름", required=True)
+    parser.add_argument(
+        "--number", type=int, help="더미 데이터 개수", required=False, default=1
+    )
 
-    # args = parser.parse_args()
-    # ARG_TABLE = args.table
-    # ARG_NUMBER = args.number
+    args = parser.parse_args()
+    ARG_TABLE = args.table
+    ARG_NUMBER = args.number
+    MIN_USER_ID = 16 # TODO - SELECT 문으로 직접 알아내기
+    MAX_USER_ID = 100 # TODO - SELECT 문으로 직접 알아내기
+    MAX_ACC_ID = 100 # TODO - SELECT 문으로 직접 알아내기
+    MAX_IMG_ID = 100 # TODO - SELECT 문으로 직접 알아내기
+    MAX_FUND_ID = 100 # TODO - SELECT 문으로 직접 알아내기
 
+    for _ in range(ARG_NUMBER):
 
-    with psycopg2.connect(
-        host=os.getenv("DB_HOST"),
-        user=os.getenv("DB_DEV_USERNAME"),
-        password=os.getenv("DB_DEV_PASSWORD"),
-        dbname=os.getenv("DB_DEV_DATABASE"),
-    ) as conn:
-        kwargs = {
-            "fundTitle": fake.paragraph(nb_sentences=1),
-            "fundCont" : fake.paragraph(nb_sentences=2),
-            "fundTheme" : fake.word(ext_word_list=["Birthday", "Anniversary", "Donation"]),
-            "fundGoal" : fake.random_int(min=1000, max=100_000_000),
-            "endAt" : fake.future_date(end_date=date(2055, 3, 29)).strftime("%Y-%m-%d"),
-            "fundUser" : 1
-        }
-        exec_insertion(conn, "funding", **kwargs)
+        match ARG_TABLE:
+            case "account":
+                kwargs = {
+                    "bank": fake.word(
+                        ext_word_list=[
+                            "Kakaobank",
+                            "Nonghyup",
+                            "Kookmin",
+                            "Shinhan",
+                            "Woori",
+                            "Ibk",
+                            "Hana",
+                            "Daegu",
+                            "Kyongnam",
+                            "Gwangju",
+                            "Busan",
+                            "Jeju",
+                            "Deutschebank",
+                            "Kdb",
+                            "Nfcf",
+                            "Kfcc",
+                            "Suhyup",
+                            "Nacufok",
+                            "Citybank",
+                            "Tossbank",
+                            "Scbank",
+                            "Kbank",
+                        ]
+                    ),
+                    "accNum": fake.credit_card_number(),
+                }
+            case "address":
+                kwargs = {
+                    "userId": fake.random_int(min=1, max=MAX_USER_ID),
+                    "addrRoad": fake.street_address(),
+                    "addrDetl": fake.address(),
+                    "addrZip": fake.postcode(),
+                    "addrNick": fake.emoji(),
+                }
+            case "comment":
+                kwargs = {
+                    "fundId": fake.random_int(min=1, max=MAX_FUND_ID),
+                    "authorId": fake.random_int(min=1, max=MAX_USER_ID),
+                    "content": fake.sentence(),
+                }
+            case "donation":
+                pass
+            case "friend":
+                pass
+            case "funding":
+                kwargs = {
+                    "fundTitle": fake.paragraph(nb_sentences=1),
+                    "fundCont" : fake.paragraph(nb_sentences=2),
+                    "fundTheme" : fake.word(ext_word_list=["Birthday", "Anniversary", "Donation"]),
+                    "fundGoal" : fake.random_int(min=1000, max=100_000_000),
+                    "endAt" : fake.future_date(end_date=date(2055, 3, 29)).strftime("%Y-%m-%d"),
+                    "fundUser" : fake.random_int(min=MIN_USER_ID, max=MAX_USER_ID),
+                }
+            case "gratitude":
+                pass
+            case "image":
+                kwargs = {
+                    "imgUrl": "https://picsum.photos/200",
+                    "imgType": fake.word(
+                        ext_word_list=[
+                            "Funding",
+                            "Donation",
+                            "Gratitude",
+                            "RollingPaper",
+                        ]
+                    ),
+                    "subId": fake.random_int(min=1, max=100),
+                }
+            case "notification":
+                pass
+            case "open_bank_token":
+                pass
+            case "rolling_paper":
+                pass
+            case "user":
+                kwargs = {
+                    "userNick": fake.safe_color_name()
+                    + " "
+                    + fake.first_name()
+                    + " "
+                    + str(fake.random_int()),
+                    "userPw": fake.password(),
+                    "userName": fake.name(),
+                    "userPhone": fake.phone_number(),
+                    "userEmail": fake.email(),
+                    "userBirth": fake.date(),
+                    "accId": fake.random_int(min=1, max=MAX_USER_ID),
+                    "userImg": fake.random_int(min=1, max=MAX_ACC_ID),
+                }
+
+        with psycopg2.connect(
+            host=os.getenv("DB_HOST"),
+            user=os.getenv("DB_DEV_USERNAME"),
+            password=os.getenv("DB_DEV_PASSWORD"),
+            dbname=os.getenv("DB_DEV_DATABASE"),
+        ) as conn:
+            exec_insertion(conn, ARG_TABLE, **kwargs)
+
+        conn.commit()

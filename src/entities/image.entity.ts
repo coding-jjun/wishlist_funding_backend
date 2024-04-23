@@ -14,14 +14,14 @@ export class Image {
   @Column('varchar')
   imgUrl: string;
 
-  @Index({ unique: true })
+  @Index({ unique: false })
   @Column({
     type: 'enum',
     enum: ImageType,
   })
   imgType: ImageType;
   
-  @Index({ unique: true })
+  @Index({ unique: false })
   @Column('int')
   subId: number;
 

@@ -34,7 +34,7 @@ export class User {
   @Column('date')
   userBirth: Date;
 
-  @Column({ unique: true })
+  @Column()
   accId: number;
 
   @Column()
