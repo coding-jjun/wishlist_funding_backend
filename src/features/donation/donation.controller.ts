@@ -34,38 +34,30 @@ export class DonationController {
   // 마이페이지에서 후원내역 조회
   @Get()
   async getAllDonations() {
-    try {
-      const data = await this.donationService.getAllDonations();
-      return { timeStamp: new Date(), message: 'Success', data };
-    } catch (error) {
-      throw new HttpException(
-        'Failed to get donations',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    return {
+      timestamp: new Date(Date.now()),
+      message: 'Donation list 조회 성공',
+      data: await this.donationService.getAllDonations()
+    };
   }
 
   // 비회원 후원내역 조회
   @Get('/:orderId')
   async getOneDonation(@Param('orderId') orderId: string) {
-    try {
-      const data = await this.donationService.getOneDonation(orderId);
-      return { timeStamp: new Date(), message: 'Success', data };
-    } catch (error) {
-      throw new HttpException(
-        'Failed to get one donation',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    return {
+      timestamp: new Date(Date.now()),
+      message: 'Donation 조회 성공',
+      data: await this.donationService.getOneDonation(orderId)
+    };
   }
 
   // 후원 취소
   @Delete('/:donId')
   async deleteDonation(@Param('donId') donId: number) {
-    const result = await this.donationService.deleteDonation(donId);
-    if (result) {
-      return { timeStamp: new Date(), message: 'Success' };
-    }
-    throw new HttpException('Failed to delete donation', HttpStatus.NOT_FOUND);
+    return {
+      timestamp: new Date(Date.now()),
+      message: 'Donation 삭제 성공',
+      data: await this.donationService.deleteDonation(donId)
+    };
   }
 }

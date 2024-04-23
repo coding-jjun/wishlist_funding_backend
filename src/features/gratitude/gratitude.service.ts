@@ -1,16 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Donation } from 'src/entities/donation.entity';
 import { Gratitude } from 'src/entities/gratitude.entity';
-import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import { GratitudeDto } from './dto/gratitude.dto';
+import { Funding } from 'src/entities/funding.entity';
 
 @Injectable()
 export class GratitudeService {
   constructor(
     @InjectRepository(Gratitude)
     private readonly gratitudeRepo: Repository<Gratitude>,
+
+    @InjectRepository(Funding)
+    private readonly fundingRepo: Repository<Funding>,
   ) {}
   
   async getGratitude(gratId: number){
@@ -19,32 +21,26 @@ export class GratitudeService {
     return gratitude;
   }
 
-  async createGratitude(gratId: number, gratitudeDto: GratitudeDto) {
-    const gratitude = await this.createOrUpdateGratitude(gratId, gratitudeDto);
-    // TODO create gratitude image url
+  async createGratitude(fundUuid: string, gratitudeDto: GratitudeDto) {
+    const funding = await this.fundingRepo.findOne({ where: {fundUuid}});
+
+    const savedgratitude 
+          = await this.gratitudeRepo.save(new Gratitude(funding,
+                                                        gratitudeDto.gratTitle,
+                                                        gratitudeDto.gratCont));
+
+    const { funding: ignoredFunding, ...gratitude } = savedgratitude;
+
     return gratitude;
+    // TODO create gratitude image url
   }
   
   async updateGratitude(gratId: number, gratitudeDto: GratitudeDto) {
-    const gratitude = this.createOrUpdateGratitude(gratId, gratitudeDto, true);
-    // TODO update gratitude image
-    return gratitude;
-  }
-  
-  private async createOrUpdateGratitude(gratId: number, gratitudeDto: GratitudeDto, isUpdate: boolean = false): Promise<Gratitude> {
-    let gratitude: Gratitude;
-    
-    if (isUpdate) {
-      gratitude = await this.gratitudeRepo.findOne({where: {gratId}});
-    } else {
-      gratitude = new Gratitude();
-      gratitude.gratId = gratId;
-    }  
+    const gratitude = await this.gratitudeRepo.findOne({where: {gratId}});
     gratitude.gratTitle = gratitudeDto.gratTitle;
     gratitude.gratCont = gratitudeDto.gratCont;
-    await this.gratitudeRepo.save(gratitude);
-    
-    return gratitude;
+    // TODO update gratitude image
+    return await this.gratitudeRepo.save(gratitude);
   }
 
 
