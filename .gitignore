@@ -20,8 +20,7 @@ lerna-debug.log*
 /.nyc_output
 
 # IDEs and editors
-/.idea
-.project
+/.ide.project
 .classpath
 .c9/
 *.launch
@@ -55,3 +54,10 @@ pids
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 global-bundle.pem
+
+# Ignore Node.js binaries
+*.tar
+*.tar.gz
+
+# Docker
+.dockerignore
