@@ -20,7 +20,8 @@ lerna-debug.log*
 /.nyc_output
 
 # IDEs and editors
-/.ide.project
+/.ide
+.project
 .classpath
 .c9/
 *.launch
