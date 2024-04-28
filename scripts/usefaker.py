@@ -40,7 +40,10 @@ if __name__ == "__main__":
     MAX_USER_ID = 100 # TODO - SELECT 문으로 직접 알아내기
     MAX_ACC_ID = 100 # TODO - SELECT 문으로 직접 알아내기
     MAX_IMG_ID = 100 # TODO - SELECT 문으로 직접 알아내기
+    MIN_FUND_ID = 1 # TODO - SELECT 문으로 직접 알아내기
     MAX_FUND_ID = 100 # TODO - SELECT 문으로 직접 알아내기
+    MIN_ORDER_ID = 10 # TODO - SELECT 문으로 직접 알아내기
+    MAX_ORDER_ID = 10 # TODO - SELECT 문으로 직접 알아내기
 
 
     with psycopg2.connect(
@@ -83,7 +86,7 @@ if __name__ == "__main__":
                     }
                 case "address":
                     kwargs = {
-                        "userId": fake.random_int(min=1, max=MAX_USER_ID),
+                        "userId": fake.random_int(min=MIN_USER_ID, max=MAX_USER_ID),
                         "addrRoad": fake.street_address(),
                         "addrDetl": fake.address(),
                         "addrZip": fake.postcode(),
@@ -96,9 +99,17 @@ if __name__ == "__main__":
                         "content": fake.sentence(),
                     }
                 case "donation":
-                    pass
+                    kwargs = {
+                        "donationStatus": fake.word(ext_word_list=["Donated", "WaitingRefund", "RefundComplete"]),
+                        "orderId": fake.random_int(min=MIN_ORDER_ID, max=MAX_ORDER_ID),
+                        "donAmnt": fake.random_int(min=1000, max=100_000_000),
+                        "fundId": fake.random_int(min=MIN_FUND_ID, max=MAX_FUND_ID)
+                    }
                 case "friend":
-                    pass
+                    kwargs = {
+                        "userId": fake.random_int(min=MIN_USER_ID, max=MAX_USER_ID),
+                        "friendId": fake.random_int(min=MIN_USER_ID, max=MAX_USER_ID),
+                    }
                 case "funding":
                     kwargs = {
                         "fundTitle": fake.paragraph(nb_sentences=1),
