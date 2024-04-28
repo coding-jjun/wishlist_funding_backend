@@ -36,18 +36,19 @@ export class FriendService {
 			.getRawMany();
 
 		// 친구 정보 및 이미지 URL 조회
-		const [friendsData, total] = await this.userRepository.createQueryBuilder('user')
-    .leftJoin('image', 'image', 'image.imgId = user.userImg')
-    .where('user.userId IN (:...ids)', { ids: friendIds.map(fi => fi.friendId) })
-    .select(['user.userId', 'user.userName', 'image.imgUrl AS userImg']) // 이미지 URL 직접 추가
-    .getManyAndCount();
+    const [friendsData, total] = await this.userRepository.createQueryBuilder('user')
+        .leftJoinAndSelect('user.image', 'image') // 업데이트된 관계 필드 사용
+        .where('user.userId IN (:...ids)', { ids: friendIds.map(fi => fi.friendId) })
+        .select(['user.userId', 'user.userName'])
+        .addSelect('image.imgUrl', 'userImg') // 이미지 URL 직접 추가
+        .getManyAndCount();
 
 		// 결과 객체 반환
 		return {
 			result: friendsData.map(friend => ({
 					userId: friend.userId,
 					userName: friend.userName,
-					userImg: friend.userImg || null, // 이미지가 있으면 URL을, 없으면 null
+					userImg: friend.image ? friend.image.imgUrl : null, // 이미지가 있으면 URL을, 없으면 null
 			})),
 			total
 		};

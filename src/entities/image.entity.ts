@@ -24,5 +24,4 @@ export class Image {
   @Index({ unique: false })
   @Column('int')
   subId: number;
-
 }

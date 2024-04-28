@@ -56,7 +56,8 @@ import { Account } from './entities/account.entity';
         Address,
         Gratitude,
         Image,
-        OpenBankToken
+        OpenBankToken,
+        Account,
       ],
       ssl: {
         ca: readFileSync('global-bundle.pem'),

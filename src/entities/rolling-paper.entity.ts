@@ -3,14 +3,22 @@ import {
   Entity,
   OneToOne,
   JoinColumn,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   DeleteDateColumn,
 } from 'typeorm';
+import { Donation } from './donation.entity';
 
 @Entity()
 export class RollingPaper {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   rollId: number;
+
+  @OneToOne(() => Donation, {cascade: true})
+  @JoinColumn({ name: 'donId', referencedColumnName: 'donId' })
+  donation: Donation;
+
+  @Column()
+  fundId: number;
 
   // @OneToOne(() => Image, img => img.imgId)
   // @JoinColumn({ name: 'rollImg' })

@@ -1,16 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Address } from 'src/entities/address.entity';
-import { UpdateUserDto } from '../user/dto/update-user.dto';
+import { User } from 'src/entities/user.entity';
 
 @Injectable()
 export class AddressService {
   constructor(
     @InjectRepository(Address)
     private readonly addrRepository: Repository<Address>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
 
@@ -22,7 +24,13 @@ export class AddressService {
     address.addrZip = createAddressDto.addrZip;
     address.addrNick = createAddressDto.addrNick;
     address.isDef = createAddressDto.isDef;
-    address.userId = createAddressDto.userId;
+    
+    const user = await this.userRepository.findOne({ where: {userId: createAddressDto.userId }});
+    if (!user) {
+      throw new HttpException('존재하지 않는 사용자입니다.', HttpStatus.BAD_REQUEST);
+    }
+
+    address.addrUser = user;
 
     return await this.addrRepository.save(address);
   }
@@ -32,10 +40,11 @@ export class AddressService {
   ): Promise<{ result: Address[] }> {
     const addresses = await this.addrRepository
       .createQueryBuilder('addr')
-      .where('addr.userId = :userId', {userId})
+      .leftJoinAndSelect('addr.addrUser', 'user')
+      .where('user.userId = :userId', { userId })
       .getMany();
 
-    return { result: addresses};
+    return { result: addresses };
   }
 
   async update(
