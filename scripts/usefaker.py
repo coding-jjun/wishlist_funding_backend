@@ -152,8 +152,8 @@ if __name__ == "__main__":
                         "userPhone": fake.phone_number(),
                         "userEmail": fake.email(),
                         "userBirth": fake.date(),
-                        "accId": fake.random_int(min=1, max=MAX_USER_ID),
-                        "userImg": fake.random_int(min=1, max=MAX_ACC_ID),
+                        "userAcc": None,
+                        "userImg": None,
                     }
 
             exec_insertion(conn, ARG_TABLE, **kwargs)
