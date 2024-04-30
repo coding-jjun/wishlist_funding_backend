@@ -121,9 +121,10 @@ export class FundingService {
     });
   }
 
-  create(fundingCreateDto: CreateFundingDto, accessToken: string): Promise<Funding> {
+  async create(fundingCreateDto: CreateFundingDto, accessToken: string): Promise<Funding> {
     // TODO - accessToken -> User 객체로 변환하기
-    const user = this.userRepository.find()[0];
+    const users = await this.userRepository.find();
+    const user = users[0];
     let funding = new Funding(
       user,
       fundingCreateDto.fundTitle,
