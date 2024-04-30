@@ -16,27 +16,21 @@ export class GratitudeService {
   ) {}
   
   async getGratitude(gratId: number){
-    const gratitude = await this.gratitudeRepo.findOne({where: {gratId}});
     // TODO find all image url
-    return gratitude;
+    return await this.gratitudeRepo.findOneBy({gratId});
   }
 
   async createGratitude(fundUuid: string, gratitudeDto: GratitudeDto) {
     const funding = await this.fundingRepo.findOne({ where: {fundUuid}});
 
-    const savedgratitude 
-          = await this.gratitudeRepo.save(new Gratitude(funding,
-                                                        gratitudeDto.gratTitle,
-                                                        gratitudeDto.gratCont));
-
-    const { funding: ignoredFunding, ...gratitude } = savedgratitude;
-
-    return gratitude;
+    return await this.gratitudeRepo.save(new Gratitude(funding.fundId,
+                                                      gratitudeDto.gratTitle,
+                                                      gratitudeDto.gratCont));
     // TODO create gratitude image url
   }
   
   async updateGratitude(gratId: number, gratitudeDto: GratitudeDto) {
-    const gratitude = await this.gratitudeRepo.findOne({where: {gratId}});
+    const gratitude = await this.gratitudeRepo.findOneBy({gratId});
     gratitude.gratTitle = gratitudeDto.gratTitle;
     gratitude.gratCont = gratitudeDto.gratCont;
     // TODO update gratitude image
@@ -45,7 +39,7 @@ export class GratitudeService {
 
 
   async deleteGratitude(gratId: number){
-    const gratitude = await this.gratitudeRepo.findOne({where: {gratId}});
+    const gratitude = await this.gratitudeRepo.findOneBy({gratId});
     if (gratitude) {
       console.log(gratitude);
       gratitude.isDel = true;
