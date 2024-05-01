@@ -7,6 +7,7 @@ import { User } from 'src/entities/user.entity';
 import { FundTheme } from 'src/enums/fund-theme.enum';
 import { FriendStatus } from 'src/enums/friend-status.enum';
 import { Friend } from 'src/entities/friend.entity';
+import { GiftService } from '../gift/gift.service';
 
 @Injectable()
 export class FundingService {
@@ -19,6 +20,8 @@ export class FundingService {
     
     @InjectRepository(Friend)
     private friendRepository: Repository<Friend>,
+
+    private giftService: GiftService,
   ) {}
 
   async findAll(
@@ -121,7 +124,7 @@ export class FundingService {
     });
   }
 
-  create(fundingCreateDto: CreateFundingDto, accessToken: string): Promise<Funding> {
+  async create(fundingCreateDto: CreateFundingDto, accessToken: string): Promise<Funding> {
     // TODO - accessToken -> User 객체로 변환하기
     const user = this.userRepository.find()[0];
     let funding = new Funding(

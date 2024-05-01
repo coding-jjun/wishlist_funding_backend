@@ -9,7 +9,7 @@ export class Gift {
 
   @ManyToOne(() => Funding, (funding) => funding.fundId)
   @JoinColumn({ name: 'fundId' })
-  fundId: Funding;
+  funding: Funding;
 
   @Column()
   giftUrl: string;
@@ -25,5 +25,5 @@ export class Gift {
 
   @OneToMany(() => Image, (image) => image.imgId, { nullable: true })
   @JoinColumn({ name: 'imgId' })
-  imgId: Image;
+  images: Image[];
 }
