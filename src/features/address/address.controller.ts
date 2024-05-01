@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put, ParseIntPipe, ValidationPipe, HttpException, HttpStatus } from '@nestjs/common';
 import { AddressService } from './address.service';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
@@ -7,23 +7,10 @@ import { CommonResponse } from 'src/interfaces/common-response.interface';
 @Controller('api/address')
 export class AddressController {
   constructor(private readonly addressService: AddressService) {}
-
-  @Post()
-  async create(
-    @Body() createAddressDto: CreateAddressDto
-    ): Promise<CommonResponse> {
-    const result = await this.addressService.create(createAddressDto);
-    
-    return {
-      timestamp: new Date(Date.now()),
-      message: '배송지를 추가하였습니다.',
-      data: result
-    };
-  }
-
-  @Get(':userId')
+  
+  @Get('user/:userId')
   async findAll(
-    @Param('userId') userId: number,
+    @Param('userId', ParseIntPipe) userId: number,
   ): Promise<CommonResponse> {
     const result = await this.addressService.findAll(userId);
 
@@ -34,10 +21,42 @@ export class AddressController {
     };
   }
 
+  @Post()
+  async create(
+    @Body(new ValidationPipe()) createAddressDto: CreateAddressDto
+    ): Promise<CommonResponse> {
+    const result = await this.addressService.create(createAddressDto);
+    
+    return {
+      timestamp: new Date(Date.now()),
+      message: '배송지를 추가하였습니다.',
+      data: result
+    };
+  }
+
+  @Get('addrId')
+  async findOne(
+    @Param('addrId', ParseIntPipe) addrId: number,
+  ): Promise<CommonResponse> {
+    const address = await this.addressService.findOne(addrId);
+    try {
+      return {
+        timestamp: new Date(),
+        message: '배송지 조회에 성공하였습니다.',
+        data: address,
+      }
+    } catch (error) {
+      throw new HttpException(
+        '배송지 조회에 실패하였습니다',
+        HttpStatus.BAD_REQUEST
+      )
+    }
+  }
+
   @Put('addrId')
   async update(
     @Param('addrId', ParseIntPipe) addrId: number,
-    @Body() updateAddressDto: UpdateAddressDto
+    @Body(new ValidationPipe()) updateAddressDto: UpdateAddressDto
   ): Promise<CommonResponse> {
     const result = await this.addressService.update(addrId, updateAddressDto);
 

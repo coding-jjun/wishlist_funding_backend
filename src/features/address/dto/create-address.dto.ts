@@ -7,6 +7,9 @@ export class CreateAddressDto {
   userId: number;
 
   @IsNotEmpty()
+  addrNick: string;
+
+  @IsNotEmpty()
   addrRoad: string;
 
   @IsNotEmpty()
@@ -14,9 +17,6 @@ export class CreateAddressDto {
 
   @IsNotEmpty()
   addrZip: string;
-
-  @IsOptional()
-  addrNick: string;
 
   @IsNotEmpty()
   isDef: boolean;
