@@ -12,7 +12,7 @@ export class ImageService {
   async upload(filename: string, file: Buffer) {
     await this.s3Client.send(
       new PutObjectCommand({
-        Bucket: 'giftogether2',
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
         Key: filename,
         Body: file,
       }),
