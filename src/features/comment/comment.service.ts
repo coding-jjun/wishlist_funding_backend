@@ -64,7 +64,7 @@ export class CommentService {
     const where = { funding: { fundId } };
 
     return this.commentRepository
-      .find({ where, relations: { author: true } })
+      .find({ where, relations: { author: true }, order: { regAt: 'DESC' } })
       .then((comments) => comments.map(convertToGetCommentDto));
   }
 

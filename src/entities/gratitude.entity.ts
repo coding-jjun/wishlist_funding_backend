@@ -1,8 +1,8 @@
 import {
   Column,
   Entity,
-  PrimaryColumn,
-  CreateDateColumn
+  CreateDateColumn,
+  PrimaryColumn
 } from 'typeorm';
 
 @Entity()
@@ -10,7 +10,7 @@ export class Gratitude {
 
   @PrimaryColumn()
   gratId: number;
-
+  
   @Column()
   gratTitle: string;
   
@@ -22,6 +22,12 @@ export class Gratitude {
 
   @Column('bool', { default: false })
   isDel: boolean;
+
+  constructor(gratId :number, gratTitle: string, gratCont: string){
+    this.gratId = gratId;
+    this.gratTitle = gratTitle;
+    this.gratCont = gratCont;
+  }
 
 }
 

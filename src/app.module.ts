@@ -16,11 +16,19 @@ import { DonationModule } from './features/donation/donation.module';
 import { RollingPaperModule } from './features/rolling-paper/rolling-paper.module';
 import { readFileSync } from 'fs';
 import { Friend } from './entities/friend.entity';
+import { Address } from './entities/address.entity';
+import { AddressModule } from './features/address/address.module';
+
 import { CommentModule } from './features/comment/comment.module';
 import { Gratitude } from './entities/gratitude.entity';
 import { GratitudeModule } from './features/gratitude/gratitude.module';
 import { Image } from './entities/image.entity';
 import { Notification } from './entities/notification.entity';
+import { TokenModule } from './features/open-bank/token/token.module';
+import { OpenBankToken } from './entities/open-bank-token.entity';
+import { Account } from './entities/account.entity';
+import { Gift } from './entities/gift.entity';
+import { GiftModule } from './features/gift/gift.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -34,20 +42,24 @@ import { Notification } from './entities/notification.entity';
       host: process.env.DB_HOST,
       port: parseInt(process.env.DB_PORT) || 5432,
       password: process.env.DB_DEV_PASSWORD,
-      username: process.env.DB_DEV_1_USERNAME,
-      database: process.env.DB_DEV_1_DATABASE,
+      username: process.env.DB_DEV_USERNAME,
+      database: process.env.DB_DEV_DATABASE,
       synchronize: true,
       logging: true,
       entities: [
-        User,
-        Funding,
-        Comment,
+        User, 
+        Funding, 
+        Comment, 
         Donation,
-        RollingPaper,
-        Notification,
-        Friend,
+        RollingPaper, 
+        Notification, 
+        Friend, 
+        Address,
         Gratitude,
         Image,
+        OpenBankToken,
+        Account,
+        Gift,
       ],
       ssl: {
         ca: readFileSync('global-bundle.pem'),
@@ -64,8 +76,11 @@ import { Notification } from './entities/notification.entity';
     RollingPaperModule,
     FriendModule,
     NotificationModule,
+    AddressModule,
     CommentModule,
     GratitudeModule,
+    TokenModule,
+    GiftModule,
   ],
   controllers: [AppController],
   providers: [AppService],

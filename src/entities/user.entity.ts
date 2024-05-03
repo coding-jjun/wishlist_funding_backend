@@ -2,14 +2,19 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  Timestamp,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
   OneToMany,
+  OneToOne,
+  JoinColumn,
+  ManyToOne,
 } from 'typeorm';
 import { Funding } from './funding.entity';
 import { Comment } from './comment.entity';
+import { Account } from './account.entity';
+import { Image } from './image.entity';
+import { Address } from './address.entity';
 
 @Entity()
 export class User {
@@ -34,11 +39,13 @@ export class User {
   @Column('date')
   userBirth: Date;
 
-  @Column({ unique: true })
-  accId: number;
+  @OneToOne(() => Account, (account) => account.user, { nullable: true })
+  @JoinColumn({ name: 'userAcc' })
+  account: Account;
 
-  @Column()
-  userImg: number;
+  @ManyToOne(() => Image, { nullable: true })
+  @JoinColumn({ name: 'userImg' })
+  image: Image;
 
   @CreateDateColumn()
   regAt: Date;
@@ -54,4 +61,7 @@ export class User {
 
   @OneToMany(() => Comment, (comment) => comment.author)
   comments: Comment[];
+
+  @OneToMany(() => Address, (address) => address.addrUser)
+  addresses: Address[];
 }
