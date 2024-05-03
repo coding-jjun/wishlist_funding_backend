@@ -151,7 +151,15 @@ if __name__ == "__main__":
                     case "friend":
                         kwargs = {
                             "userId": fake.random_int(min=MIN_USER_ID, max=MAX_USER_ID),
-                            "friendId": fake.random_int(min=MIN_USER_ID, max=MAX_USER_ID),
+                            "friendId": fake.random_int(
+                                min=MIN_USER_ID, max=MAX_USER_ID
+                            ),
+                            "status": fake.word(
+                                ext_word_list=[
+                                    "Friend",
+                                    "Requested",
+                                ]
+                            ),
                         }
                     case "funding":
                         kwargs = {
