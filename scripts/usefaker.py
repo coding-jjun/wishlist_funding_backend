@@ -1,6 +1,7 @@
 import psycopg2
 import psycopg2.extras
 import psycopg2.extensions
+from psycopg2.errors import UniqueViolation
 import os
 from dotenv import load_dotenv
 from faker import Faker
@@ -76,6 +77,10 @@ if __name__ == "__main__":
             MAX_GRAT_ID = int(unwrap_or(cursor.fetchone(), (0,))[0])
             cursor.execute("SELECT \"gratId\" from public.gratitude ORDER BY \"gratId\" ASC LIMIT 1")
             MIN_GRAT_ID = int(unwrap_or(cursor.fetchone(), (0,))[0])
+            cursor.execute("SELECT \"donId\" FROM public.donation ORDER BY \"donId\" ASC LIMIT 1")
+            MIN_DON_ID = int(unwrap_or(cursor.fetchone(), (0,))[0])
+            cursor.execute("SELECT \"donId\" FROM public.donation ORDER BY \"donId\" DESC LIMIT 1")
+            MAX_DON_ID = int(unwrap_or(cursor.fetchone(), (0,))[0])
 
         print(
             f"""
@@ -87,134 +92,150 @@ if __name__ == "__main__":
             MAX_FUND_ID: {MAX_FUND_ID}"""
         )
         for _ in range(ARG_NUMBER):
-            match ARG_TABLE:
-                case "account":
-                    kwargs = {
-                        "bank": fake.word(
-                            ext_word_list=[
-                                "Kakaobank",
-                                "Nonghyup",
-                                "Kookmin",
-                                "Shinhan",
-                                "Woori",
-                                "Ibk",
-                                "Hana",
-                                "Daegu",
-                                "Kyongnam",
-                                "Gwangju",
-                                "Busan",
-                                "Jeju",
-                                "Deutschebank",
-                                "Kdb",
-                                "Nfcf",
-                                "Kfcc",
-                                "Suhyup",
-                                "Nacufok",
-                                "Citybank",
-                                "Tossbank",
-                                "Scbank",
-                                "Kbank",
-                            ]
-                        ),
-                        "accNum": fake.credit_card_number(),
-                    }
-                case "address":
-                    kwargs = {
-                        "userId": fake.random_int(min=MIN_USER_ID, max=MAX_USER_ID),
-                        "addrRoad": fake.street_address(),
-                        "addrDetl": fake.address(),
-                        "addrZip": fake.postcode(),
-                        "addrNick": fake.emoji(),
-                    }
-                case "comment":
-                    kwargs = {
-                        "fundId": fake.random_int(min=1, max=MAX_FUND_ID),
-                        "authorId": fake.random_int(min=1, max=MAX_USER_ID),
-                        "content": fake.sentence(),
-                    }
-                case "donation":
-                    kwargs = {
-                        "donationStatus": fake.word(ext_word_list=["Donated", "WaitingRefund", "RefundComplete"]),
-                        "orderId": fake.word(),
-                        "donAmnt": fake.random_int(min=1000, max=100_000_000),
-                        "fundId": fake.random_int(min=MIN_FUND_ID, max=MAX_FUND_ID)
-                    }
-                case "friend":
-                    kwargs = {
-                        "userId": fake.random_int(min=MIN_USER_ID, max=MAX_USER_ID),
-                        "friendId": fake.random_int(min=MIN_USER_ID, max=MAX_USER_ID),
-                    }
-                case "funding":
-                    kwargs = {
-                        "fundTitle": fake.paragraph(nb_sentences=1),
-                        "fundCont" : fake.paragraph(nb_sentences=2),
-                        "fundTheme" : fake.word(ext_word_list=["Birthday", "Anniversary", "Donation"]),
-                        "fundGoal" : fake.random_int(min=1000, max=100_000_000),
-                        "endAt" : fake.future_date(end_date=date(2055, 3, 29)).strftime("%Y-%m-%d"),
-                        "fundUser" : fake.random_int(min=MIN_USER_ID, max=MAX_USER_ID),
-                    }
-                case "gratitude":
-                    # TODO - fundId와 같이 1대1로 물려있음. 만들 때 항상 중복여부를 검사하기 때문에 삽입하기 까다롭다.
-                    pass
-                case "image":
-                    kwargs = {
-                        "imgUrl": "https://picsum.photos/200",
-                        "imgType": fake.word(
-                            ext_word_list=[
-                                "Funding",
-                                "Donation",
-                                "Gratitude",
-                                "RollingPaper",
-                            ]
-                        ),
-                        "subId": fake.random_int(min=1, max=100),
-                    }
-                case "notification":
-                    kwargs = {
-                        "recvId": fake.random_int(min=1, max=MAX_USER_ID),
-                        "sendId": fake.random_int(min=1, max=MAX_USER_ID),
-                        "notiType": fake.word(
-                            ext_word_list=[
-                                "IncomingFollow",
-                                "AcceptFollow",
-                                "FundClose",
-                                "FundAchieve",
-                                "NewDonate",
-                                "DonatedFundClose",
-                                "WriteGratitude",
-                                "CheckGratitude",
-                            ]
-                        ),
-                        "reqType": fake.word(
-                            ext_word_list=[
-                                "00",
-                                "01",
-                                "02",
-                                "03",
-                            ]
-                        ),
-                        "subId": fake.random_int(min=1, max=MAX_FUND_ID), # FIXME - subid description에 맞추기
-                    }
-                case "open_bank_token":
-                    kwargs = {}
-                case "rolling_paper":
-                    kwargs = {}
-                case "user":
-                    kwargs = {
-                        "userNick": fake.safe_color_name()
-                        + " "
-                        + fake.first_name()
-                        + " "
-                        + str(fake.random_int()),
-                        "userPw": fake.password(),
-                        "userName": fake.name(),
-                        "userPhone": fake.phone_number(),
-                        "userEmail": fake.email(),
-                        "userBirth": fake.date(),
-                        "userAcc": None,
-                        "userImg": None,
-                    }
+            try:
+                match ARG_TABLE:
+                    case "account":
+                        kwargs = {
+                            "bank": fake.word(
+                                ext_word_list=[
+                                    "Kakaobank",
+                                    "Nonghyup",
+                                    "Kookmin",
+                                    "Shinhan",
+                                    "Woori",
+                                    "Ibk",
+                                    "Hana",
+                                    "Daegu",
+                                    "Kyongnam",
+                                    "Gwangju",
+                                    "Busan",
+                                    "Jeju",
+                                    "Deutschebank",
+                                    "Kdb",
+                                    "Nfcf",
+                                    "Kfcc",
+                                    "Suhyup",
+                                    "Nacufok",
+                                    "Citybank",
+                                    "Tossbank",
+                                    "Scbank",
+                                    "Kbank",
+                                ]
+                            ),
+                            "accNum": fake.credit_card_number(),
+                        }
+                    case "address":
+                        kwargs = {
+                            "userId": fake.random_int(min=MIN_USER_ID, max=MAX_USER_ID),
+                            "addrRoad": fake.street_address(),
+                            "addrDetl": fake.address(),
+                            "addrZip": fake.postcode(),
+                            "addrNick": fake.emoji(),
+                        }
+                    case "comment":
+                        kwargs = {
+                            "fundId": fake.random_int(min=1, max=MAX_FUND_ID),
+                            "authorId": fake.random_int(min=1, max=MAX_USER_ID),
+                            "content": fake.sentence(),
+                        }
+                    case "donation":
+                        kwargs = {
+                            "donationStatus": fake.word(
+                                ext_word_list=["Donated", "WaitingRefund", "RefundComplete"]
+                            ),
+                            "orderId": fake.word(),
+                            "donAmnt": fake.random_int(min=1000, max=100_000_000),
+                            "fundId": fake.random_int(min=MIN_FUND_ID, max=MAX_FUND_ID),
+                            "userId": fake.random_int(min=MIN_USER_ID, max=MAX_USER_ID),
+                        }
+                    case "friend":
+                        kwargs = {
+                            "userId": fake.random_int(min=MIN_USER_ID, max=MAX_USER_ID),
+                            "friendId": fake.random_int(min=MIN_USER_ID, max=MAX_USER_ID),
+                        }
+                    case "funding":
+                        kwargs = {
+                            "fundTitle": fake.paragraph(nb_sentences=1),
+                            "fundCont" : fake.paragraph(nb_sentences=2),
+                            "fundTheme" : fake.word(ext_word_list=["Birthday", "Anniversary", "Donation"]),
+                            "fundGoal" : fake.random_int(min=1000, max=100_000_000),
+                            "endAt" : fake.future_date(end_date=date(2055, 3, 29)).strftime("%Y-%m-%d"),
+                            "fundUser" : fake.random_int(min=MIN_USER_ID, max=MAX_USER_ID),
+                        }
+                    case "gratitude":
+                        # TODO - fundId와 같이 1대1로 물려있음. 만들 때 항상 중복여부를 검사하기 때문에 삽입하기 까다롭다.
+                        pass
+                    case "image":
+                        kwargs = {
+                            "imgUrl": "https://picsum.photos/200",
+                            "imgType": fake.word(
+                                ext_word_list=[
+                                    "Funding",
+                                    "Donation",
+                                    "Gratitude",
+                                    "RollingPaper",
+                                ]
+                            ),
+                            "subId": fake.random_int(min=1, max=100),
+                        }
+                    case "notification":
+                        kwargs = {
+                            "recvId": fake.random_int(min=1, max=MAX_USER_ID),
+                            "sendId": fake.random_int(min=1, max=MAX_USER_ID),
+                            "notiType": fake.word(
+                                ext_word_list=[
+                                    "IncomingFollow",
+                                    "AcceptFollow",
+                                    "FundClose",
+                                    "FundAchieve",
+                                    "NewDonate",
+                                    "DonatedFundClose",
+                                    "WriteGratitude",
+                                    "CheckGratitude",
+                                ]
+                            ),
+                            "reqType": fake.word(
+                                ext_word_list=[
+                                    "00",
+                                    "01",
+                                    "02",
+                                    "03",
+                                ]
+                            ),
+                            "subId": fake.random_int(min=1, max=MAX_FUND_ID), # FIXME - subid description에 맞추기
+                        }
+                    case "open_bank_token":
+                        kwargs = {}
+                    case "rolling_paper":
+                        # donation과 1대1 관계이기 때문에 하나가 만들어지면 함께 만들어진다.
+                        kwargs = {
+                            "fundId": fake.random_int(min=MIN_FUND_ID, max=MAX_FUND_ID),
+                            "rollMsg": fake.paragraph(nb_sentences=5),
+                            "donId": fake.random_int(min=MIN_DON_ID, max=MAX_DON_ID),
+                        }
+                    case "user":
+                        kwargs = {
+                            "userNick": fake.safe_color_name()
+                            + " "
+                            + fake.first_name()
+                            + " "
+                            + str(fake.random_int()),
+                            "userPw": fake.password(),
+                            "userName": fake.name(),
+                            "userPhone": fake.phone_number(),
+                            "userEmail": fake.email(),
+                            "userBirth": fake.date(),
+                            "userAcc": None,
+                            "userImg": None,
+                        }
 
-            exec_insertion(conn, ARG_TABLE, **kwargs)
+                exec_insertion(conn, ARG_TABLE, **kwargs)
 
+            except UniqueViolation:
+                print("unique violation 발생! 하지만 무시하겠습니다.")
+                conn.commit()
+                continue
+        # end for
         conn.commit()
+    # end with
+# end if
