@@ -18,7 +18,6 @@ import { readFileSync } from 'fs';
 import { Friend } from './entities/friend.entity';
 import { Address } from './entities/address.entity';
 import { AddressModule } from './features/address/address.module';
-
 import { CommentModule } from './features/comment/comment.module';
 import { Gratitude } from './entities/gratitude.entity';
 import { GratitudeModule } from './features/gratitude/gratitude.module';
@@ -27,7 +26,6 @@ import { Notification } from './entities/notification.entity';
 import { TokenModule } from './features/open-bank/token/token.module';
 import { OpenBankToken } from './entities/open-bank-token.entity';
 import { Account } from './entities/account.entity';
-import { ImageController } from './features/image/image.controller';
 import { MulterModule } from '@nestjs/platform-express';
 import { ImageModule } from './features/image/image.module';
 @Module({

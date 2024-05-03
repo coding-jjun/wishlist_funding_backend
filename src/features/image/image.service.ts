@@ -5,12 +5,14 @@ import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 export class ImageService {
   private readonly s3Client = new S3Client({
     region: process.env.AWS_S3_REGION,
+    maxAttempts: 30,
+    
   });
 
   async upload(filename: string, file: Buffer) {
     await this.s3Client.send(
       new PutObjectCommand({
-        Bucket: 'nestjs-uploader',
+        Bucket: 'giftogether2',
         Key: filename,
         Body: file,
       }),
