@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Funding } from 'src/entities/funding.entity';
 import { Repository,Like, MoreThan, Brackets } from 'typeorm';
@@ -149,10 +149,14 @@ export class FundingService {
     return new FundingDto(funding, giftDtos);
   }
 
-  async update(id: number, updateFundingDto: UpdateFundingDto): Promise<Funding> {
+  async update(fundUuid: string, updateFundingDto: UpdateFundingDto): Promise<FundingDto> {
+    Logger.log(updateFundingDto);
     const { fundTitle, fundCont, fundImg, fundTheme, endAt } = updateFundingDto;
     const funding = await this.fundingRepository.findOne({
-      where: { fundId: id },
+      relations: {
+        fundUser: true,
+      },
+      where: { fundUuid },
     });
     if (!funding) {
       throw new HttpException('funding not found!', HttpStatus.NOT_FOUND);
@@ -165,6 +169,7 @@ export class FundingService {
 
     // endAt이 앞당겨지면 안된다.
     if (funding.endAt > endAt) {
+      Logger.log(`funding.endAt: ${JSON.stringify(JSON.stringify(funding.endAt))}, endAt: ${JSON.stringify(endAt)}`);
       throw new HttpException(
         'endAt property should not go backward!!',
         HttpStatus.BAD_REQUEST,
@@ -174,10 +179,13 @@ export class FundingService {
 
     this.fundingRepository.save(funding);
 
-    return funding;
+    let gifts = await this.giftService.createGift(funding.fundId, updateFundingDto.gifts ?? []);
+    const giftDtos = gifts.map(gift => new GiftDto(gift));
+
+    return new FundingDto(funding, giftDtos);
   }
 
-  async remove(fundId: number) {
+  async remove(fundId: number): Promise<void> {
     const funding = await this.fundingRepository.findOneBy({ fundId });
     this.fundingRepository.remove(funding);
   }

@@ -6,6 +6,7 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  Logger,
   Param,
   ParseIntPipe,
   ParseUUIDPipe,
@@ -67,15 +68,15 @@ export class FundingController {
     };
   }
 
-  @Put(':fundid')
+  @Put(':fundUuid')
   async update(
-    @Param('id') id: number,
-    fundingUpdateDto: UpdateFundingDto,
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
+    @Body() fundingUpdateDto: UpdateFundingDto,
   ): Promise<CommonResponse> {
     return {
       timestamp: new Date(Date.now()),
       message: 'success',
-      data: await this.fundingService.update(id, fundingUpdateDto),
+      data: await this.fundingService.update(fundUuid, fundingUpdateDto),
     };
   }
 
