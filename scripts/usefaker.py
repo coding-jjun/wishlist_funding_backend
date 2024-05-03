@@ -1,5 +1,6 @@
 import psycopg2
 import psycopg2.extras
+import psycopg2.extensions
 import os
 from dotenv import load_dotenv
 from faker import Faker
@@ -7,9 +8,7 @@ from datetime import date
 from argparse import ArgumentParser
 
 
-def exec_insertion(
-    connection, tablename: str, **kwargs
-) -> None:
+def exec_insertion(connection, tablename: str, **kwargs) -> None:
     COLUMNS = str(tuple(kwargs.keys())).replace("'", "\"")
     VALUES = tuple(kwargs.values())
 
@@ -18,6 +17,22 @@ def exec_insertion(
 
         print(QUERY)
         cur.execute(QUERY, VALUES)
+
+
+def exec_query(connection: psycopg2.extensions.connection, query: str) :
+    """query 실행 결과를 list[tuple]로 반환합니다."""
+    print("query: ", query)
+    with connection.cursor() as cur:
+        cur.execute(query)
+        return cur.fetchall()
+
+
+def unwrap_or(nullable, then):
+    """nullable 예외처리"""
+    if not nullable:
+        return then
+    return nullable
+
 
 if __name__ == "__main__":
     load_dotenv()
@@ -36,15 +51,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     ARG_TABLE = args.table
     ARG_NUMBER = args.number
-    MIN_USER_ID = 16 # TODO - SELECT 문으로 직접 알아내기
-    MAX_USER_ID = 100 # TODO - SELECT 문으로 직접 알아내기
-    MAX_ACC_ID = 100 # TODO - SELECT 문으로 직접 알아내기
-    MAX_IMG_ID = 100 # TODO - SELECT 문으로 직접 알아내기
-    MIN_FUND_ID = 1 # TODO - SELECT 문으로 직접 알아내기
-    MAX_FUND_ID = 100 # TODO - SELECT 문으로 직접 알아내기
-    MIN_ORDER_ID = 10 # TODO - SELECT 문으로 직접 알아내기
-    MAX_ORDER_ID = 10 # TODO - SELECT 문으로 직접 알아내기
-
 
     with psycopg2.connect(
         host=os.getenv("DB_HOST"),
@@ -52,6 +58,34 @@ if __name__ == "__main__":
         password=os.getenv("DB_DEV_PASSWORD"),
         dbname=os.getenv("DB_DEV_DATABASE"),
     ) as conn:
+
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT \"userId\" FROM public.user ORDER BY \"userId\" ASC LIMIT 1")
+            MIN_USER_ID = int(unwrap_or(cursor.fetchone(), (0,))[0])
+            cursor.execute("SELECT \"userId\" from public.user ORDER BY \"userId\" DESC LIMIT 1")
+            MAX_USER_ID = int(unwrap_or(cursor.fetchone(), (0,))[0])
+            cursor.execute("SELECT \"accId\" from public.account ORDER BY \"accId\" DESC LIMIT 1")
+            MAX_ACC_ID = int(unwrap_or(cursor.fetchone(), (0,))[0])
+            cursor.execute("SELECT \"imgId\" from public.image ORDER BY \"imgId\" DESC LIMIT 1")
+            MAX_IMG_ID = int(unwrap_or(cursor.fetchone(), (0,))[0])
+            cursor.execute("SELECT \"fundId\" from public.funding ORDER BY \"fundId\" ASC LIMIT 1")
+            MIN_FUND_ID = int(unwrap_or(cursor.fetchone(), (0,))[0])
+            cursor.execute("SELECT \"fundId\" from public.funding ORDER BY \"fundId\" DESC LIMIT 1")
+            MAX_FUND_ID = int(unwrap_or(cursor.fetchone(), (0,))[0])
+            cursor.execute("SELECT \"gratId\" from public.gratitude ORDER BY \"gratId\" DESC LIMIT 1")
+            MAX_GRAT_ID = int(unwrap_or(cursor.fetchone(), (0,))[0])
+            cursor.execute("SELECT \"gratId\" from public.gratitude ORDER BY \"gratId\" ASC LIMIT 1")
+            MIN_GRAT_ID = int(unwrap_or(cursor.fetchone(), (0,))[0])
+
+        print(
+            f"""
+            MIN_USER_ID: {MIN_USER_ID},
+            MAX_USER_ID: {MAX_USER_ID},
+            MAX_ACC_ID: {MAX_ACC_ID},
+            MAX_IMG_ID: {MAX_IMG_ID},
+            MIN_FUND_ID: {MIN_FUND_ID},
+            MAX_FUND_ID: {MAX_FUND_ID}"""
+        )
         for _ in range(ARG_NUMBER):
             match ARG_TABLE:
                 case "account":
@@ -101,7 +135,7 @@ if __name__ == "__main__":
                 case "donation":
                     kwargs = {
                         "donationStatus": fake.word(ext_word_list=["Donated", "WaitingRefund", "RefundComplete"]),
-                        "orderId": fake.random_int(min=MIN_ORDER_ID, max=MAX_ORDER_ID),
+                        "orderId": fake.word(),
                         "donAmnt": fake.random_int(min=1000, max=100_000_000),
                         "fundId": fake.random_int(min=MIN_FUND_ID, max=MAX_FUND_ID)
                     }
@@ -120,6 +154,7 @@ if __name__ == "__main__":
                         "fundUser" : fake.random_int(min=MIN_USER_ID, max=MAX_USER_ID),
                     }
                 case "gratitude":
+                    # TODO - fundId와 같이 1대1로 물려있음. 만들 때 항상 중복여부를 검사하기 때문에 삽입하기 까다롭다.
                     pass
                 case "image":
                     kwargs = {
@@ -135,11 +170,35 @@ if __name__ == "__main__":
                         "subId": fake.random_int(min=1, max=100),
                     }
                 case "notification":
-                    pass
+                    kwargs = {
+                        "recvId": fake.random_int(min=1, max=MAX_USER_ID),
+                        "sendId": fake.random_int(min=1, max=MAX_USER_ID),
+                        "notiType": fake.word(
+                            ext_word_list=[
+                                "IncomingFollow",
+                                "AcceptFollow",
+                                "FundClose",
+                                "FundAchieve",
+                                "NewDonate",
+                                "DonatedFundClose",
+                                "WriteGratitude",
+                                "CheckGratitude",
+                            ]
+                        ),
+                        "reqType": fake.word(
+                            ext_word_list=[
+                                "00",
+                                "01",
+                                "02",
+                                "03",
+                            ]
+                        ),
+                        "subId": fake.random_int(min=1, max=MAX_FUND_ID), # FIXME - subid description에 맞추기
+                    }
                 case "open_bank_token":
-                    pass
+                    kwargs = {}
                 case "rolling_paper":
-                    pass
+                    kwargs = {}
                 case "user":
                     kwargs = {
                         "userNick": fake.safe_color_name()
