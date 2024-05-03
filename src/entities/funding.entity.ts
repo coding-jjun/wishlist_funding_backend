@@ -14,6 +14,7 @@ import { User } from './user.entity';
 import { Comment } from './comment.entity';
 import { FundTheme } from 'src/enums/fund-theme.enum';
 import { Gift } from './gift.entity';
+import { Donation } from './donation.entity';
 
 @Entity()
 export class Funding {
@@ -40,7 +41,7 @@ export class Funding {
 
   @Index()
   @Column()
-  @Generated("uuid")
+  @Generated('uuid')
   fundUuid: string;
 
   @ManyToOne(() => User, (user) => user.fundings)
@@ -74,12 +75,17 @@ export class Funding {
 
   @OneToMany(() => Gift, (gift) => gift.funding)
   gifts: Gift[];
-  
+
+  @OneToMany(() => Donation, (donation) => donation.funding, {
+    cascade: true,
+  })
+  donations: Donation[];
+
   /**
    * TODO - timestamptz를 사용할지, 일반 date를 사용할지 결정해야함.
    * timestamptz는 시간 & 타임존을 포함하고 date는 말 그대로 날짜만 저장함
    */
-  @Column("date")
+  @Column('date')
   // @Column('timestamptz')
   endAt: Date;
 

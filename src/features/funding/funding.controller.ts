@@ -80,9 +80,9 @@ export class FundingController {
     };
   }
 
-  @Delete(':id')
-  async remove(@Param('id') id: number): Promise<CommonResponse> {
-    await this.fundingService.remove(id);
+  @Delete(':fundUuid')
+  async remove(@Param('fundUuid', ParseUUIDPipe) fundUuid: string): Promise<CommonResponse> {
+    await this.fundingService.remove(fundUuid);
 
     return {
       timestamp: new Date(Date.now()),

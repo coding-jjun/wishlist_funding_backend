@@ -185,8 +185,8 @@ export class FundingService {
     return new FundingDto(funding, giftDtos);
   }
 
-  async remove(fundId: number): Promise<void> {
-    const funding = await this.fundingRepository.findOneBy({ fundId });
+  async remove(fundUuid: string): Promise<void> {
+    const funding = await this.fundingRepository.findOneBy({ fundUuid });
     this.fundingRepository.remove(funding);
   }
 }
