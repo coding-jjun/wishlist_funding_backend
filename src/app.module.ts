@@ -6,6 +6,7 @@ import { UserModule } from './features/user/user.module';
 import { FriendModule } from './features/friend/friend.module';
 import { FundingModule } from './features/funding/funding.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 import { User } from './entities/user.entity';
 import { Funding } from './entities/funding.entity';
 import { Comment } from './entities/comment.entity';
@@ -28,6 +29,7 @@ import { OpenBankToken } from './entities/open-bank-token.entity';
 import { Account } from './entities/account.entity';
 import { ImageController } from './features/image/image.controller';
 import { MulterModule } from '@nestjs/platform-express';
+import { ImageModule } from './features/image/image.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -79,8 +81,9 @@ import { MulterModule } from '@nestjs/platform-express';
     GratitudeModule,
     TokenModule,
     MulterModule,
+    ImageModule,
   ],
-  controllers: [AppController, ImageController],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
