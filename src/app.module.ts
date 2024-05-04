@@ -45,6 +45,7 @@ import { Account } from './entities/account.entity';
       synchronize: true,
       logging: true,
       entities: [
+        Account,
         User, 
         Funding, 
         Comment, 
