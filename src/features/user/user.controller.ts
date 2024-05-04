@@ -4,10 +4,15 @@ import { User } from 'src/entities/user.entity';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AddressService } from '../address/address.service';
+import e from 'express';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly addrService: AddressService,
+  ) {}
 
   @Get('/:userId')
   async getUser(
@@ -40,6 +45,21 @@ export class UserController {
   // ) {
   //     return await this.userService.getUserAccount(userId);
   // }
+
+  @Get('/:userId/address')
+  async getUserAddress(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<CommonResponse> {
+    try {
+      return {
+        timestamp: new Date(),
+        message: 'success',
+        data: await this.addrService.findAll(userId),
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
 
   @Post('/')
   async createUser(
