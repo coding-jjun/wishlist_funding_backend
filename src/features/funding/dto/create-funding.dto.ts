@@ -1,6 +1,7 @@
 import { IsDate, IsDateString, Min } from 'class-validator';
 import { Funding } from 'src/entities/funding.entity';
 import { FundTheme } from 'src/enums/fund-theme.enum';
+import { CreateGiftDto } from 'src/features/gift/dto/create-gift.dto';
 
 export class CreateFundingDto {
   fundTitle: string;
@@ -19,5 +20,5 @@ export class CreateFundingDto {
   endAt: Date;
 
   // TODO - GiftCreateDto
-  // gifts: GiftCreateDto[]
+  gifts: CreateGiftDto[]
 }

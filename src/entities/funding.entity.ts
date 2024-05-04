@@ -13,6 +13,7 @@ import {
 import { User } from './user.entity';
 import { Comment } from './comment.entity';
 import { FundTheme } from 'src/enums/fund-theme.enum';
+import { Gift } from './gift.entity';
 
 @Entity()
 export class Funding {
@@ -71,6 +72,9 @@ export class Funding {
   @OneToMany(() => Comment, (comment) => comment.funding)
   comments: Comment[];
 
+  @OneToMany(() => Gift, (gift) => gift.funding)
+  gifts: Gift[];
+  
   /**
    * TODO - timestamptz를 사용할지, 일반 date를 사용할지 결정해야함.
    * timestamptz는 시간 & 타임존을 포함하고 date는 말 그대로 날짜만 저장함

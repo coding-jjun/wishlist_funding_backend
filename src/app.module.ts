@@ -18,7 +18,6 @@ import { readFileSync } from 'fs';
 import { Friend } from './entities/friend.entity';
 import { Address } from './entities/address.entity';
 import { AddressModule } from './features/address/address.module';
-
 import { CommentModule } from './features/comment/comment.module';
 import { Gratitude } from './entities/gratitude.entity';
 import { GratitudeModule } from './features/gratitude/gratitude.module';
@@ -27,10 +26,10 @@ import { Notification } from './entities/notification.entity';
 import { TokenModule } from './features/open-bank/token/token.module';
 import { OpenBankToken } from './entities/open-bank-token.entity';
 import { Account } from './entities/account.entity';
-import { APP_FILTER } from '@nestjs/core';
-import { GiftogetherExceptionFilter } from './filters/giftogether-exception.filter';
-import { ExceptionModule } from './filters/exception.module';
+import { Gift } from './entities/gift.entity';
+import { GiftModule } from './features/gift/gift.module';
 import { GiftogetherError } from './entities/error.entity';
+import { ExceptionModule } from './filters/exception.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -62,6 +61,7 @@ import { GiftogetherError } from './entities/error.entity';
         Image,
         OpenBankToken,
         Account,
+        Gift,
         GiftogetherError,
       ],
       ssl: {
@@ -83,6 +83,7 @@ import { GiftogetherError } from './entities/error.entity';
     CommentModule,
     GratitudeModule,
     TokenModule,
+    GiftModule,
     ExceptionModule,
   ],
   controllers: [AppController],
