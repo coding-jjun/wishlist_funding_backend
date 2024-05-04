@@ -6,6 +6,7 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  Logger,
   Param,
   ParseIntPipe,
   ParseUUIDPipe,
@@ -67,13 +68,26 @@ export class FundingController {
     };
   }
 
-  @Put(':id')
-  async update(@Param('id') id: number, fundingUpdateDto: UpdateFundingDto) {
-    return await this.fundingService.update(id, fundingUpdateDto);
+  @Put(':fundUuid')
+  async update(
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
+    @Body() fundingUpdateDto: UpdateFundingDto,
+  ): Promise<CommonResponse> {
+    return {
+      timestamp: new Date(Date.now()),
+      message: 'success',
+      data: await this.fundingService.update(fundUuid, fundingUpdateDto),
+    };
   }
 
-  @Delete(':id')
-  async remove(@Param('id') id: number) {
-    return await this.fundingService.remove(id);
+  @Delete(':fundUuid')
+  async remove(@Param('fundUuid', ParseUUIDPipe) fundUuid: string): Promise<CommonResponse> {
+    await this.fundingService.remove(fundUuid);
+
+    return {
+      timestamp: new Date(Date.now()),
+      message: '성공적으로 삭제되었습니다.',
+      data: null,
+    };
   }
 }

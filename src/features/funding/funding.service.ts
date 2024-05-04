@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Funding } from 'src/entities/funding.entity';
 import { Repository,Like, MoreThan, Brackets } from 'typeorm';
@@ -10,6 +10,7 @@ import { Friend } from 'src/entities/friend.entity';
 import { GiftService } from '../gift/gift.service';
 import { GiftDto } from '../gift/dto/gift.dto';
 import { FundingDto } from './dto/funding.dto';
+import { UpdateFundingDto } from './dto/update-funding.dto';
 
 @Injectable()
 export class FundingService {
@@ -148,10 +149,44 @@ export class FundingService {
     return new FundingDto(funding, giftDtos);
   }
 
-  update(id: number, updateFundingDto) {}
+  async update(fundUuid: string, updateFundingDto: UpdateFundingDto): Promise<FundingDto> {
+    Logger.log(updateFundingDto);
+    const { fundTitle, fundCont, fundImg, fundTheme, endAt } = updateFundingDto;
+    const funding = await this.fundingRepository.findOne({
+      relations: {
+        fundUser: true,
+      },
+      where: { fundUuid },
+    });
+    if (!funding) {
+      throw new HttpException('funding not found!', HttpStatus.NOT_FOUND);
+    }
 
-  async remove(fundId: number) {
-    const funding = await this.fundingRepository.findOneBy({ fundId });
+    funding.fundTitle = fundTitle;
+    funding.fundCont = fundCont;
+    // funding.fundImg = fundImg; // TODO - add relation on funding.entity
+    funding.fundTheme = fundTheme;
+
+    // endAt이 앞당겨지면 안된다.
+    if (funding.endAt > endAt) {
+      Logger.log(`funding.endAt: ${JSON.stringify(JSON.stringify(funding.endAt))}, endAt: ${JSON.stringify(endAt)}`);
+      throw new HttpException(
+        'endAt property should not go backward!!',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    funding.endAt = endAt;
+
+    this.fundingRepository.save(funding);
+
+    let gifts = await this.giftService.createGift(funding.fundId, updateFundingDto.gifts ?? []);
+    const giftDtos = gifts.map(gift => new GiftDto(gift));
+
+    return new FundingDto(funding, giftDtos);
+  }
+
+  async remove(fundUuid: string): Promise<void> {
+    const funding = await this.fundingRepository.findOneBy({ fundUuid });
     this.fundingRepository.remove(funding);
   }
 }
