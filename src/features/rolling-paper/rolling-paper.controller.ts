@@ -2,7 +2,7 @@ import { Controller, Get, Param } from '@nestjs/common';
 import { RollingPaperService } from './rolling-paper.service';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 
-@Controller('api/rollingpaper')
+@Controller('rollingpaper')
 export class RollingPaperController {
 
   constructor(private rollingPaperService: RollingPaperService) {}

@@ -4,7 +4,7 @@ import { FriendService } from './friend.service';
 import { FriendDto } from './dto/friend.dto';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 
-@Controller('api/friend')
+@Controller('friend')
 export class FriendController {
 	constructor (private readonly friendService: FriendService) {}
 

@@ -21,7 +21,7 @@ import { Funding } from 'src/entities/funding.entity';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { FundTheme } from 'src/enums/fund-theme.enum';
 
-@Controller('api/funding')
+@Controller('funding')
 export class FundingController {
   constructor(private fundingService: FundingService) {}
 

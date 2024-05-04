@@ -3,7 +3,7 @@ import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { GratitudeDto } from './dto/gratitude.dto';
 import { GratitudeService } from './gratitude.service';
 
-@Controller('/api/gratitude')
+@Controller('gratitude')
 export class GratitudeController {
   constructor(private readonly gratitudeService: GratitudeService) {}
   

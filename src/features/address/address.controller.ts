@@ -4,7 +4,7 @@ import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 
-@Controller('api/address')
+@Controller('address')
 export class AddressController {
   constructor(private readonly addressService: AddressService) {}
 
@@ -34,7 +34,7 @@ export class AddressController {
     };
   }
 
-  @Put('addrId')
+  @Put(':addrId')
   async update(
     @Param('addrId', ParseIntPipe) addrId: number,
     @Body() updateAddressDto: UpdateAddressDto
@@ -48,7 +48,7 @@ export class AddressController {
     };
   }
 
-  @Delete('addrId')
+  @Delete(':addrId')
   async remove(
     @Param('addrId', ParseIntPipe) addrId: number,
     ): Promise<CommonResponse> {
