@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { NotificationModule } from './features/notification/notification.module';
@@ -27,6 +27,10 @@ import { Notification } from './entities/notification.entity';
 import { TokenModule } from './features/open-bank/token/token.module';
 import { OpenBankToken } from './entities/open-bank-token.entity';
 import { Account } from './entities/account.entity';
+import { APP_FILTER } from '@nestjs/core';
+import { GiftogetherExceptionFilter } from './filters/giftogether-exception.filter';
+import { ExceptionModule } from './filters/exception.module';
+import { GiftogetherError } from './entities/error.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -57,6 +61,7 @@ import { Account } from './entities/account.entity';
         Image,
         OpenBankToken,
         Account,
+        GiftogetherError,
       ],
       ssl: {
         ca: readFileSync('global-bundle.pem'),
@@ -77,8 +82,11 @@ import { Account } from './entities/account.entity';
     CommentModule,
     GratitudeModule,
     TokenModule,
+    ExceptionModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+  ],
 })
 export class AppModule {}
