@@ -17,10 +17,9 @@ import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
-import { CommonExceptionFilter } from 'src/filters/common-exception.filter';
+import { GiftogetherExceptionFilter } from 'src/filters/giftogether-exception.filter';
 
 @Controller('api/comment')
-@UseFilters(CommonExceptionFilter)
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
