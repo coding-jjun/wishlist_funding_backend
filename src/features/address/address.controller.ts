@@ -23,7 +23,7 @@ export class AddressController {
 
   @Post()
   async create(
-    @Body(new ValidationPipe()) createAddressDto: CreateAddressDto
+    @Body() createAddressDto: CreateAddressDto
     ): Promise<CommonResponse> {
     const result = await this.addressService.create(createAddressDto);
     
@@ -56,7 +56,7 @@ export class AddressController {
   @Put('addrId')
   async update(
     @Param('addrId', ParseIntPipe) addrId: number,
-    @Body(new ValidationPipe()) updateAddressDto: UpdateAddressDto
+    @Body() updateAddressDto: UpdateAddressDto
   ): Promise<CommonResponse> {
     const result = await this.addressService.update(addrId, updateAddressDto);
 
