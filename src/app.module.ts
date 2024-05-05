@@ -30,6 +30,8 @@ import { Gift } from './entities/gift.entity';
 import { GiftModule } from './features/gift/gift.module';
 import { GiftogetherError } from './entities/error.entity';
 import { ExceptionModule } from './filters/exception.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { TransformInterceptor } from './transform/transform.interceptor';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -89,6 +91,10 @@ import { ExceptionModule } from './filters/exception.module';
   controllers: [AppController],
   providers: [
     AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TransformInterceptor,
+    }
   ],
 })
 export class AppModule {}
