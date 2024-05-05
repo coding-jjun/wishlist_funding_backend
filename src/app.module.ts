@@ -27,6 +27,7 @@ import { Notification } from './entities/notification.entity';
 import { TokenModule } from './features/open-bank/token/token.module';
 import { OpenBankToken } from './entities/open-bank-token.entity';
 import { Account } from './entities/account.entity';
+import { AuthModule } from './features/auth/auth.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -77,6 +78,7 @@ import { Account } from './entities/account.entity';
     CommentModule,
     GratitudeModule,
     TokenModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],
