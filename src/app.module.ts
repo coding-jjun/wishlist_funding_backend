@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { NotificationModule } from './features/notification/notification.module';
@@ -28,6 +28,10 @@ import { OpenBankToken } from './entities/open-bank-token.entity';
 import { Account } from './entities/account.entity';
 import { MulterModule } from '@nestjs/platform-express';
 import { ImageModule } from './features/image/image.module';
+import { Gift } from './entities/gift.entity';
+import { GiftModule } from './features/gift/gift.module';
+import { GiftogetherError } from './entities/error.entity';
+import { ExceptionModule } from './filters/exception.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -46,6 +50,7 @@ import { ImageModule } from './features/image/image.module';
       synchronize: true,
       logging: true,
       entities: [
+        Account,
         User,
         Funding,
         Comment,
@@ -58,6 +63,8 @@ import { ImageModule } from './features/image/image.module';
         Image,
         OpenBankToken,
         Account,
+        Gift,
+        GiftogetherError,
       ],
       ssl: {
         ca: readFileSync('global-bundle.pem'),
@@ -80,8 +87,12 @@ import { ImageModule } from './features/image/image.module';
     TokenModule,
     MulterModule,
     ImageModule,
+    GiftModule,
+    ExceptionModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+  ],
 })
 export class AppModule {}

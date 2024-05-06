@@ -1,0 +1,7 @@
+Faker==24.11.0
+psycopg2-binary==2.9.9
+python-dateutil==2.9.0.post0
+python-dotenv==1.0.1
+setuptools==68.2.2
+six==1.16.0
+wheel==0.41.2

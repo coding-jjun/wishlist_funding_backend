@@ -41,10 +41,7 @@ export class FriendController {
 				data: result,
 			}
 		} catch (error) {
-			throw new HttpException(
-				error.message,
-				HttpStatus.BAD_REQUEST
-			);
+			throw error;
 		}
 	}
 
