@@ -11,7 +11,7 @@ import { Notification } from 'src/entities/notification.entity';
 import { NotiType, ReqType } from 'src/enums/notification.enum';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 
-@Controller('api/notification')
+@Controller('notification')
 export class NotificationController {
   constructor(
     private notificationService: NotificationService,

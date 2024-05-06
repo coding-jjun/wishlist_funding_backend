@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { NotificationModule } from './features/notification/notification.module';
@@ -18,7 +18,6 @@ import { readFileSync } from 'fs';
 import { Friend } from './entities/friend.entity';
 import { Address } from './entities/address.entity';
 import { AddressModule } from './features/address/address.module';
-
 import { CommentModule } from './features/comment/comment.module';
 import { Gratitude } from './entities/gratitude.entity';
 import { GratitudeModule } from './features/gratitude/gratitude.module';
@@ -27,6 +26,14 @@ import { Notification } from './entities/notification.entity';
 import { TokenModule } from './features/open-bank/token/token.module';
 import { OpenBankToken } from './entities/open-bank-token.entity';
 import { Account } from './entities/account.entity';
+import { MulterModule } from '@nestjs/platform-express';
+import { ImageModule } from './features/image/image.module';
+import { Gift } from './entities/gift.entity';
+import { GiftModule } from './features/gift/gift.module';
+import { GiftogetherError } from './entities/error.entity';
+import { ExceptionModule } from './filters/exception.module';
+import { AuthModule } from './features/auth/auth.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -45,18 +52,21 @@ import { Account } from './entities/account.entity';
       synchronize: true,
       logging: true,
       entities: [
-        User, 
-        Funding, 
-        Comment, 
+        Account,
+        User,
+        Funding,
+        Comment,
         Donation,
-        RollingPaper, 
-        Notification, 
-        Friend, 
+        RollingPaper,
+        Notification,
+        Friend,
         Address,
         Gratitude,
         Image,
         OpenBankToken,
         Account,
+        Gift,
+        GiftogetherError,
       ],
       ssl: {
         ca: readFileSync('global-bundle.pem'),
@@ -77,8 +87,15 @@ import { Account } from './entities/account.entity';
     CommentModule,
     GratitudeModule,
     TokenModule,
+    MulterModule,
+    ImageModule,
+    GiftModule,
+    ExceptionModule,
+    AuthModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+  ],
 })
 export class AppModule {}

@@ -5,6 +5,7 @@ import { User } from 'src/entities/user.entity';
 import { Brackets, Repository } from 'typeorm';
 import { FriendDto } from './dto/friend.dto';
 import { FriendStatus } from 'src/enums/friend-status.enum';
+import { GiftogetherException, GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 @Injectable()
 export class FriendService {
@@ -13,6 +14,7 @@ export class FriendService {
 		private readonly userRepository: Repository<User>,
 		@InjectRepository(Friend)
 		private readonly friendRepository: Repository<Friend>,
+		private readonly g2gException: GiftogetherExceptions,
 	) {}
 	
 	/**
@@ -89,7 +91,7 @@ export class FriendService {
 					};
 				} else {
 					// Request already sent
-					throw new HttpException('이미 친구를 요청한 상태입니다.', HttpStatus.BAD_REQUEST);
+					throw this.g2gException.AlreadySendRequest;
 				}
 			}
     } else {
@@ -105,7 +107,7 @@ export class FriendService {
 				message: '친구 추가를 요청하였습니다.'
 			};
     }
-}
+	}
 
 	/**
 	 * 친구 삭제

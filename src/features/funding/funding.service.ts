@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Funding } from 'src/entities/funding.entity';
 import { Repository,Like, MoreThan, Brackets } from 'typeorm';
@@ -7,6 +7,10 @@ import { User } from 'src/entities/user.entity';
 import { FundTheme } from 'src/enums/fund-theme.enum';
 import { FriendStatus } from 'src/enums/friend-status.enum';
 import { Friend } from 'src/entities/friend.entity';
+import { GiftService } from '../gift/gift.service';
+import { ResponseGiftDto } from '../gift/dto/response-gift.dto';
+import { FundingDto } from './dto/funding.dto';
+import { UpdateFundingDto } from './dto/update-funding.dto';
 
 @Injectable()
 export class FundingService {
@@ -19,6 +23,8 @@ export class FundingService {
     
     @InjectRepository(Friend)
     private friendRepository: Repository<Friend>,
+
+    private giftService: GiftService,
   ) {}
 
   async findAll(
@@ -121,27 +127,66 @@ export class FundingService {
     });
   }
 
-  async create(fundingCreateDto: CreateFundingDto, accessToken: string): Promise<Funding> {
+  async create(createFundingDto: CreateFundingDto, accessToken: string): Promise<FundingDto> {
     // TODO - accessToken -> User 객체로 변환하기
     const users = await this.userRepository.find();
     const user = users[0];
     let funding = new Funding(
       user,
-      fundingCreateDto.fundTitle,
-      fundingCreateDto.fundCont,
-      fundingCreateDto.fundGoal,
-      fundingCreateDto.endAt,
-      fundingCreateDto.fundTheme,
-      fundingCreateDto.fundPubl,
+      createFundingDto.fundTitle,
+      createFundingDto.fundCont,
+      createFundingDto.fundGoal,
+      createFundingDto.endAt,
+      createFundingDto.fundTheme,
+      createFundingDto.fundPubl,
     );
-
-    return this.fundingRepository.save(funding);
+    
+    await this.fundingRepository.save(funding);
+    
+    const gifts = await this.giftService.createOrUpdateGift(funding.fundId, createFundingDto.gifts);
+    
+    return new FundingDto(funding, gifts);
   }
 
-  update(id: number, updateFundingDto) {}
+  async update(fundUuid: string, updateFundingDto: UpdateFundingDto): Promise<FundingDto> {
+    Logger.log(updateFundingDto);
+    const { fundTitle, fundCont, fundImg, fundTheme, endAt } = updateFundingDto;
+    const funding = await this.fundingRepository.findOne({
+      relations: {
+        fundUser: true,
+      },
+      where: { fundUuid },
+    });
+    if (!funding) {
+      throw new HttpException('funding not found!', HttpStatus.NOT_FOUND);
+    }
 
-  async remove(fundId: number) {
-    const funding = await this.fundingRepository.findOneBy({ fundId });
+    funding.fundTitle = fundTitle;
+    funding.fundCont = fundCont;
+    // funding.fundImg = fundImg; // TODO - add relation on funding.entity
+    funding.fundTheme = fundTheme;
+
+    // endAt이 앞당겨지면 안된다.
+    if (funding.endAt > endAt) {
+      Logger.log(`funding.endAt: ${JSON.stringify(JSON.stringify(funding.endAt))}, endAt: ${JSON.stringify(endAt)}`);
+      throw new HttpException(
+        'endAt property should not go backward!!',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    funding.endAt = endAt;
+
+    await this.fundingRepository.save(funding);
+
+    // let gifts = await this.giftService.createGift(funding.fundId, updateFundingDto.gifts ?? []);
+
+    const { gifts, count } = await this.giftService.findAllGift(funding.fundId);
+
+    return new FundingDto(funding, gifts);
+  }
+
+  async remove(fundUuid: string): Promise<void> {
+    const funding = await this.fundingRepository.findOneBy({ fundUuid });
     this.fundingRepository.remove(funding);
   }
 }
