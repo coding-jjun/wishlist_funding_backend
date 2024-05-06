@@ -12,6 +12,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageService } from './image.service';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { timestamp } from 'rxjs';
+import { ImageDto } from './dto/image.dto';
 
 @Controller('image')
 export class ImageController {
@@ -30,12 +31,12 @@ export class ImageController {
     )
     file: Express.Multer.File,
   ): Promise<CommonResponse> {
-    await this.imageService.upload(file.originalname, file.buffer);
+    const imagedto: ImageDto = await this.imageService.upload(file.originalname, file.buffer);
 
     return {
       timestamp: new Date(Date.now()),
       message: '성공적으로 파일이 업로드 되었습니다.',
-      data: null,
+      data: imagedto,
     };
   }
 }

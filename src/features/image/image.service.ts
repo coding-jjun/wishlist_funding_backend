@@ -1,15 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { ImageDto } from './dto/image.dto';
 
 @Injectable()
 export class ImageService {
   private readonly s3Client = new S3Client({
     region: process.env.AWS_S3_REGION,
     maxAttempts: 30,
-    
   });
 
-  async upload(filename: string, file: Buffer) {
+  getObjectUrlOf(filename: string): string {
+    return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.amazonaws.com/${filename}`;
+  }
+
+  async upload(filename: string, file: Buffer): Promise<ImageDto> {
     await this.s3Client.send(
       new PutObjectCommand({
         Bucket: process.env.AWS_S3_BUCKET_NAME,
@@ -17,6 +21,10 @@ export class ImageService {
         Body: file,
       }),
     );
+
+    return {
+      url: this.getObjectUrlOf(filename),
+    };
   }
 }
 
