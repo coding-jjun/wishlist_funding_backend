@@ -26,6 +26,8 @@ import { Notification } from './entities/notification.entity';
 import { TokenModule } from './features/open-bank/token/token.module';
 import { OpenBankToken } from './entities/open-bank-token.entity';
 import { Account } from './entities/account.entity';
+import { MulterModule } from '@nestjs/platform-express';
+import { ImageModule } from './features/image/image.module';
 import { Gift } from './entities/gift.entity';
 import { GiftModule } from './features/gift/gift.module';
 import { GiftogetherError } from './entities/error.entity';
@@ -49,13 +51,13 @@ import { ExceptionModule } from './filters/exception.module';
       logging: true,
       entities: [
         Account,
-        User, 
-        Funding, 
-        Comment, 
+        User,
+        Funding,
+        Comment,
         Donation,
-        RollingPaper, 
-        Notification, 
-        Friend, 
+        RollingPaper,
+        Notification,
+        Friend,
         Address,
         Gratitude,
         Image,
@@ -83,6 +85,8 @@ import { ExceptionModule } from './filters/exception.module';
     CommentModule,
     GratitudeModule,
     TokenModule,
+    MulterModule,
+    ImageModule,
     GiftModule,
     ExceptionModule,
   ],
