@@ -32,6 +32,8 @@ import { Gift } from './entities/gift.entity';
 import { GiftModule } from './features/gift/gift.module';
 import { GiftogetherError } from './entities/error.entity';
 import { ExceptionModule } from './filters/exception.module';
+import { AuthModule } from './features/auth/auth.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -89,6 +91,7 @@ import { ExceptionModule } from './filters/exception.module';
     ImageModule,
     GiftModule,
     ExceptionModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [

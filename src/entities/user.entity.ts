@@ -21,10 +21,13 @@ export class User {
   @PrimaryGeneratedColumn()
   userId: number;
 
+  @Column({nullable: true, type: 'bigint'})
+  kakaoId: string;
+
   @Column({ unique: true })
   userNick: string;
 
-  @Column()
+  @Column({nullable: true})
   userPw: string;
 
   @Column()
@@ -64,4 +67,5 @@ export class User {
 
   @OneToMany(() => Address, (address) => address.addrUser)
   addresses: Address[];
+  user: Promise<Date>;
 }
