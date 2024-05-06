@@ -11,6 +11,7 @@ export class KakaoApiClient{
     params.append('client_id', process.env.CLIENT_ID);
     params.append('redirect_uri', process.env.REDIRECT_URI);
     params.append('code', code);
+    params.append('client_secret', process.env.CLIENT_SECRET);
 
     try{
       const responseToken = await axios.post(this.kakaoOauthUrl+"/token", params.toString(),
@@ -27,12 +28,16 @@ export class KakaoApiClient{
   }
 
   async getUserInfo(token: string){
-    const userInfo = await axios.get(this.kakaoApiUrl, {
-      headers: {
-        'Authorization': 'Bearer ' + token
-      }}
-    );
-    console.log(userInfo.data)
-    return userInfo.data;
+    try{
+      const userInfo = await axios.get(this.kakaoApiUrl, {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }}
+      );
+      return userInfo.data;
+    }catch(error){
+      console.log("Error request userInfo from kakao : ", error);
+
+    }
   }
 }
