@@ -12,7 +12,7 @@ import { DonationService } from './donation.service';
 import { CreateDonationDto } from './dto/create-donation.dto';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 
-@Controller('api/donation')
+@Controller('donation')
 export class DonationController {
   constructor(private donationService: DonationService) {}
 

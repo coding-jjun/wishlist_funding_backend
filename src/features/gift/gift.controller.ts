@@ -4,7 +4,7 @@ import { CreateGiftDto } from "./dto/create-gift.dto";
 import { UpdateGiftDto } from "./dto/update-gift.dto";
 import { GiftService } from "./gift.service";
 
-@Controller('api/gift')
+@Controller('gift')
 export class GiftController {
   constructor(private giftService: GiftService) {}
 

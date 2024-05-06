@@ -19,7 +19,7 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { GiftogetherExceptionFilter } from 'src/filters/giftogether-exception.filter';
 
-@Controller('api/comment')
+@Controller('comment')
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
