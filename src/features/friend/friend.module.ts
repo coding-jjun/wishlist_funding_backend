@@ -4,10 +4,11 @@ import { FriendController } from './friend.controller';
 import { FriendService } from './friend.service';
 import { Friend } from 'src/entities/friend.entity';
 import { User } from 'src/entities/user.entity';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 @Module({
   imports : [TypeOrmModule.forFeature([Friend, User])],
   controllers: [FriendController],
-  providers: [FriendService]
+  providers: [FriendService, GiftogetherExceptions]
 })
 export class FriendModule {}

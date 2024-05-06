@@ -3,14 +3,14 @@ import {
   Entity,
   OneToOne,
   JoinColumn,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   DeleteDateColumn,
 } from 'typeorm';
 import { Donation } from './donation.entity';
 
 @Entity()
 export class RollingPaper {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   rollId: number;
 
   @OneToOne(() => Donation, {cascade: true})
