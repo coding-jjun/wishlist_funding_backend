@@ -11,6 +11,9 @@ export class Address {
   addrUser: User;
 
   @Column({ nullable: false })
+  addrNick: string;
+
+  @Column({ nullable: false })
   addrRoad: string;
 
   @Column({ nullable: false })
@@ -18,9 +21,6 @@ export class Address {
 
   @Column({ nullable: false })
   addrZip: string;
-
-  @Column()
-  addrNick: string;
 
   @Column({ default: false })
   isDef: boolean;

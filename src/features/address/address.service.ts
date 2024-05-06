@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -27,7 +27,7 @@ export class AddressService {
     
     const user = await this.userRepository.findOne({ where: {userId: createAddressDto.userId }});
     if (!user) {
-      throw new HttpException('존재하지 않는 사용자입니다.', HttpStatus.BAD_REQUEST);
+      throw new NotFoundException('존재하지 않는 사용자입니다.');
     }
 
     address.addrUser = user;
@@ -37,14 +37,32 @@ export class AddressService {
 
   async findAll(
     userId: number,
-  ): Promise<{ result: Address[] }> {
+  ): Promise<Address[]> {
     const addresses = await this.addrRepository
-      .createQueryBuilder('addr')
-      .leftJoinAndSelect('addr.addrUser', 'user')
-      .where('user.userId = :userId', { userId })
-      .getMany();
+    .createQueryBuilder('addr')
+    .select([
+      'addr.addrId',
+      'addr.addrNick',
+      'addr.addrRoad',
+      'addr.addrDetl',
+      'addr.addrZip',
+      'addr.isDef',
+    ])
+    .where('addr.userId = :userId', { userId })
+    .getMany();
 
-    return { result: addresses };
+    return addresses;
+  }
+
+  async findOne(
+    addrId: number,
+  ): Promise<Address> {
+    const addr = await this.addrRepository.findOneBy({ addrId });
+    if (!addr) {
+      throw new NotFoundException('배송지를 조회할 수 없습니다.');
+    }
+
+    return addr;
   }
 
   async update(
@@ -52,12 +70,14 @@ export class AddressService {
     updateAddressDto: UpdateAddressDto
   ): Promise<Address> {
     const addr = await this.addrRepository.findOne({ where: {addrId}});
-    if (addr) {
-      addr.addrNick = updateAddressDto.addrNick;
-      addr.isDef = updateAddressDto.isDef;
-
-      return await this.addrRepository.save(addr);
+    if (!addr) {
+      throw new NotFoundException('배송지를 조회할 수 없습니다.');
     }
+
+    addr.addrNick = updateAddressDto.addrNick;
+    addr.isDef = updateAddressDto.isDef;
+
+    return await this.addrRepository.save(addr);
   }
 
 
@@ -66,7 +86,7 @@ export class AddressService {
   ): Promise<Address> {
     const addr = await this.addrRepository.findOne({ where: {addrId }});
     if (!addr) {
-      throw new Error('Address not found');
+      throw new NotFoundException('배송지를 조회할 수 없습니다.');
     }
     try {
       const result = await this.addrRepository.softDelete({ addrId });
