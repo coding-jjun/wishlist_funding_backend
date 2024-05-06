@@ -16,8 +16,6 @@ import {
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
-import { CommonResponse } from 'src/interfaces/common-response.interface';
-import { GiftogetherExceptionFilter } from 'src/filters/giftogether-exception.filter';
 
 @Controller('api/comment')
 export class CommentController {
@@ -29,10 +27,8 @@ export class CommentController {
   @Post()
   async create(
     @Body() createCommentDto: CreateCommentDto,
-  ): Promise<CommonResponse> {
+  ): Promise<any> {
     return {
-      timestamp: new Date(Date.now()),
-      message: 'success',
       data: await this.commentService.create(createCommentDto),
     };
   }
@@ -43,7 +39,7 @@ export class CommentController {
    * @returns Comment[]
    */
   @Get()
-  async findMany(@Query('fundId') fundId: number): Promise<CommonResponse> {
+  async findMany(@Query('fundId') fundId: number): Promise<any> {
     Logger.log(`fundId: ${fundId}`);
     if (!fundId) {
       throw new HttpException(
@@ -52,7 +48,6 @@ export class CommentController {
       );
     }
     return {
-      timestamp: new Date(Date.now()),
       message: 'success',
       data: await this.commentService.findMany(fundId),
     };
@@ -66,12 +61,10 @@ export class CommentController {
     @Query('fundId') fundId: number,
     @Query('comId') comId: number,
     @Body() updateCommentDto: UpdateCommentDto,
-  ): Promise<CommonResponse> {
+  ): Promise<any> {
     return {
-      timestamp: new Date(Date.now()),
-      message: 'success',
       data: await this.commentService.update(fundId, comId, updateCommentDto),
-    } as CommonResponse;
+    };
   }
 
   /**
@@ -81,10 +74,8 @@ export class CommentController {
   async remove(
     @Query('fundId') fundId: number,
     @Query('comId') comId: number,
-  ): Promise<CommonResponse> {
+  ): Promise<any> {
     return {
-      timestamp: new Date(Date.now()),
-      message: 'success',
       data: await this.commentService.remove(fundId, comId),
     };
   }

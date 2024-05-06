@@ -2,7 +2,6 @@ import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseI
 import { InjectRepository } from '@nestjs/typeorm';
 import { FriendService } from './friend.service';
 import { FriendDto } from './dto/friend.dto';
-import { CommonResponse } from 'src/interfaces/common-response.interface';
 
 @Controller('api/friend')
 export class FriendController {
@@ -11,14 +10,11 @@ export class FriendController {
 	@Get('/:userId')
 	async getFriends(
 			@Param('userId') userId: number
-	): Promise<CommonResponse> {
+	): Promise<any> {
 		try {
-			const data = await this.friendService.getFriends(userId);
-
 			return {
-				timestamp: new Date(),
-				message: 'Success',
-				data: data,
+				message: '친구 조회에 성공하였습니다.',
+				data: await this.friendService.getFriends(userId),
 			}
 		} catch (error) {
 			throw new HttpException(
@@ -31,12 +27,11 @@ export class FriendController {
 	@Post('/')
 	async createFriend(
 			@Body() friendDto: FriendDto,
-	): Promise<CommonResponse> {
+	): Promise<any> {
 		try {
 			const { result, message } = await this.friendService.createFriend(friendDto);
 
 			return {
-				timestamp: new Date(),
 				message: message,
 				data: result,
 			}
@@ -48,12 +43,11 @@ export class FriendController {
 	@Delete('/')
 	async deleteFriend(
 		@Body() friendDto: FriendDto
-	): Promise<CommonResponse> {
+	): Promise<any> {
 		try {
 			const { result, message } = await this.friendService.deleteFriend(friendDto);
 
 			return {
-				timestamp: new Date(),
 				message: message,
 				data: result,
 			}

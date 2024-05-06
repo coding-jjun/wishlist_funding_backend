@@ -1,7 +1,5 @@
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, Request } from '@nestjs/common';
 import { UserService } from './user.service';
-import { User } from 'src/entities/user.entity';
-import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -12,11 +10,10 @@ export class UserController {
   @Get('/:userId')
   async getUser(
     @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<CommonResponse> {
+  ): Promise<any> {
     try {
       return {
-        timestamp: new Date(),
-        message: 'success',
+        message: '사용자 정보 조회에 성공하였습니다.',
         data : await this.userService.getUserInfo(userId),
       };
     } catch (error) {
@@ -44,11 +41,10 @@ export class UserController {
   @Post('/')
   async createUser(
     @Body() createUserDto : CreateUserDto,
-  ): Promise<CommonResponse> {
+  ): Promise<any> {
     try {
       return {
-        timestamp: new Date(Date.now()),
-        message: 'success',
+        message: '사용자 생성에 성공하였습니다.',
         data: await this.userService.createUser(createUserDto),
       };
     } catch (error) {
@@ -63,11 +59,10 @@ export class UserController {
   async updateUser(
     @Param('userId', ParseIntPipe) userId : number,
     @Body() updateUserDto : UpdateUserDto,
-  ): Promise<CommonResponse> {
+  ): Promise<any> {
     try {
       return {
-        timestamp: new Date(Date.now()),
-        message: 'success',
+        message: '사용자 정보 갱신에 성공하였습니다.',
         data: await this.userService.updateUser(userId, updateUserDto),
       };
     } catch (error) {
@@ -81,11 +76,10 @@ export class UserController {
   @Delete('/:userId')
   async deleteUser(
     @Param('userId', ParseIntPipe) userId : number,
-  ): Promise<CommonResponse> {
+  ): Promise<any> {
     try {
       return {
-        timestamp: new Date(Date.now()),
-        message: 'success',
+        message: '사용자 정보 삭제에 성공하였습니다.',
         data: await this.userService.deleteUser(userId),
       };
     } catch (error) {

@@ -2,7 +2,6 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Put, ParseIntPipe } 
 import { AddressService } from './address.service';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
-import { CommonResponse } from 'src/interfaces/common-response.interface';
 
 @Controller('api/address')
 export class AddressController {
@@ -11,26 +10,20 @@ export class AddressController {
   @Post()
   async create(
     @Body() createAddressDto: CreateAddressDto
-    ): Promise<CommonResponse> {
-    const result = await this.addressService.create(createAddressDto);
-    
+  ): Promise<any> {
     return {
-      timestamp: new Date(Date.now()),
       message: '배송지를 추가하였습니다.',
-      data: result
+      data: await this.addressService.create(createAddressDto),
     };
   }
 
   @Get(':userId')
   async findAll(
     @Param('userId') userId: number,
-  ): Promise<CommonResponse> {
-    const result = await this.addressService.findAll(userId);
-
+  ): Promise<any> {
     return {
-      timestamp: new Date(Date.now()),
       message: '성공적으로 생성했습니다.',
-      data: result,
+      data: await this.addressService.findAll(userId),
     };
   }
 
@@ -38,26 +31,20 @@ export class AddressController {
   async update(
     @Param('addrId', ParseIntPipe) addrId: number,
     @Body() updateAddressDto: UpdateAddressDto
-  ): Promise<CommonResponse> {
-    const result = await this.addressService.update(addrId, updateAddressDto);
-
+  ): Promise<any> {
     return {
-      timestamp: new Date(Date.now()),
       message: '배송지 정보를 갱신하였습니다.',
-      data: result,
+      data: await this.addressService.update(addrId, updateAddressDto)
     };
   }
 
   @Delete('addrId')
   async remove(
     @Param('addrId', ParseIntPipe) addrId: number,
-    ): Promise<CommonResponse> {
-      const result = await this.addressService.remove(addrId);
-
+    ): Promise<any> {
       return {
-        timestamp: new Date(Date.now()),
         message: '배송지를 삭제하였습니다.',
-        data: result,
+        data: await this.addressService.remove(addrId),
       };
   }
 }

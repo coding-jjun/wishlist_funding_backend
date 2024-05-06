@@ -19,17 +19,19 @@ export class NotificationController {
   ) {}
 
   @Get('/:userId')
-  findAllByUser(
+  async findAllByUser(
     @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<Notification[]> {
-    return this.notificationService.findAllByUser(userId);
+  ): Promise<{ data: Notification[] }> {
+    return {
+      data: await this.notificationService.findAllByUser(userId)
+    };
   }
 
   @Put('/:notiId')
   async update(
     @Param('notiId', ParseIntPipe) notiId: number,
     @Body() updateNotificationDto: UpdateNotificationDto,
-  ): Promise<Notification> {
+  ): Promise<any> {
     const newNoti = await this.notificationService.updateNotification(
       notiId,
       updateNotificationDto,
@@ -38,6 +40,8 @@ export class NotificationController {
     // if (newNoti.notiType == NotiType.FriendRequest && newNoti.reqType == ReqType.Accept) {
     //     this.appGateWay.notifyFriendResponse(newNoti);
     // }
-    return newNoti;
+    return {
+      data: newNoti,
+    }
   }
 }
