@@ -71,7 +71,7 @@ export class UserService {
     if (!user) {
       throw HttpException
     }
-    await this.userRepository.softDelete(user);
+    await this.userRepository.softDelete(user.userId);
 
     return user;
   }
