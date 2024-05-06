@@ -7,20 +7,6 @@ import { CommonResponse } from 'src/interfaces/common-response.interface';
 @Controller('address')
 export class AddressController {
   constructor(private readonly addressService: AddressService) {}
-  
-  @Get('user/:userId')
-  async findAll(
-    @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<CommonResponse> {
-    const result = await this.addressService.findAll(userId);
-
-    return {
-      timestamp: new Date(Date.now()),
-      message: '배송지 목록 조회에 성공하였습니다.',
-      data: result,
-    };
-  }
-
   @Post()
   async create(
     @Body() createAddressDto: CreateAddressDto
