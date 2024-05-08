@@ -19,10 +19,15 @@ import { CreateFundingDto } from './dto/create-funding.dto';
 import { UpdateFundingDto } from './dto/update-funding.dto';
 import { Funding } from 'src/entities/funding.entity';
 import { FundTheme } from 'src/enums/fund-theme.enum';
+import { GiftArray } from '../gift/dto/request-gift.dto';
+import { GiftService } from '../gift/gift.service';
 
-@Controller('api/funding')
+@Controller('funding')
 export class FundingController {
-  constructor(private fundingService: FundingService) {}
+  constructor(
+    private fundingService: FundingService,
+    private readonly giftService: GiftService,
+  ) {}
 
   @Get('/user/:userId')
   async findAll(
@@ -50,11 +55,28 @@ export class FundingController {
   }
 
   @Post()
-  async create(@Body() fundingCreateDto: CreateFundingDto): Promise<any> {
+  async create(@Body() createFundingDto: CreateFundingDto): Promise<any> {
     return {
       message: '성공적으로 생성했습니다.',
-      data: await this.fundingService.create(fundingCreateDto, ''),
+      data: await this.fundingService.create(createFundingDto, ''),
     };
+  }
+
+  @Post(':fundUuid/gift')
+  async createOrUpdateGift(
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
+    @Body() giftArray: GiftArray,
+  ): Promise<any> {
+    const funding = await this.fundingService.findOne(fundUuid);
+
+    try {
+      return {
+        message: 'Success',
+        data: await this.giftService.createOrUpdateGift(funding.fundId, giftArray.gifts),
+      }
+    } catch (error) {
+      throw error
+    }
   }
 
   @Get(':fundUuid')
@@ -68,11 +90,11 @@ export class FundingController {
   @Put(':fundUuid')
   async update(
     @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
-    @Body() fundingUpdateDto: UpdateFundingDto,
+    @Body() updateFunidngDto: UpdateFundingDto,
   ): Promise<any> {
     return {
       message: 'success',
-      data: await this.fundingService.update(fundUuid, fundingUpdateDto),
+      data: await this.fundingService.update(fundUuid, updateFunidngDto),
     };
   }
 

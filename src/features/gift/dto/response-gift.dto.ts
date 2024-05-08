@@ -1,12 +1,12 @@
 import { Gift } from "src/entities/gift.entity";
 
-export class GiftDto {
+export class ResponseGiftDto {
   giftId: number;
   fundId: number; // funding 객체 대신 fundId만 포함
   giftUrl: string;
   giftOrd: number;
-  giftOpt?: string;
-  giftCont?: string;
+  giftOpt: string;
+  giftCont: string;
 
   constructor(gift: Gift) {
     this.giftId = gift.giftId;

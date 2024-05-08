@@ -8,7 +8,7 @@ import { FundTheme } from 'src/enums/fund-theme.enum';
 import { FriendStatus } from 'src/enums/friend-status.enum';
 import { Friend } from 'src/entities/friend.entity';
 import { GiftService } from '../gift/gift.service';
-import { GiftDto } from '../gift/dto/gift.dto';
+import { ResponseGiftDto } from '../gift/dto/response-gift.dto';
 import { FundingDto } from './dto/funding.dto';
 import { UpdateFundingDto } from './dto/update-funding.dto';
 
@@ -143,10 +143,9 @@ export class FundingService {
     
     await this.fundingRepository.save(funding);
     
-    const gifts = await this.giftService.createGift(funding.fundId, createFundingDto.gifts);
-    const giftDtos = gifts.map(gift => new GiftDto(gift));
+    const gifts = await this.giftService.createOrUpdateGift(funding.fundId, createFundingDto.gifts);
     
-    return new FundingDto(funding, giftDtos);
+    return new FundingDto(funding, gifts);
   }
 
   async update(fundUuid: string, updateFundingDto: UpdateFundingDto): Promise<FundingDto> {
@@ -177,12 +176,13 @@ export class FundingService {
     }
     funding.endAt = endAt;
 
-    this.fundingRepository.save(funding);
+    await this.fundingRepository.save(funding);
 
-    let gifts = await this.giftService.createGift(funding.fundId, updateFundingDto.gifts ?? []);
-    const giftDtos = gifts.map(gift => new GiftDto(gift));
+    // let gifts = await this.giftService.createGift(funding.fundId, updateFundingDto.gifts ?? []);
 
-    return new FundingDto(funding, giftDtos);
+    const { gifts, count } = await this.giftService.findAllGift(funding.fundId);
+
+    return new FundingDto(funding, gifts);
   }
 
   async remove(fundUuid: string): Promise<void> {

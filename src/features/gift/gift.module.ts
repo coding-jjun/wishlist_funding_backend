@@ -4,6 +4,9 @@ import { Gift } from "src/entities/gift.entity";
 import { GiftController } from "./gift.controller";
 import { GiftService } from "./gift.service";
 import { Module } from "@nestjs/common";
+import { FundingService } from "../funding/funding.service";
+import { User } from "src/entities/user.entity";
+import { Friend } from "src/entities/friend.entity";
 
 @Module({
   imports: [TypeOrmModule.forFeature([Gift, Funding])],

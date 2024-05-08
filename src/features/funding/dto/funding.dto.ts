@@ -1,5 +1,5 @@
 import { Funding } from "src/entities/funding.entity";
-import { GiftDto } from "src/features/gift/dto/gift.dto";
+import { ResponseGiftDto } from "src/features/gift/dto/response-gift.dto";
 
 export class FundingDto {
   fundId: number;
@@ -13,9 +13,9 @@ export class FundingDto {
   fundSum: number;
   regAt: Date;
   endAt: Date;
-  gifts: GiftDto[];
+  gifts: ResponseGiftDto[];
 
-  constructor(funding: Funding, gifts: GiftDto[]) {
+  constructor(funding: Funding, gifts: ResponseGiftDto[]) {
     this.fundId = funding.fundId;
     this.fundUuid = funding.fundUuid;
     this.fundUser = funding.fundUser.userId;

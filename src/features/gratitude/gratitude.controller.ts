@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common'
 import { GratitudeDto } from './dto/gratitude.dto';
 import { GratitudeService } from './gratitude.service';
 
-@Controller('/api/gratitude')
+@Controller('gratitude')
 export class GratitudeController {
   constructor(private readonly gratitudeService: GratitudeService) {}
   

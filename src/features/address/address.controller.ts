@@ -1,12 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put, ParseIntPipe, ValidationPipe, HttpException, HttpStatus } from '@nestjs/common';
 import { AddressService } from './address.service';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 
-@Controller('api/address')
+@Controller('address')
 export class AddressController {
   constructor(private readonly addressService: AddressService) {}
-
   @Post()
   async create(
     @Body() createAddressDto: CreateAddressDto
@@ -17,17 +16,25 @@ export class AddressController {
     };
   }
 
-  @Get(':userId')
-  async findAll(
-    @Param('userId') userId: number,
+  @Get(':addrId')
+  async findOne(
+    @Param('addrId', ParseIntPipe) addrId: number,
   ): Promise<any> {
-    return {
-      message: '성공적으로 생성했습니다.',
-      data: await this.addressService.findAll(userId),
-    };
+    const address = await this.addressService.findOne(addrId);
+    try {
+      return {
+        message: '배송지 조회에 성공하였습니다.',
+        data: address,
+      }
+    } catch (error) {
+      throw new HttpException(
+        '배송지 조회에 실패하였습니다',
+        HttpStatus.BAD_REQUEST
+      )
+    }
   }
 
-  @Put('addrId')
+  @Put(':addrId')
   async update(
     @Param('addrId', ParseIntPipe) addrId: number,
     @Body() updateAddressDto: UpdateAddressDto
@@ -38,7 +45,7 @@ export class AddressController {
     };
   }
 
-  @Delete('addrId')
+  @Delete(':addrId')
   async remove(
     @Param('addrId', ParseIntPipe) addrId: number,
     ): Promise<any> {

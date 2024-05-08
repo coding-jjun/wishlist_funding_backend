@@ -13,5 +13,6 @@ import { Gift } from 'src/entities/gift.entity';
   imports: [TypeOrmModule.forFeature([Funding, User, Comment, Friend, Gift])],
   controllers: [FundingController],
   providers: [FundingService, GiftService],
+  exports: [FundingService]
 })
 export class FundingModule {}

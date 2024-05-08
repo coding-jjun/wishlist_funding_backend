@@ -1,11 +1,13 @@
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, ValidationPipe } from "@nestjs/common";
-import { CreateGiftDto } from "./dto/create-gift.dto";
-import { UpdateGiftDto } from "./dto/update-gift.dto";
+import { CommonResponse } from "src/interfaces/common-response.interface";
 import { GiftService } from "./gift.service";
+import { RequestGiftDto } from "./dto/request-gift.dto";
 
-@Controller('api/gift')
+@Controller('gift')
 export class GiftController {
-  constructor(private giftService: GiftService) {}
+  constructor(
+    private readonly giftService: GiftService,
+  ) {}
 
   @Get(':fundId')
   async findAllGift(
@@ -23,33 +25,33 @@ export class GiftController {
     }
   }
 
-  // @Post()
-  // async createGift(
-  //   @Body() createGiftDto: CreateGiftDto
+  // @Post(':fundUuid')
+  // async createOrUpdateGift(
+  //   @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
+  //   @Body() giftArray: GiftArray,
   // ): Promise<CommonResponse> {
+  //   const funding = await this.fundingService.findOne(fundUuid);
+
   //   try {
   //     return {
   //       timestamp: new Date(),
   //       message: 'Success',
-  //       data: await this.giftService.createGift(createGiftDto),
+  //       data: await this.giftService.createOrUpdateGift(funding.fundId, giftArray.gifts),
   //     }
   //   } catch (error) {
-  //     throw new HttpException(
-  //       'Failed to create gift',
-  //       HttpStatus.BAD_REQUEST,
-  //     )
+  //     throw error
   //   }
   // }
 
   @Put(':giftId')
   async updateGift(
     @Param('giftId', ParseIntPipe) giftId: number,
-    @Body(ValidationPipe) updateGiftDto: UpdateGiftDto
+    @Body() requestGiftDto: RequestGiftDto,
   ): Promise<any> {
     try {
       return {
         message: 'Success',
-        data: await this.giftService.updateGift(giftId, updateGiftDto),
+        data: await this.giftService.updateGift(giftId, requestGiftDto),
       }
     } catch (error) {
       throw new HttpException(
