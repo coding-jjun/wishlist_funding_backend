@@ -7,18 +7,18 @@ import { CommonResponse } from 'src/interfaces/common-response.interface';
 export class TransformInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
-        map(response => {
-            // 응답 객체에서 메시지와 데이터 추출
-            const message = response.message || 'Success';
-            const data = response.data;
+			map(response => {
+				// 응답 객체에서 메시지와 데이터 추출
+				const message = response.message || 'Success';
+				const data = response.data;
 
-            return {
-                timestamp: new Date(),
-                message: message,
-                data: data
-            };
-        })
+				return {
+					timestamp: new Date(),
+					message: message,
+					data: data
+				};
+			})
     );
-}
+	}
 }
 

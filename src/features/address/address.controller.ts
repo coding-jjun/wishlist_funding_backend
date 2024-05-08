@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Put, ParseIntPipe, V
 import { AddressService } from './address.service';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
+import { CommonResponse } from 'src/interfaces/common-response.interface';
 
 @Controller('address')
 export class AddressController {
@@ -9,7 +10,7 @@ export class AddressController {
   @Post()
   async create(
     @Body() createAddressDto: CreateAddressDto
-  ): Promise<any> {
+  ): Promise<CommonResponse> {
     return {
       message: '배송지를 추가하였습니다.',
       data: await this.addressService.create(createAddressDto),
@@ -19,7 +20,7 @@ export class AddressController {
   @Get(':addrId')
   async findOne(
     @Param('addrId', ParseIntPipe) addrId: number,
-  ): Promise<any> {
+  ): Promise<CommonResponse> {
     const address = await this.addressService.findOne(addrId);
     try {
       return {
@@ -38,7 +39,7 @@ export class AddressController {
   async update(
     @Param('addrId', ParseIntPipe) addrId: number,
     @Body() updateAddressDto: UpdateAddressDto
-  ): Promise<any> {
+  ): Promise<CommonResponse> {
     return {
       message: '배송지 정보를 갱신하였습니다.',
       data: await this.addressService.update(addrId, updateAddressDto)
@@ -48,7 +49,7 @@ export class AddressController {
   @Delete(':addrId')
   async remove(
     @Param('addrId', ParseIntPipe) addrId: number,
-    ): Promise<any> {
+    ): Promise<CommonResponse> {
       return {
         message: '배송지를 삭제하였습니다.',
         data: await this.addressService.remove(addrId),

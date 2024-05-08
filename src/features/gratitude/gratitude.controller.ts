@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { GratitudeDto } from './dto/gratitude.dto';
 import { GratitudeService } from './gratitude.service';
+import { CommonResponse } from 'src/interfaces/common-response.interface';
 
 @Controller('gratitude')
 export class GratitudeController {
@@ -9,7 +10,7 @@ export class GratitudeController {
   @Get('/:gratId')
   async getGratitude(
     @Param('gratId') gratId: number
-  ): Promise<any> {
+  ): Promise<CommonResponse> {
     return {
       data: await this.gratitudeService.getGratitude(gratId),
     };
@@ -19,7 +20,7 @@ export class GratitudeController {
   async createGratitude(
     @Param('fundUuid') fundUuid: string,
     @Body() createGratitudeDto: GratitudeDto
-  ): Promise<any> {
+  ): Promise<CommonResponse> {
     return {
       message: '감사인사 생성 성공!',
       data: await this.gratitudeService.createGratitude(fundUuid, createGratitudeDto)
@@ -30,7 +31,7 @@ export class GratitudeController {
   async updateGratitude(
     @Param('gratId') gratId: number,
     @Body() updateGratitudeDto: GratitudeDto
-  ): Promise<any> {
+  ): Promise<CommonResponse> {
     return {
       message: 'success',
       data: await this.gratitudeService.updateGratitude(gratId, updateGratitudeDto),
@@ -38,12 +39,11 @@ export class GratitudeController {
   }
 
   @Delete('/:gratId')
-  async deleteGratitude(@Param('gratId') gratId: number): Promise<any> {
+  async deleteGratitude(
+    @Param('gratId') gratId: number
+  ): Promise<CommonResponse> {
     return {
       data: await this.gratitudeService.deleteGratitude(gratId),
     };
   }
-
-
-
 }

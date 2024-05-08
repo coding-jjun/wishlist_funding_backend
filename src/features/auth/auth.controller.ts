@@ -11,7 +11,6 @@ export class AuthController {
     console.log("code for token : ", code);
     try {
       return {
-        timestamp: new Date(),
         message: 'success',
         data : await this.authService.requestKakaoToken(code)
       };

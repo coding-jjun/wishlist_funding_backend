@@ -21,6 +21,7 @@ import { Funding } from 'src/entities/funding.entity';
 import { FundTheme } from 'src/enums/fund-theme.enum';
 import { GiftArray } from '../gift/dto/request-gift.dto';
 import { GiftService } from '../gift/gift.service';
+import { CommonResponse } from 'src/interfaces/common-response.interface';
 
 @Controller('funding')
 export class FundingController {
@@ -39,7 +40,7 @@ export class FundingController {
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
     @Query('lastFundId', new DefaultValuePipe(0), ParseIntPipe) lastFundId?: number,
     @Query('lastEndAt', new DefaultValuePipe(undefined)) lastEndAt?: string,
-  ): Promise<any> {
+  ): Promise<CommonResponse> {
     try {
       const themesArray = Array.isArray(fundThemes) ? fundThemes : [fundThemes];
       const lastEndAtDate = lastEndAt ? new Date(lastEndAt) : undefined;
@@ -55,7 +56,9 @@ export class FundingController {
   }
 
   @Post()
-  async create(@Body() createFundingDto: CreateFundingDto): Promise<any> {
+  async create(
+    @Body() createFundingDto: CreateFundingDto
+  ): Promise<CommonResponse> {
     return {
       message: '성공적으로 생성했습니다.',
       data: await this.fundingService.create(createFundingDto, ''),
@@ -66,7 +69,7 @@ export class FundingController {
   async createOrUpdateGift(
     @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
     @Body() giftArray: GiftArray,
-  ): Promise<any> {
+  ): Promise<CommonResponse> {
     const funding = await this.fundingService.findOne(fundUuid);
 
     try {
@@ -80,7 +83,9 @@ export class FundingController {
   }
 
   @Get(':fundUuid')
-  async findOne(@Param('fundUuid', ParseUUIDPipe) fundUuid: string): Promise<any> {
+  async findOne(
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string
+  ): Promise<CommonResponse> {
     return {
       message: '성공적으로 찾았습니다.',
       data: await this.fundingService.findOne(fundUuid),
@@ -91,7 +96,7 @@ export class FundingController {
   async update(
     @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
     @Body() updateFunidngDto: UpdateFundingDto,
-  ): Promise<any> {
+  ): Promise<CommonResponse> {
     return {
       message: 'success',
       data: await this.fundingService.update(fundUuid, updateFunidngDto),
@@ -99,7 +104,9 @@ export class FundingController {
   }
 
   @Delete(':fundUuid')
-  async remove(@Param('fundUuid', ParseUUIDPipe) fundUuid: string): Promise<any> {
+  async remove(
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string
+  ): Promise<CommonResponse> {
     await this.fundingService.remove(fundUuid);
 
     return {

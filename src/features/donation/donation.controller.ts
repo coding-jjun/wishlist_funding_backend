@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { DonationService } from './donation.service';
 import { CreateDonationDto } from './dto/create-donation.dto';
+import { CommonResponse } from 'src/interfaces/common-response.interface';
 
 @Controller('donation')
 export class DonationController {
@@ -22,7 +23,7 @@ export class DonationController {
   async createDonation(
     @Param('fundUuid') fundUuid: string,
     @Body() createDonationDto: CreateDonationDto,
-  ): Promise<any>  {
+  ): Promise<CommonResponse>  {
     return {
       message: 'Donation 생성 완료',
       data: await this.donationService.createDonation(fundUuid, createDonationDto)

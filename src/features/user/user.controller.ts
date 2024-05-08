@@ -3,6 +3,7 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AddressService } from '../address/address.service';
+import { CommonResponse } from 'src/interfaces/common-response.interface';
 
 @Controller('user')
 export class UserController {
@@ -14,7 +15,7 @@ export class UserController {
   @Get('/:userId')
   async getUser(
     @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<any> {
+  ): Promise<CommonResponse> {
     try {
       return {
         message: '사용자 정보 조회에 성공하였습니다.',
@@ -45,7 +46,7 @@ export class UserController {
   @Get('/:userId/address')
   async getUserAddress(
     @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<any> {
+  ): Promise<CommonResponse> {
     try {
       return {
         message: 'success',
@@ -59,7 +60,7 @@ export class UserController {
   @Post('/')
   async createUser(
     @Body() createUserDto : CreateUserDto,
-  ): Promise<any> {
+  ): Promise<CommonResponse> {
     try {
       return {
         message: '사용자 생성에 성공하였습니다.',
@@ -77,7 +78,7 @@ export class UserController {
   async updateUser(
     @Param('userId', ParseIntPipe) userId : number,
     @Body() updateUserDto : UpdateUserDto,
-  ): Promise<any> {
+  ): Promise<CommonResponse> {
     try {
       return {
         message: '사용자 정보 갱신에 성공하였습니다.',
@@ -94,7 +95,7 @@ export class UserController {
   @Delete('/:userId')
   async deleteUser(
     @Param('userId', ParseIntPipe) userId : number,
-  ): Promise<any> {
+  ): Promise<CommonResponse> {
     try {
       return {
         message: '사용자 정보 삭제에 성공하였습니다.',

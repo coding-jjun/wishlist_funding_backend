@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseI
 import { InjectRepository } from '@nestjs/typeorm';
 import { FriendService } from './friend.service';
 import { FriendDto } from './dto/friend.dto';
+import { CommonResponse } from 'src/interfaces/common-response.interface';
 
 @Controller('friend')
 export class FriendController {
@@ -10,7 +11,7 @@ export class FriendController {
 	@Get('/:userId')
 	async getFriends(
 			@Param('userId') userId: number
-	): Promise<any> {
+	): Promise<CommonResponse> {
 		try {
 			return {
 				message: '친구 조회에 성공하였습니다.',
@@ -27,7 +28,7 @@ export class FriendController {
 	@Post('/')
 	async createFriend(
 			@Body() friendDto: FriendDto,
-	): Promise<any> {
+	): Promise<CommonResponse> {
 		try {
 			const { result, message } = await this.friendService.createFriend(friendDto);
 
@@ -43,7 +44,7 @@ export class FriendController {
 	@Delete('/')
 	async deleteFriend(
 		@Body() friendDto: FriendDto
-	): Promise<any> {
+	): Promise<CommonResponse> {
 		try {
 			const { result, message } = await this.friendService.deleteFriend(friendDto);
 

@@ -12,7 +12,7 @@ export class GiftController {
   @Get(':fundId')
   async findAllGift(
     @Param('fundId') fundId: number,
-  ): Promise<any> {
+  ): Promise<CommonResponse> {
     try {
       return {
         data: await this.giftService.findAllGift(fundId) 
@@ -47,7 +47,7 @@ export class GiftController {
   async updateGift(
     @Param('giftId', ParseIntPipe) giftId: number,
     @Body() requestGiftDto: RequestGiftDto,
-  ): Promise<any> {
+  ): Promise<CommonResponse> {
     try {
       return {
         message: 'Success',
@@ -64,7 +64,7 @@ export class GiftController {
   @Delete(':giftId')
   async deleteGift(
     @Param('giftId', ParseIntPipe) giftId: number
-  ): Promise<any> {
+  ): Promise<CommonResponse> {
     try {
       return {
         data: await this.giftService.deleteGift(giftId),

@@ -16,6 +16,7 @@ import {
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { CommonResponse } from 'src/interfaces/common-response.interface';
 
 @Controller('comment')
 export class CommentController {
@@ -27,7 +28,7 @@ export class CommentController {
   @Post()
   async create(
     @Body() createCommentDto: CreateCommentDto,
-  ): Promise<any> {
+  ): Promise<CommonResponse> {
     return {
       data: await this.commentService.create(createCommentDto),
     };
@@ -39,7 +40,9 @@ export class CommentController {
    * @returns Comment[]
    */
   @Get()
-  async findMany(@Query('fundId') fundId: number): Promise<any> {
+  async findMany(
+    @Query('fundId') fundId: number
+  ): Promise<CommonResponse> {
     Logger.log(`fundId: ${fundId}`);
     if (!fundId) {
       throw new HttpException(
@@ -61,7 +64,7 @@ export class CommentController {
     @Query('fundId') fundId: number,
     @Query('comId') comId: number,
     @Body() updateCommentDto: UpdateCommentDto,
-  ): Promise<any> {
+  ): Promise<CommonResponse> {
     return {
       data: await this.commentService.update(fundId, comId, updateCommentDto),
     };
@@ -74,7 +77,7 @@ export class CommentController {
   async remove(
     @Query('fundId') fundId: number,
     @Query('comId') comId: number,
-  ): Promise<any> {
+  ): Promise<CommonResponse> {
     return {
       data: await this.commentService.remove(fundId, comId),
     };
