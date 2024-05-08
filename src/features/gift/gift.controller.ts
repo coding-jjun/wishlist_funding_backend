@@ -23,10 +23,7 @@ export class GiftController {
         data
       }
     } catch (error) {
-      throw new HttpException(
-        'Failed to get gifts',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw error
     }
   }
 
@@ -78,10 +75,7 @@ export class GiftController {
         data: await this.giftService.deleteGift(giftId),
       }
     } catch (error) {
-      throw new HttpException(
-        'Failed to delete gift',
-        HttpStatus.BAD_REQUEST,
-      )
+      throw error;
     }
   }
 }
