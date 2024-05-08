@@ -1,7 +1,6 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor, SetMetadata } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { Observable, map, timestamp } from 'rxjs';
-import { CommonResponse } from 'src/interfaces/common-response.interface';
+import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
+import { Observable, map } from 'rxjs';
+import { getNow } from 'src/app.module';
 
 @Injectable()
 export class TransformInterceptor implements NestInterceptor {
@@ -13,7 +12,7 @@ export class TransformInterceptor implements NestInterceptor {
 				const data = response.data;
 
 				return {
-					timestamp: new Date(),
+					timestamp: getNow(),
 					message: message,
 					data: data
 				};
