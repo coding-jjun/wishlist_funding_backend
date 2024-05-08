@@ -105,3 +105,9 @@ import { AuthModule } from './features/auth/auth.module';
   ],
 })
 export class AppModule {}
+
+export function getNow(): string {
+  const event = new Date();
+  event.setTime(event.getTime() - event.getTimezoneOffset() * 60 * 1000);
+  return event.toISOString();
+}
