@@ -34,7 +34,6 @@ export class ImageController {
     const imagedto: ImageDto = await this.imageService.upload(file.originalname, file.buffer);
 
     return {
-      timestamp: new Date(Date.now()),
       message: '성공적으로 파일이 업로드 되었습니다.',
       data: imagedto,
     };
