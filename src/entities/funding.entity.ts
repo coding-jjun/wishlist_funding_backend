@@ -9,12 +9,14 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  OneToOne,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Comment } from './comment.entity';
 import { FundTheme } from 'src/enums/fund-theme.enum';
 import { Gift } from './gift.entity';
 import { Donation } from './donation.entity';
+import { Image } from './image.entity';
 
 @Entity()
 export class Funding {
@@ -80,6 +82,16 @@ export class Funding {
     cascade: true,
   })
   donations: Donation[];
+
+  /**
+   * defaultImgId가 null인 경우, Image.subId로 이미지를 가져올 수 있습니다.
+   */
+  @Column('int', { nullable: true })
+  @OneToOne(() => Image)
+  defaultImgId: number;
+
+  @OneToMany(() => Image, (image) => image.subId)
+  images: Image[];
 
   /**
    * TODO - timestamptz를 사용할지, 일반 date를 사용할지 결정해야함.
