@@ -4,6 +4,7 @@ import { KakaoAuthGuard } from './guard/kakao-auth-guard';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from './guard/jwt-auth-guard';
 import { AuthUserDto } from './auth-user.dto';
+import { NaverAuthGuard } from './guard/naver-auth-guard';
 
 @Controller('auth')
 export class AuthController {
@@ -20,6 +21,19 @@ export class AuthController {
   async kakaoCallback(@Req() req: Request, @Res() res:Response){
     return await this.setupAuthResponse(res, req.user);
 
+  }
+
+  @Get('naver')
+  @UseGuards(NaverAuthGuard)
+  async naverLogin(){
+    return;
+  }
+
+  @Get('naver/callback')
+  @UseGuards(NaverAuthGuard)
+  async naverCallback(@Req() req: Request, @Res() res:Response){
+    
+    return await this.setupAuthResponse(res, req.user);
   }
 
   @Post()

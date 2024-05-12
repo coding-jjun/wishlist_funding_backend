@@ -34,10 +34,10 @@ export class User {
   @Column({nullable: true})
   userPw: string;
 
-  @Column()
+  @Column({nullable: true})
   userName: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true , nullable: true})
   userPhone: string;
 
   @Column()
