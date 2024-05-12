@@ -9,10 +9,10 @@ import {
 import { Response } from 'express';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { GiftogetherException } from './giftogether-exception';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { GiftogetherError } from 'src/entities/error.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { request } from 'http';
+import { getNow } from 'src/app.module';
 
 @Catch()
 export class GiftogetherExceptionFilter implements ExceptionFilter {
@@ -42,7 +42,7 @@ export class GiftogetherExceptionFilter implements ExceptionFilter {
 
 
     res.status(err.httpCode).json({
-      timestamp: new Date(),
+      timestamp: getNow(),
       message: msg,
       data: null,
     } as CommonResponse);

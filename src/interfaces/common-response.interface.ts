@@ -1,5 +1,4 @@
 export interface CommonResponse {
-  timestamp: Date;
-  message: string;
+  message?: string;
   data: any;
 }

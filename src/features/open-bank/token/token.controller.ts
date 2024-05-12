@@ -11,7 +11,6 @@ export class TokenController {
   async saveOpenBankToken(@Body() reqOpenBankToken: TokenRequestDataDto): Promise<CommonResponse>{
     const token = this.tokenService.saveOpenBankToken(reqOpenBankToken);
     return {
-      timestamp: new Date(Date.now()),
       message: '성공적으로 생성했습니다.',
       data: token,
     };

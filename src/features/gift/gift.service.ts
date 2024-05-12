@@ -24,6 +24,7 @@ export class GiftService {
   
     const [gifts, count] = await this.giftRepository.findAndCount({
       where: { funding: { fundId } },
+      relations: ['funding'],
     });
   
     // Gift 배열을 ResponseGiftDto 배열로 변환
@@ -108,7 +109,7 @@ export class GiftService {
       )
     }
 
-    await this.giftRepository.softDelete(gift);
+    await this.giftRepository.delete(gift);
 
     return gift;
   }

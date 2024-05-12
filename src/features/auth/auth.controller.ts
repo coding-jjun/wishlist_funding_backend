@@ -45,6 +45,7 @@ export class AuthController {
       console.log("updateUser : ", userInfo);
       const user =  await this.authService.saveAuthUser(authUserDto, userInfo.user);
       res.json({user: user})
+
     }
     res.end();
   }
