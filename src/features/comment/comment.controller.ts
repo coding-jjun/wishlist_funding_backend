@@ -17,7 +17,6 @@ import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
-import { GiftogetherExceptionFilter } from 'src/filters/giftogether-exception.filter';
 
 @Controller('comment')
 export class CommentController {
@@ -31,8 +30,6 @@ export class CommentController {
     @Body() createCommentDto: CreateCommentDto,
   ): Promise<CommonResponse> {
     return {
-      timestamp: new Date(Date.now()),
-      message: 'success',
       data: await this.commentService.create(createCommentDto),
     };
   }
@@ -43,7 +40,9 @@ export class CommentController {
    * @returns Comment[]
    */
   @Get()
-  async findMany(@Query('fundId') fundId: number): Promise<CommonResponse> {
+  async findMany(
+    @Query('fundId') fundId: number
+  ): Promise<CommonResponse> {
     Logger.log(`fundId: ${fundId}`);
     if (!fundId) {
       throw new HttpException(
@@ -52,7 +51,6 @@ export class CommentController {
       );
     }
     return {
-      timestamp: new Date(Date.now()),
       message: 'success',
       data: await this.commentService.findMany(fundId),
     };
@@ -68,10 +66,8 @@ export class CommentController {
     @Body() updateCommentDto: UpdateCommentDto,
   ): Promise<CommonResponse> {
     return {
-      timestamp: new Date(Date.now()),
-      message: 'success',
       data: await this.commentService.update(fundId, comId, updateCommentDto),
-    } as CommonResponse;
+    };
   }
 
   /**
@@ -83,8 +79,6 @@ export class CommentController {
     @Query('comId') comId: number,
   ): Promise<CommonResponse> {
     return {
-      timestamp: new Date(Date.now()),
-      message: 'success',
       data: await this.commentService.remove(fundId, comId),
     };
   }

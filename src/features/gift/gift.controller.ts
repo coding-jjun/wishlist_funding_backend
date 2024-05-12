@@ -1,8 +1,7 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, ParseUUIDPipe, Post, Put, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, ValidationPipe } from "@nestjs/common";
 import { CommonResponse } from "src/interfaces/common-response.interface";
-import { GiftArray, RequestGiftDto } from "./dto/request-gift.dto";
 import { GiftService } from "./gift.service";
-import { FundingService } from "../funding/funding.service";
+import { RequestGiftDto } from "./dto/request-gift.dto";
 
 @Controller('gift')
 export class GiftController {
@@ -15,18 +14,11 @@ export class GiftController {
     @Param('fundId') fundId: number,
   ): Promise<CommonResponse> {
     try {
-      const data = await this.giftService.findAllGift(fundId);
-
       return {
-        timestamp: new Date(),
-        message: 'Success',
-        data
+        data: await this.giftService.findAllGift(fundId) 
       }
     } catch (error) {
-      throw new HttpException(
-        'Failed to get gifts',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw error
     }
   }
 
@@ -51,11 +43,10 @@ export class GiftController {
   @Put(':giftId')
   async updateGift(
     @Param('giftId', ParseIntPipe) giftId: number,
-    @Body() requestGiftDto: RequestGiftDto
+    @Body() requestGiftDto: RequestGiftDto,
   ): Promise<CommonResponse> {
     try {
       return {
-        timestamp: new Date(),
         message: 'Success',
         data: await this.giftService.updateGift(giftId, requestGiftDto),
       }
@@ -73,15 +64,10 @@ export class GiftController {
   ): Promise<CommonResponse> {
     try {
       return {
-        timestamp: new Date(),
-        message: 'Success',
         data: await this.giftService.deleteGift(giftId),
       }
     } catch (error) {
-      throw new HttpException(
-        'Failed to delete gift',
-        HttpStatus.BAD_REQUEST,
-      )
+      throw error;
     }
   }
 }

@@ -13,12 +13,9 @@ export class FriendController {
 			@Param('userId') userId: number
 	): Promise<CommonResponse> {
 		try {
-			const data = await this.friendService.getFriends(userId);
-
 			return {
-				timestamp: new Date(),
-				message: 'Success',
-				data: data,
+				message: '친구 조회에 성공하였습니다.',
+				data: await this.friendService.getFriends(userId),
 			}
 		} catch (error) {
 			throw new HttpException(
@@ -36,7 +33,6 @@ export class FriendController {
 			const { result, message } = await this.friendService.createFriend(friendDto);
 
 			return {
-				timestamp: new Date(),
 				message: message,
 				data: result,
 			}
@@ -53,7 +49,6 @@ export class FriendController {
 			const { result, message } = await this.friendService.deleteFriend(friendDto);
 
 			return {
-				timestamp: new Date(),
 				message: message,
 				data: result,
 			}
