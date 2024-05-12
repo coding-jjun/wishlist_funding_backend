@@ -18,21 +18,8 @@ export class AuthController {
   @Get('kakao/callback')
   @UseGuards(KakaoAuthGuard)
   async kakaoCallback(@Req() req: Request, @Res() res:Response){
+    return await this.setupAuthResponse(res, req.user);
 
-    const user = req.user as any;
-    if(user.type === 'login'){
-
-      res.cookie('access_token', user.accessToken);
-      res.cookie('refresh_token', user.refreshToken);
-      res.json({user: user.user})
-    
-
-    }else if(user.type === 'once'){
-      res.cookie('once', user.onceToken);
-      res.json({user: user.user})
-    
-    }
-    res.end();
   }
 
   @Post()
@@ -47,4 +34,21 @@ export class AuthController {
     }
     res.end();
   }
+
+  async setupAuthResponse(res: Response, userInfo: any){
+    if(userInfo.type === 'login'){
+
+      res.cookie('access_token', userInfo.accessToken);
+      res.cookie('refresh_token', userInfo.refreshToken);
+      res.json({user: userInfo.user})
+
+    }else if(userInfo.type === 'once'){
+
+      res.cookie('once', userInfo.onceToken);
+      res.json({user: userInfo.user})
+    }
+    return res;
+  }
+
+
 }
