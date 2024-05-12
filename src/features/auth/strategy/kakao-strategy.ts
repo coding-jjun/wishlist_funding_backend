@@ -4,6 +4,7 @@ import { PassportStrategy } from "@nestjs/passport";
 import { Profile, Strategy } from "passport-kakao";
 import { AuthService } from "../auth.service";
 import { AuthType } from "src/enums/auth-type.enum";
+import { UserInfo } from "src/interfaces/user-info.interface";
 
 @Injectable()
 export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao'){
@@ -24,14 +25,15 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao'){
     const kakaoAccount = resProfile.kakao_account;
 
     const userEmail = kakaoAccount.email;
-    const userInfo = {
+
+    const userInfo : UserInfo = {
       authType: AuthType.Kakao,
       authId: resProfile.id,
-      userNick: kakaoAccount.profile.nickname || null,
+      userNick: kakaoAccount.profile.nickname,
       userName: kakaoAccount.name || null,
       userEmail: userEmail,
-      userBirth: null,
       userPhone: kakaoAccount.phone_number || null,
+
     }
 
     const user = await this.authService.validateUser(userEmail);
