@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import { Profile, Strategy } from "passport-kakao";
-import { AuthService } from "./auth.service";
+import { AuthService } from "../auth.service";
 import { AuthType } from "src/enums/auth-type.enum";
 
 @Injectable()
@@ -12,9 +12,9 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao'){
     private readonly authService: AuthService,
   ){
     super({
-      clientID: configService.get<string>('CLIENT_ID'),
-      clientSecret: configService.get<string>('CLIENT_SECRET'),
-      callbackURL: configService.get<string>('REDIRECT_URI'),
+      clientID: configService.get<string>('KAKAO_CLIENT_ID'),
+      clientSecret: configService.get<string>('KAKAO_CLIENT_SECRET'),
+      callbackURL: configService.get<string>('KAKAO_CALLBACK_URI'),
     });
 
   }

@@ -1,8 +1,8 @@
 import { Controller, Get, Body, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { KakaoAuthGuard } from './kakao-auth-guard';
+import { KakaoAuthGuard } from './guard/kakao-auth-guard';
 import { Request, Response } from 'express';
-import { JwtAuthGuard } from './jwt-auth-guard';
+import { JwtAuthGuard } from './guard/jwt-auth-guard';
 import { AuthUserDto } from './auth-user.dto';
 
 @Controller('auth')
