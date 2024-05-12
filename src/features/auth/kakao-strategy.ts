@@ -37,11 +37,14 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao'){
     // 기존 회원 -> 로그인
     if(user){
 
+      const accessToken = await this.authService.createAccessToken(userEmail);
+      const refreshToken = await this.authService.createRefreshToken(userEmail);
 
-      done(null, {type: 'login', user})
+      done(null, {type: 'login', accessToken, refreshToken, user})
       
     // 신규 회원 -> 회원가입
     }else{
+      const onceToken = await this.authService.onceToken(userEmail);
 
       if(kakaoAccount.has_birthyear && kakaoAccount.has_birthday){
         userInfo.userBirth
@@ -54,7 +57,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao'){
       }
 
       const user = await this.authService.saveAuthUser(userInfo, imgUrl);
-      done(null, {type: 'once', user})
+      done(null, {type: 'once', onceToken, user})
     }
   }
 }

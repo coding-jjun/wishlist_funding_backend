@@ -19,10 +19,13 @@ export class AuthController {
     const user = req.user as any;
     if(user.type === 'login'){
 
+      res.cookie('access_token', user.accessToken);
+      res.cookie('refresh_token', user.refreshToken);
       res.json({user: user.user})
     
 
     }else if(user.type === 'once'){
+      res.cookie('once', user.onceToken);
       res.json({user: user.user})
     
     }
