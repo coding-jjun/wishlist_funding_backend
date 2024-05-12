@@ -1,25 +1,33 @@
-import { Controller, Get, HttpException, HttpStatus, Query } from '@nestjs/common';
+import { Controller, Get, Body, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CommonResponse } from 'src/interfaces/common-response.interface';
+import { KakaoAuthGuard } from './kakao-auth-guard';
 
-@Controller()
+@Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService){}
 
-  @Get('/oauth')
-  async requestKakaoToken(@Query('code') code: string): Promise<CommonResponse> {
-    console.log("code for token : ", code);
-    try {
-      return {
-        timestamp: new Date(),
-        message: 'success',
-        data : await this.authService.requestKakaoToken(code)
-      };
-    } catch (error) {
-      throw new HttpException(
-        'Failed to get user info',
-        HttpStatus.BAD_REQUEST,
-      );
+  @Get('kakao')
+  @UseGuards(KakaoAuthGuard)
+  async kakaoLogin(){
+    return;
+  }
+
+  @Get('kakao/callback')
+  @UseGuards(KakaoAuthGuard)
+  async kakaoCallback(@Req() req: Request, @Res() res:Response){
+
+    const user = req.user as any;
+    if(user.type === 'login'){
+
+      res.json({user: user.user})
+    
+
+    }else if(user.type === 'once'){
+      res.json({user: user.user})
+    
+    }
+    res.end();
+  }
     }
   }
 }
