@@ -14,10 +14,10 @@ export class UpdateAddressDto {
   @IsNotEmpty()
   addrZip: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   recvName: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   recvPhone: string;
 
   @IsNotEmpty()
