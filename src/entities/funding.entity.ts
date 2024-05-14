@@ -17,6 +17,7 @@ import { FundTheme } from 'src/enums/fund-theme.enum';
 import { Gift } from './gift.entity';
 import { Donation } from './donation.entity';
 import { Image } from './image.entity';
+import { ValidateNested } from 'class-validator';
 
 @Entity()
 export class Funding {
@@ -87,9 +88,10 @@ export class Funding {
    * defaultImgId가 null인 경우, Image.subId로 이미지를 가져올 수 있습니다.
    */
   @Column('int', { nullable: true })
-  @OneToOne(() => Image)
+  @OneToOne(() => Image, (image) => image.imgId)
   defaultImgId: number;
 
+  @ValidateNested()
   @OneToMany(() => Image, (image) => image.subId)
   images: Image[];
 

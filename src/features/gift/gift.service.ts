@@ -5,6 +5,8 @@ import { Gift } from "src/entities/gift.entity";
 import { Repository } from "typeorm";
 import { RequestGiftDto } from "./dto/request-gift.dto";
 import { ResponseGiftDto } from "./dto/response-gift.dto";
+import { isURL } from "class-validator";
+import { GiftogetherExceptions } from "src/filters/giftogether-exception";
 
 @Injectable()
 export class GiftService {
@@ -14,6 +16,8 @@ export class GiftService {
 
     @InjectRepository(Funding)
     private readonly fundingRepository: Repository<Funding>,
+
+    private readonly g2gException: GiftogetherExceptions,
   ) {}
 
   async findAllGift(fundId: number): Promise<{ gifts: ResponseGiftDto[], count: number }> {
@@ -71,6 +75,10 @@ export class GiftService {
   
   private async createNewGift(funding: Funding, gift: RequestGiftDto): Promise<Gift> {
     const newGift = new Gift();
+    
+    if (!isURL(gift.giftUrl)) {
+      throw this.g2gException.IncorrectImageUrl;
+    }
     newGift.giftUrl = gift.giftUrl;
     newGift.giftOrd = gift.giftOrd;
     newGift.giftOpt = gift.giftOpt;

@@ -22,6 +22,11 @@ export class GiftogetherExceptions {
   // Donation
   
   // Gift
+  IncorrectGiftUrl = new GiftogetherException(
+    ErrorMsg.IncorrectGiftUrl,
+    ErrorCode.IncorrectGiftUrl,
+    HttpStatus.BAD_REQUEST,
+  )
   
   // Gratitude
   
@@ -30,6 +35,11 @@ export class GiftogetherExceptions {
   // Comment
   
   // Image
+  IncorrectImageUrl = new GiftogetherException(
+    ErrorMsg.IncorrectImageUrl,
+    ErrorCode.IncorrectImageUrl,
+    HttpStatus.BAD_REQUEST,
+  )
   
   // User
   UserNotFound = new GiftogetherException(

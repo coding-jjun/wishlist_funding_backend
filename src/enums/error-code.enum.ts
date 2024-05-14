@@ -4,6 +4,7 @@ export enum ErrorCode {
   // Donation
   
   // Gift
+  IncorrectGiftUrl = "0200",
   
   // Gratitude
   
@@ -12,6 +13,7 @@ export enum ErrorCode {
   // Comment
   
   // Image
+  IncorrectImageUrl = "0600",
   
   // User
   UserNotFound = '0700',

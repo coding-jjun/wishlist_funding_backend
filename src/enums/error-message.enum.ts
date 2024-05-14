@@ -4,6 +4,7 @@ export enum ErrorMsg {
   // Donation
   
   // Gift
+  IncorrectGiftUrl = "선물 URL이 유효하지 않습니다.",
   
   // Gratitude
   
@@ -12,6 +13,7 @@ export enum ErrorMsg {
   // Comment
   
   // Image
+  IncorrectImageUrl = "이미지 URL이 유효하지 않습니다.",
   
   // User
   UserNotFound = '사용자 정보가 없습니다.',
