@@ -125,12 +125,31 @@ export class FundingService {
     };
   }
 
-  findOne(fundUuid: string): Promise<Funding> {
-    return this.fundingRepository.findOne({
-      where: {
-        fundUuid
-      }
+  async findOne(fundUuid: string): Promise<FundingDto> {
+    const fund = await this.fundingRepository.findOne({
+      relations: { fundUser: true },
+      where: { fundUuid },
     });
+    const gifts = (await this.giftService.findAllGift(fund.fundId)).gifts;
+    
+    if (fund.defaultImgId) {
+      // fund 기본 이미지로 DTO를 생성한다.
+      const img = await this.imageRepository.findOne({
+        where: { imgId: DefaultImageId.Funding },
+      });
+      
+      return new FundingDto(fund, gifts, [img.imgUrl]);
+    }
+    
+    const images = await this.imageRepository.find({
+      where: { imgType: ImageType.Funding, subId: fund.fundId },
+    });
+
+    return new FundingDto(
+      fund,
+      gifts,
+      images.map((img) => img.imgUrl),
+    );
   }
 
   async create(createFundingDto: CreateFundingDto, accessToken: string): Promise<FundingDto> {
