@@ -1,7 +1,6 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsUrl } from 'class-validator';
 
 export class GratitudeDto {
-
   @IsNotEmpty()
   gratTitle: string;
 
@@ -9,5 +8,6 @@ export class GratitudeDto {
   gratCont: string;
 
   @IsNotEmpty()
+  @IsUrl({}, { each: true })
   gratImg: string[];
 }
