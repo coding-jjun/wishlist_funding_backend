@@ -20,22 +20,20 @@ export class DonationController {
   // @Get(':fundUuid')
   // async findOne(@Param('fundUuid', ParseUUIDPipe) fundUuid: string): Promise<CommonResponse> {
   @Post('/:fundUuid')
-  async createDonation(@Param('fundUuid') fundUuid: string,
-                       @Body() createDonationDto: CreateDonationDto,
+  async createDonation(
+    @Param('fundUuid') fundUuid: string,
+    @Body() createDonationDto: CreateDonationDto,
   ): Promise<CommonResponse>  {
-
-      return {
-        timestamp: new Date(Date.now()),
-        message: 'Donation 생성 완료',
-        data: await this.donationService.createDonation(fundUuid, createDonationDto)
-      };
+    return {
+      message: 'Donation 생성 완료',
+      data: await this.donationService.createDonation(fundUuid, createDonationDto)
+    };
   }
 
   // 마이페이지에서 후원내역 조회
   @Get()
   async getAllDonations() {
     return {
-      timestamp: new Date(Date.now()),
       message: 'Donation list 조회 성공',
       data: await this.donationService.getAllDonations()
     };
@@ -45,7 +43,6 @@ export class DonationController {
   @Get('/:orderId')
   async getOneDonation(@Param('orderId') orderId: string) {
     return {
-      timestamp: new Date(Date.now()),
       message: 'Donation 조회 성공',
       data: await this.donationService.getOneDonation(orderId)
     };
@@ -55,7 +52,6 @@ export class DonationController {
   @Delete('/:donId')
   async deleteDonation(@Param('donId') donId: number) {
     return {
-      timestamp: new Date(Date.now()),
       message: 'Donation 삭제 성공',
       data: await this.donationService.deleteDonation(donId)
     };

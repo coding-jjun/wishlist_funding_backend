@@ -18,10 +18,10 @@ import { FundingService } from './funding.service';
 import { CreateFundingDto } from './dto/create-funding.dto';
 import { UpdateFundingDto } from './dto/update-funding.dto';
 import { Funding } from 'src/entities/funding.entity';
-import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { FundTheme } from 'src/enums/fund-theme.enum';
 import { GiftArray } from '../gift/dto/request-gift.dto';
 import { GiftService } from '../gift/gift.service';
+import { CommonResponse } from 'src/interfaces/common-response.interface';
 
 @Controller('funding')
 export class FundingController {
@@ -46,7 +46,7 @@ export class FundingController {
       const lastEndAtDate = lastEndAt ? new Date(lastEndAt) : undefined;
       const data = await this.fundingService.findAll(userId, fundPublFilter, themesArray, status, sort, limit, lastFundId, lastEndAtDate);
 
-      return { timestamp: new Date(), message: 'Success', data };
+      return { message: 'Success', data };
     } catch (error) {
       throw new HttpException(
         'Failed to get fundings',
@@ -56,9 +56,10 @@ export class FundingController {
   }
 
   @Post()
-  async create(@Body() createFundingDto: CreateFundingDto): Promise<CommonResponse> {
+  async create(
+    @Body() createFundingDto: CreateFundingDto
+  ): Promise<CommonResponse> {
     return {
-      timestamp: new Date(Date.now()),
       message: '성공적으로 생성했습니다.',
       data: await this.fundingService.create(createFundingDto, ''),
     };
@@ -73,7 +74,6 @@ export class FundingController {
 
     try {
       return {
-        timestamp: new Date(),
         message: 'Success',
         data: await this.giftService.createOrUpdateGift(funding.fundId, giftArray.gifts),
       }
@@ -83,9 +83,10 @@ export class FundingController {
   }
 
   @Get(':fundUuid')
-  async findOne(@Param('fundUuid', ParseUUIDPipe) fundUuid: string): Promise<CommonResponse> {
+  async findOne(
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string
+  ): Promise<CommonResponse> {
     return {
-      timestamp: new Date(Date.now()),
       message: '성공적으로 찾았습니다.',
       data: await this.fundingService.findOne(fundUuid),
     };
@@ -97,18 +98,18 @@ export class FundingController {
     @Body() updateFunidngDto: UpdateFundingDto,
   ): Promise<CommonResponse> {
     return {
-      timestamp: new Date(Date.now()),
       message: 'success',
       data: await this.fundingService.update(fundUuid, updateFunidngDto),
     };
   }
 
   @Delete(':fundUuid')
-  async remove(@Param('fundUuid', ParseUUIDPipe) fundUuid: string): Promise<CommonResponse> {
+  async remove(
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string
+  ): Promise<CommonResponse> {
     await this.fundingService.remove(fundUuid);
 
     return {
-      timestamp: new Date(Date.now()),
       message: '성공적으로 삭제되었습니다.',
       data: null,
     };

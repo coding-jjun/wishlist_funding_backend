@@ -10,13 +10,10 @@ export class AddressController {
   @Post()
   async create(
     @Body() createAddressDto: CreateAddressDto
-    ): Promise<CommonResponse> {
-    const result = await this.addressService.create(createAddressDto);
-    
+  ): Promise<CommonResponse> {
     return {
-      timestamp: new Date(Date.now()),
       message: '배송지를 추가하였습니다.',
-      data: result
+      data: await this.addressService.create(createAddressDto),
     };
   }
 
@@ -27,7 +24,6 @@ export class AddressController {
     const address = await this.addressService.findOne(addrId);
     try {
       return {
-        timestamp: new Date(),
         message: '배송지 조회에 성공하였습니다.',
         data: address,
       }
@@ -44,12 +40,9 @@ export class AddressController {
     @Param('addrId', ParseIntPipe) addrId: number,
     @Body() updateAddressDto: UpdateAddressDto
   ): Promise<CommonResponse> {
-    const result = await this.addressService.update(addrId, updateAddressDto);
-
     return {
-      timestamp: new Date(Date.now()),
       message: '배송지 정보를 갱신하였습니다.',
-      data: result,
+      data: await this.addressService.update(addrId, updateAddressDto)
     };
   }
 
@@ -57,12 +50,9 @@ export class AddressController {
   async remove(
     @Param('addrId', ParseIntPipe) addrId: number,
     ): Promise<CommonResponse> {
-      const result = await this.addressService.remove(addrId);
-
       return {
-        timestamp: new Date(Date.now()),
         message: '배송지를 삭제하였습니다.',
-        data: result,
+        data: await this.addressService.remove(addrId),
       };
   }
 }
