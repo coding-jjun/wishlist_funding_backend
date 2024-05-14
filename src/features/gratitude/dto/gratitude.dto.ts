@@ -10,4 +10,10 @@ export class GratitudeDto {
   @IsNotEmpty()
   @IsUrl({}, { each: true })
   gratImg: string[];
+
+  constructor(gratTitle: string, gratCont: string, gratImg?: string[]) {
+    this.gratTitle = gratTitle;
+    this.gratCont = gratCont;
+    this.gratImg = gratImg || [];
+  }
 }

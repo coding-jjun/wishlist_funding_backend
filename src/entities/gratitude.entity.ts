@@ -3,7 +3,8 @@ import {
   Entity,
   CreateDateColumn,
   PrimaryColumn,
-  OneToOne
+  OneToOne,
+  JoinColumn
 } from 'typeorm';
 import { Image } from './image.entity';
 
@@ -27,6 +28,7 @@ export class Gratitude {
   
   @Column('int', { nullable: true })
   @OneToOne(() => Image, (image) => image.imgId)
+  @JoinColumn({ name: 'defaultImgId' })
   defaultImgId: number;
 
   constructor(gratId :number, gratTitle: string, gratCont: string){
