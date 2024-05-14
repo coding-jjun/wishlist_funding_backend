@@ -29,6 +29,11 @@ export class GiftogetherExceptions {
   )
   
   // Gratitude
+  GratitudeAlreadyExists = new GiftogetherException(
+    ErrorMsg.GratitudeAlreadyExists,
+    ErrorCode.GratitudeAlreadyExists,
+    HttpStatus.FORBIDDEN,
+  )
   
   // RollingPaper
   

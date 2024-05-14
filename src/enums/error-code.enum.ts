@@ -7,6 +7,7 @@ export enum ErrorCode {
   IncorrectGiftUrl = "0200",
   
   // Gratitude
+  GratitudeAlreadyExists = "0300",
   
   // RollingPaper
   
