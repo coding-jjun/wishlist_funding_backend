@@ -1,13 +1,12 @@
 import { RollingPaper } from 'src/entities/rolling-paper.entity';
-export class RollingPaperDto{
-  
+export class RollingPaperDto {
   rollId: number;
   rollMsg: string;
   regAt: Date;
   donAmnt: number;
   userNick: string;
 
-  constructor(rollingPaper: RollingPaper){
+  constructor(rollingPaper: RollingPaper) {
     this.rollId = rollingPaper.rollId;
     this.rollMsg = rollingPaper.rollMsg;
     // rollImg;
@@ -16,5 +15,4 @@ export class RollingPaperDto{
     this.userNick = rollingPaper.donation.user.userNick;
     // userImage
   }
-
 }

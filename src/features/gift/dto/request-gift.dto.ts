@@ -1,5 +1,12 @@
-import { Type } from "class-transformer";
-import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsUrl, ValidateNested } from "class-validator";
+import { Type } from 'class-transformer';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsUrl,
+  ValidateNested,
+} from 'class-validator';
 
 export class RequestGiftDto {
   @IsOptional()
@@ -23,5 +30,5 @@ export class GiftArray {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => RequestGiftDto)
-  gifts: RequestGiftDto[]; 
+  gifts: RequestGiftDto[];
 }

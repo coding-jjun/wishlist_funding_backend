@@ -12,9 +12,11 @@ import { Image } from 'src/entities/image.entity';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Funding, User, Comment, Friend, Gift, Image])],
+  imports: [
+    TypeOrmModule.forFeature([Funding, User, Comment, Friend, Gift, Image]),
+  ],
   controllers: [FundingController],
   providers: [FundingService, GiftService, GiftogetherExceptions],
-  exports: [FundingService]
+  exports: [FundingService],
 })
 export class FundingModule {}

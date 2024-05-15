@@ -1,4 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put, ParseIntPipe, ValidationPipe, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Put,
+  ParseIntPipe,
+  ValidationPipe,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { AddressService } from './address.service';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
@@ -11,7 +24,7 @@ export class AddressController {
   constructor(private readonly addressService: AddressService) {}
   @Post()
   async create(
-    @Body() createAddressDto: CreateAddressDto
+    @Body() createAddressDto: CreateAddressDto,
   ): Promise<CommonResponse> {
     const address = await this.addressService.create(createAddressDto);
 
@@ -31,19 +44,19 @@ export class AddressController {
       return {
         message: '배송지 조회에 성공하였습니다.',
         data: new AddressDto(address),
-      }
+      };
     } catch (error) {
       throw new HttpException(
         '배송지 조회에 실패하였습니다',
-        HttpStatus.BAD_REQUEST
-      )
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
   @Put(':addrId')
   async update(
     @Param('addrId', ParseIntPipe) addrId: number,
-    @Body() updateAddressDto: UpdateAddressDto
+    @Body() updateAddressDto: UpdateAddressDto,
   ): Promise<CommonResponse> {
     const address = await this.addressService.update(addrId, updateAddressDto);
 
@@ -56,12 +69,12 @@ export class AddressController {
   @Delete(':addrId')
   async remove(
     @Param('addrId', ParseIntPipe) addrId: number,
-    ): Promise<CommonResponse> {
-      const address = await this.addressService.remove(addrId);
-      
-      return {
-        message: '배송지를 삭제하였습니다.',
-        data: new AddressDto(address),
-      };
+  ): Promise<CommonResponse> {
+    const address = await this.addressService.remove(addrId);
+
+    return {
+      message: '배송지를 삭제하였습니다.',
+      data: new AddressDto(address),
+    };
   }
 }

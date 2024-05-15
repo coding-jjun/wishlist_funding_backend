@@ -1,18 +1,17 @@
-import { AuthType } from "src/enums/auth-type.enum";
+import { AuthType } from 'src/enums/auth-type.enum';
 
-export interface UserInfo{
+export interface UserInfo {
   authId: string;
 
   authType: AuthType;
 
   userNick: string;
 
-  userName ?: string | null;
+  userName?: string | null;
 
-  userPhone ?: string | null;
+  userPhone?: string | null;
 
   userEmail: string;
 
-  userBirth ?: Date | null;
-
+  userBirth?: Date | null;
 }

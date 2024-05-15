@@ -23,24 +23,18 @@ export class DonationService {
 
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
-    
+
     // private readonly imgService : ImageService
   ) {}
 
   async getAllDonations(): Promise<Donation[]> {
-    const userId = 1
+    const userId = 1;
     // TODO: donation paging 처리
     const result = await this.donationRepo
       .createQueryBuilder('d')
       .leftJoinAndSelect('d.funding', 'f')
       .leftJoinAndSelect('d.user', 'u')
-      .select([
-        'd.donId',
-        'd.orderId',
-        'd.donAmnt',
-        'd.regAt',
-        'f.fundId'
-      ])
+      .select(['d.donId', 'd.orderId', 'd.donAmnt', 'd.regAt', 'f.fundId'])
       .where('u.userId = :userId', { userId })
       .getMany();
     return result;
@@ -50,19 +44,14 @@ export class DonationService {
     const result = await this.donationRepo
       .createQueryBuilder('d')
       .leftJoinAndSelect('d.funding', 'f')
-      .select([
-        'd.orderId',
-        'd.donAmnt',
-        'd.regAt',
-        'f.fundId'
-      ])
+      .select(['d.orderId', 'd.donAmnt', 'd.regAt', 'f.fundId'])
       .where('d.orderId = :orderId', { orderId })
       .getOne();
     console.log(result);
     return result;
   }
 
-  async createOrFindDonator(userId: number, guest: CreateGuestDto){
+  async createOrFindDonator(userId: number, guest: CreateGuestDto) {
     if (guest !== null) {
       const { userNick, userPhone, accBank, accNum } = guest;
       const user = new User();
@@ -82,7 +71,12 @@ export class DonationService {
     return await this.fundingRepo.save(funding);
   }
 
-  async createRollingPaper(fundId:number, donation: Donation, rollMsg: string, rollImg: string){
+  async createRollingPaper(
+    fundId: number,
+    donation: Donation,
+    rollMsg: string,
+    rollImg: string,
+  ) {
     const rollingPaper = new RollingPaper();
     rollingPaper.rollId = donation.donId;
     rollingPaper.donation = donation;
@@ -96,10 +90,13 @@ export class DonationService {
   async createDonation(fundUuid: string, createDonationDto: CreateDonationDto) {
     const tmpUserId = 1;
     const donAmnt = createDonationDto.donAmnt;
-    
-    const user = await this.createOrFindDonator(tmpUserId, createDonationDto.guest);
 
-    const funding = await this.fundingRepo.findOne({ where: {fundUuid}})
+    const user = await this.createOrFindDonator(
+      tmpUserId,
+      createDonationDto.guest,
+    );
+
+    const funding = await this.fundingRepo.findOne({ where: { fundUuid } });
 
     const updateFunding = await this.updateFundingSum(funding, donAmnt);
 
@@ -113,8 +110,13 @@ export class DonationService {
 
     const savedDonation = await this.donationRepo.save(donation);
 
-    const rollingPaper = await this.createRollingPaper(funding.fundId, savedDonation, createDonationDto.rollMsg, createDonationDto.rollImg);
-    
+    const rollingPaper = await this.createRollingPaper(
+      funding.fundId,
+      savedDonation,
+      createDonationDto.rollMsg,
+      createDonationDto.rollImg,
+    );
+
     return new ResponseDonationDTO(savedDonation, rollingPaper.rollId);
     // TODO 후원 등록 완료 Notification
   }

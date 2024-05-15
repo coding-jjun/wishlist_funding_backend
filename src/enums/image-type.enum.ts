@@ -1,7 +1,7 @@
-export enum ImageType{
+export enum ImageType {
   Funding = 'Funding',
   Gratitude = 'Gratitude',
   RollingPaper = 'RollingPaper',
-  User = "User",
-  Gift = "Gift",
+  User = 'User',
+  Gift = 'Gift',
 }

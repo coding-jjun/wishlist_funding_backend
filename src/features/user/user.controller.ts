@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, Request } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpException,
+  HttpStatus,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+  Request,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -19,7 +31,7 @@ export class UserController {
     try {
       return {
         message: '사용자 정보 조회에 성공하였습니다.',
-        data : await this.userService.getUserInfo(userId),
+        data: await this.userService.getUserInfo(userId),
       };
     } catch (error) {
       throw new HttpException(
@@ -51,7 +63,7 @@ export class UserController {
       return {
         message: 'success',
         data: await this.addrService.findAll(userId),
-      }
+      };
     } catch (error) {
       throw error;
     }
@@ -59,7 +71,7 @@ export class UserController {
 
   @Post('/')
   async createUser(
-    @Body() createUserDto : CreateUserDto,
+    @Body() createUserDto: CreateUserDto,
   ): Promise<CommonResponse> {
     try {
       return {
@@ -67,17 +79,14 @@ export class UserController {
         data: await this.userService.createUser(createUserDto),
       };
     } catch (error) {
-      throw new HttpException(
-        'Failed to create user',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('Failed to create user', HttpStatus.BAD_REQUEST);
     }
   }
 
   @Put('/:userId')
   async updateUser(
-    @Param('userId', ParseIntPipe) userId : number,
-    @Body() updateUserDto : UpdateUserDto,
+    @Param('userId', ParseIntPipe) userId: number,
+    @Body() updateUserDto: UpdateUserDto,
   ): Promise<CommonResponse> {
     try {
       return {
@@ -85,16 +94,13 @@ export class UserController {
         data: await this.userService.updateUser(userId, updateUserDto),
       };
     } catch (error) {
-      throw new HttpException(
-        'Failed to update user',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('Failed to update user', HttpStatus.BAD_REQUEST);
     }
   }
 
   @Delete('/:userId')
   async deleteUser(
-    @Param('userId', ParseIntPipe) userId : number,
+    @Param('userId', ParseIntPipe) userId: number,
   ): Promise<CommonResponse> {
     try {
       return {

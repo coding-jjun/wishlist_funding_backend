@@ -21,7 +21,7 @@ export class UpdateUserDto {
 
   @IsNotEmpty()
   userEmail: string;
-  
+
   @IsOptional()
   @IsNumber()
   userAcc: number;

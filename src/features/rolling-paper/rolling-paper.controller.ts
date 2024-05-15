@@ -4,17 +4,15 @@ import { CommonResponse } from 'src/interfaces/common-response.interface';
 
 @Controller('rollingpaper')
 export class RollingPaperController {
-
   constructor(private rollingPaperService: RollingPaperService) {}
 
   @Get('/:fundId')
   async getAllRollingPapers(
-    @Param('fundId') fundId: number
-  ): Promise<CommonResponse>   {
+    @Param('fundId') fundId: number,
+  ): Promise<CommonResponse> {
     return {
       message: 'RollingPaper 조회 성공',
-      data: await this.rollingPaperService.getAllRollingPapers(fundId)
+      data: await this.rollingPaperService.getAllRollingPapers(fundId),
     };
-    
   }
 }
