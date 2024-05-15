@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Logger, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
 import { GratitudeDto } from './dto/gratitude.dto';
 import { GratitudeService } from './gratitude.service';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
+import { Gratitude } from 'src/entities/gratitude.entity';
 
 @Controller('gratitude')
 export class GratitudeController {
@@ -9,16 +10,15 @@ export class GratitudeController {
   
   @Get('/:gratId')
   async getGratitude(
-    @Param('gratId') gratId: number
+    @Param('gratId', ParseUUIDPipe) gratId: string,
   ): Promise<CommonResponse> {
-    return {
-      data: await this.gratitudeService.getGratitude(gratId),
-    };
+    const data = await this.gratitudeService.getGratitude(gratId)
+    return { data };
   }
 
   @Post('/:fundUuid')
   async createGratitude(
-    @Param('fundUuid') fundUuid: string,
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
     @Body() createGratitudeDto: GratitudeDto
   ): Promise<CommonResponse> {
     return {

@@ -11,6 +11,9 @@ import { GiftService } from '../gift/gift.service';
 import { ResponseGiftDto } from '../gift/dto/response-gift.dto';
 import { FundingDto } from './dto/funding.dto';
 import { UpdateFundingDto } from './dto/update-funding.dto';
+import { Image } from 'src/entities/image.entity';
+import { ImageType } from 'src/enums/image-type.enum';
+import { DefaultImageId } from 'src/enums/default-image-id';
 
 @Injectable()
 export class FundingService {
@@ -23,6 +26,9 @@ export class FundingService {
     
     @InjectRepository(Friend)
     private friendRepository: Repository<Friend>,
+    
+    @InjectRepository(Image)
+    private imageRepository: Repository<Image>,
 
     private giftService: GiftService,
   ) {}
@@ -119,12 +125,31 @@ export class FundingService {
     };
   }
 
-  findOne(fundUuid: string): Promise<Funding> {
-    return this.fundingRepository.findOne({
-      where: {
-        fundUuid
-      }
+  async findOne(fundUuid: string): Promise<FundingDto> {
+    const fund = await this.fundingRepository.findOne({
+      relations: { fundUser: true },
+      where: { fundUuid },
     });
+    const gifts = (await this.giftService.findAllGift(fund.fundId)).gifts;
+    
+    if (fund.defaultImgId) {
+      // fund 기본 이미지로 DTO를 생성한다.
+      const img = await this.imageRepository.findOne({
+        where: { imgId: DefaultImageId.Funding },
+      });
+      
+      return new FundingDto(fund, gifts, [img.imgUrl]);
+    }
+    
+    const images = await this.imageRepository.find({
+      where: { imgType: ImageType.Funding, subId: fund.fundId },
+    });
+
+    return new FundingDto(
+      fund,
+      gifts,
+      images.map((img) => img.imgUrl),
+    );
   }
 
   async create(createFundingDto: CreateFundingDto, accessToken: string): Promise<FundingDto> {
@@ -140,12 +165,26 @@ export class FundingService {
       createFundingDto.fundTheme,
       createFundingDto.fundPubl,
     );
+
+    const funding_save = await this.fundingRepository.save(funding);
     
-    await this.fundingRepository.save(funding);
-    
+    if (createFundingDto.fundImg.length > 0) {
+      // subId = fundId, imgType = "Funding" Image 객체를 만든다.
+      const images = createFundingDto.fundImg.map(
+        (url) => new Image(url, ImageType.Funding, funding_save.fundId),
+      );
+      
+      this.imageRepository.save(images);
+    } else {
+      // defaultImgId 필드에 funding 기본 이미지 ID를 넣는다.
+      await this.fundingRepository.update(funding_save.fundId, {
+        defaultImgId: DefaultImageId.Funding,
+      });
+    }
+
     const gifts = await this.giftService.createOrUpdateGift(funding.fundId, createFundingDto.gifts);
-    
-    return new FundingDto(funding, gifts);
+
+    return new FundingDto(funding_save, gifts);
   }
 
   async update(fundUuid: string, updateFundingDto: UpdateFundingDto): Promise<FundingDto> {

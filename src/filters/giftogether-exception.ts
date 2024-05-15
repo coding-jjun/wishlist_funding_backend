@@ -22,14 +22,29 @@ export class GiftogetherExceptions {
   // Donation
   
   // Gift
+  IncorrectGiftUrl = new GiftogetherException(
+    ErrorMsg.IncorrectGiftUrl,
+    ErrorCode.IncorrectGiftUrl,
+    HttpStatus.BAD_REQUEST,
+  )
   
   // Gratitude
+  GratitudeAlreadyExists = new GiftogetherException(
+    ErrorMsg.GratitudeAlreadyExists,
+    ErrorCode.GratitudeAlreadyExists,
+    HttpStatus.FORBIDDEN,
+  )
   
   // RollingPaper
   
   // Comment
   
   // Image
+  IncorrectImageUrl = new GiftogetherException(
+    ErrorMsg.IncorrectImageUrl,
+    ErrorCode.IncorrectImageUrl,
+    HttpStatus.BAD_REQUEST,
+  )
   
   // User
   UserNotFound = new GiftogetherException(
