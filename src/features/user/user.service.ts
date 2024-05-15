@@ -35,19 +35,26 @@ export class UserService {
     user.userBirth = createUserDto.userBirth;
     user.userEmail = createUserDto.userEmail;
     if (createUserDto.userAcc) {
-      const account = await this.accRepository.findOneBy({ accId: createUserDto.userAcc });
+      const account = await this.accRepository.findOneBy({
+        accId: createUserDto.userAcc,
+      });
       user.account = account;
     }
     if (createUserDto.userImg) {
-      const image = await this.imgRepository.findOneBy({ imgId: createUserDto.userImg });
+      const image = await this.imgRepository.findOneBy({
+        imgId: createUserDto.userImg,
+      });
       user.image = image;
     }
 
     return await this.userRepository.save(user);
   }
 
-  async updateUser(userId: number, updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.userRepository.findOne({ where : { userId }});
+  async updateUser(
+    userId: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { userId } });
 
     user.userNick = updateUserDto.userNick;
     user.userPw = updateUserDto.userPw;
@@ -56,20 +63,24 @@ export class UserService {
     user.userBirth = updateUserDto.userBirth;
     user.userEmail = updateUserDto.userEmail;
     if (updateUserDto.userAcc) {
-      const account = await this.accRepository.findOneBy({ accId: updateUserDto.userAcc });
+      const account = await this.accRepository.findOneBy({
+        accId: updateUserDto.userAcc,
+      });
       user.account = account;
     }
     if (updateUserDto.userImg) {
-      const image = await this.imgRepository.findOneBy({ imgId: updateUserDto.userImg });
+      const image = await this.imgRepository.findOneBy({
+        imgId: updateUserDto.userImg,
+      });
       user.image = image;
     }
     return await this.userRepository.save(user);
   }
 
   async deleteUser(userId: number): Promise<User> {
-    const user = await this.userRepository.findOne({ where : { userId }});
+    const user = await this.userRepository.findOne({ where: { userId } });
     if (!user) {
-      throw HttpException
+      throw HttpException;
     }
     await this.userRepository.softDelete(user.userId);
 

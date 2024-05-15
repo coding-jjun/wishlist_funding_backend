@@ -1,4 +1,4 @@
-import { Gift } from "src/entities/gift.entity";
+import { Gift } from 'src/entities/gift.entity';
 
 export class ResponseGiftDto {
   giftId: number;

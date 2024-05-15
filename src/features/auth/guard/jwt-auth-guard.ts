@@ -1,17 +1,16 @@
-import { ExecutionContext, Injectable } from "@nestjs/common";
-import { AuthGuard } from "@nestjs/passport";
+import { ExecutionContext, Injectable } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-  constructor(
-  ) {
+  constructor() {
     super('jwt');
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     console.log('----------- jwt guard --------------');
     const request = context.switchToHttp().getRequest();
-    
+
     // 헤더에 토큰이 있는지 확인
     const { authorization } = request.headers;
     if (!authorization) {
@@ -25,7 +24,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       const res = await super.canActivate(context);
       console.log('JwtStrategy validation result:', res);
       return true;
-
     } catch (error) {
       console.log('Error during JWT validation:', error);
       return false;

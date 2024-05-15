@@ -1,14 +1,11 @@
-import { Injectable } from "@nestjs/common";
-import { PassportStrategy } from "@nestjs/passport";
-import { ExtractJwt, Strategy } from "passport-jwt";
-import { AuthService } from "../auth.service";
+import { Injectable } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { AuthService } from '../auth.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  
-  constructor(
-    private authService: AuthService,
-  ) {
+  constructor(private authService: AuthService) {
     super({
       // 토큰이 유효한지 확인하기 위한 키
       secretOrKey: process.env.JWT_SECRET,
@@ -19,11 +16,11 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
   async validate(tokenInfo: any) {
     console.log('----------- jwt strategy --------------');
-    
+
     // 신규 회원 추가 정보 입력
-    if(tokenInfo.type === 'once'){
+    if (tokenInfo.type === 'once') {
       const user = await this.authService.validateUser(tokenInfo.userEmail);
-      return {type : 'once', user: user} 
+      return { type: 'once', user: user };
     }
   }
 }

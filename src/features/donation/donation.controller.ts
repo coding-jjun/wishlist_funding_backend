@@ -23,10 +23,13 @@ export class DonationController {
   async createDonation(
     @Param('fundUuid') fundUuid: string,
     @Body() createDonationDto: CreateDonationDto,
-  ): Promise<CommonResponse>  {
+  ): Promise<CommonResponse> {
     return {
       message: 'Donation 생성 완료',
-      data: await this.donationService.createDonation(fundUuid, createDonationDto)
+      data: await this.donationService.createDonation(
+        fundUuid,
+        createDonationDto,
+      ),
     };
   }
 
@@ -35,7 +38,7 @@ export class DonationController {
   async getAllDonations() {
     return {
       message: 'Donation list 조회 성공',
-      data: await this.donationService.getAllDonations()
+      data: await this.donationService.getAllDonations(),
     };
   }
 
@@ -44,7 +47,7 @@ export class DonationController {
   async getOneDonation(@Param('orderId') orderId: string) {
     return {
       message: 'Donation 조회 성공',
-      data: await this.donationService.getOneDonation(orderId)
+      data: await this.donationService.getOneDonation(orderId),
     };
   }
 
@@ -53,7 +56,7 @@ export class DonationController {
   async deleteDonation(@Param('donId') donId: number) {
     return {
       message: 'Donation 삭제 성공',
-      data: await this.donationService.deleteDonation(donId)
+      data: await this.donationService.deleteDonation(donId),
     };
   }
 }

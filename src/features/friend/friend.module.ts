@@ -7,8 +7,8 @@ import { User } from 'src/entities/user.entity';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 @Module({
-  imports : [TypeOrmModule.forFeature([Friend, User])],
+  imports: [TypeOrmModule.forFeature([Friend, User])],
   controllers: [FriendController],
-  providers: [FriendService, GiftogetherExceptions]
+  providers: [FriendService, GiftogetherExceptions],
 })
 export class FriendModule {}

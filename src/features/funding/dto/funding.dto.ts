@@ -1,5 +1,5 @@
-import { Funding } from "src/entities/funding.entity";
-import { ResponseGiftDto } from "src/features/gift/dto/response-gift.dto";
+import { Funding } from 'src/entities/funding.entity';
+import { ResponseGiftDto } from 'src/features/gift/dto/response-gift.dto';
 
 export class FundingDto {
   fundId: number;
@@ -16,7 +16,11 @@ export class FundingDto {
   gifts: ResponseGiftDto[];
   fundImgUrls: string[];
 
-  constructor(funding: Funding, gifts?: ResponseGiftDto[], fundImgUrls?: string[]) {
+  constructor(
+    funding: Funding,
+    gifts?: ResponseGiftDto[],
+    fundImgUrls?: string[],
+  ) {
     this.fundId = funding.fundId;
     this.fundUuid = funding.fundUuid;
     this.fundUser = funding.fundUser?.userId;
