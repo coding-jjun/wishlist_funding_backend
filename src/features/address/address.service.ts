@@ -32,6 +32,18 @@ export class AddressService {
 
     address.addrUser = user;
 
+    if (createAddressDto.recvName) {
+      address.recvName = createAddressDto.recvName;
+    } else {
+      address.recvName = user.userName;
+    }
+
+    if (createAddressDto.recvPhone) {
+      address.recvPhone = createAddressDto.recvPhone;
+    } else {
+      address.recvPhone = user.userPhone;
+    }
+
     return await this.addrRepository.save(address);
   }
 
@@ -46,6 +58,8 @@ export class AddressService {
       'addr.addrRoad',
       'addr.addrDetl',
       'addr.addrZip',
+      'addr.recvName',
+      'addr.recvPhone',
       'addr.isDef',
     ])
     .where('addr.userId = :userId', { userId })
@@ -75,6 +89,11 @@ export class AddressService {
     }
 
     addr.addrNick = updateAddressDto.addrNick;
+    addr.addrRoad = updateAddressDto.addrRoad;
+    addr.addrDetl = updateAddressDto.addrDetl;
+    addr.addrZip = updateAddressDto.addrZip;
+    addr.recvName = updateAddressDto.recvName;
+    addr.recvPhone = updateAddressDto.recvPhone;
     addr.isDef = updateAddressDto.isDef;
 
     return await this.addrRepository.save(addr);

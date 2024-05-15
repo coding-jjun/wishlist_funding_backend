@@ -3,6 +3,8 @@ import { AddressService } from './address.service';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
+import { createDecipheriv } from 'crypto';
+import { AddressDto } from './dto/address.dto';
 
 @Controller('address')
 export class AddressController {
@@ -11,9 +13,11 @@ export class AddressController {
   async create(
     @Body() createAddressDto: CreateAddressDto
   ): Promise<CommonResponse> {
+    const address = await this.addressService.create(createAddressDto);
+
     return {
       message: '배송지를 추가하였습니다.',
-      data: await this.addressService.create(createAddressDto),
+      data: new AddressDto(address),
     };
   }
 
@@ -22,10 +26,11 @@ export class AddressController {
     @Param('addrId', ParseIntPipe) addrId: number,
   ): Promise<CommonResponse> {
     const address = await this.addressService.findOne(addrId);
+
     try {
       return {
         message: '배송지 조회에 성공하였습니다.',
-        data: address,
+        data: new AddressDto(address),
       }
     } catch (error) {
       throw new HttpException(
@@ -40,9 +45,11 @@ export class AddressController {
     @Param('addrId', ParseIntPipe) addrId: number,
     @Body() updateAddressDto: UpdateAddressDto
   ): Promise<CommonResponse> {
+    const address = await this.addressService.update(addrId, updateAddressDto);
+
     return {
       message: '배송지 정보를 갱신하였습니다.',
-      data: await this.addressService.update(addrId, updateAddressDto)
+      data: new AddressDto(address),
     };
   }
 
@@ -50,9 +57,11 @@ export class AddressController {
   async remove(
     @Param('addrId', ParseIntPipe) addrId: number,
     ): Promise<CommonResponse> {
+      const address = await this.addressService.remove(addrId);
+      
       return {
         message: '배송지를 삭제하였습니다.',
-        data: await this.addressService.remove(addrId),
+        data: new AddressDto(address),
       };
   }
 }
