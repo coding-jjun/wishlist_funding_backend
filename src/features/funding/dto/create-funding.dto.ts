@@ -1,4 +1,5 @@
-import { IsDate, IsDateString, IsUrl, Min } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsDate, IsDateString, IsUrl, Min, ValidateNested } from 'class-validator';
 import { Funding } from 'src/entities/funding.entity';
 import { FundTheme } from 'src/enums/fund-theme.enum';
 import { RequestGiftDto } from 'src/features/gift/dto/request-gift.dto';
@@ -20,6 +21,7 @@ export class CreateFundingDto {
   @IsDateString()
   endAt: Date;
 
-  // TODO - GiftCreateDto
+  @ValidateNested({ each: true })
+  @Type(() => RequestGiftDto)
   gifts: RequestGiftDto[];
 }

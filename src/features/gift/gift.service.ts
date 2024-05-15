@@ -77,9 +77,6 @@ export class GiftService {
   private async createNewGift(funding: Funding, gift: RequestGiftDto): Promise<Gift> {
     const newGift = new Gift();
     
-    if (!isURL(gift.giftUrl)) {
-      throw this.g2gException.IncorrectImageUrl;
-    }
     newGift.giftUrl = gift.giftUrl;
     newGift.giftOrd = gift.giftOrd;
     newGift.giftOpt = gift.giftOpt;

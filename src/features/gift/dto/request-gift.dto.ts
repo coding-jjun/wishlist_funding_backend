@@ -6,7 +6,6 @@ export class RequestGiftDto {
   @IsNumber()
   giftId?: number;
 
-  @IsNotEmpty()
   @IsUrl()
   giftUrl: string;
 
