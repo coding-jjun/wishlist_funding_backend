@@ -1,4 +1,4 @@
 export enum FriendStatus {
-        Friend = 'Friend'
-    ,   Requested = 'Requested'
+  Friend = 'Friend',
+  Requested = 'Requested',
 }

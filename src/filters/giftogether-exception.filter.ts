@@ -27,11 +27,11 @@ export class GiftogetherExceptionFilter implements ExceptionFilter {
     const res = ctx.getResponse<Response>();
     const req = ctx.getRequest<Request>();
     const msg = exception.message;
-    const stack  = exception.stack;
+    const stack = exception.stack;
     const err = new GiftogetherError();
 
     this.logger.error(stack);
-    
+
     if (!(exception instanceof HttpException)) {
       err.httpCode = HttpStatus.INTERNAL_SERVER_ERROR;
     } else {
@@ -39,7 +39,6 @@ export class GiftogetherExceptionFilter implements ExceptionFilter {
       if (exception.name === 'GiftogetherException')
         err.errCode = exception.getErrCode();
     }
-
 
     res.status(err.httpCode).json({
       timestamp: getNow(),
@@ -57,8 +56,6 @@ export class GiftogetherExceptionFilter implements ExceptionFilter {
       err.errStack = stack;
 
       await this.errRepository.save(err);
-    } catch (error) {
-      
-    }
+    } catch (error) {}
   }
 }

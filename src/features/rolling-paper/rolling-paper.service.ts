@@ -7,21 +7,16 @@ import { RollingPaperDto } from './dto/rolling-paper.dto';
 @Injectable()
 export class RollingPaperService {
   constructor(
-  
     @InjectRepository(RollingPaper)
-    private readonly rollingPaperRepo: Repository<RollingPaper>
-  ){}
+    private readonly rollingPaperRepo: Repository<RollingPaper>,
+  ) {}
 
-  async getAllRollingPapers(fundId: number): Promise<RollingPaperDto[]>{
-
+  async getAllRollingPapers(fundId: number): Promise<RollingPaperDto[]> {
     const rolls = await this.rollingPaperRepo.find({
-                  where: {fundId: fundId},
-                  relations: ['donation', 'donation.user'],
-                });
+      where: { fundId: fundId },
+      relations: ['donation', 'donation.user'],
+    });
 
-    return rolls.map(roll=> new RollingPaperDto(roll));
+    return rolls.map((roll) => new RollingPaperDto(roll));
   }
-
-
-  
 }

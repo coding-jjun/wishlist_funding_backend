@@ -1,5 +1,11 @@
 import { ImageType } from 'src/enums/image-type.enum';
-import { Column, Entity, PrimaryGeneratedColumn, Index, OneToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  Index,
+  OneToOne,
+} from 'typeorm';
 import { Gratitude } from './gratitude.entity';
 
 @Entity()
