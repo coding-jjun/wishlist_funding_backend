@@ -15,14 +15,18 @@ import { Comment } from './comment.entity';
 import { Account } from './account.entity';
 import { Image } from './image.entity';
 import { Address } from './address.entity';
+import { AuthType } from 'src/enums/auth-type.enum';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
   userId: number;
 
-  @Column({nullable: true, type: 'bigint'})
-  kakaoId: string;
+  @Column({nullable: true})
+  authId: string;
+
+  @Column({default: AuthType.Jwt})
+  authType: AuthType;
 
   @Column({ unique: true })
   userNick: string;
@@ -30,16 +34,16 @@ export class User {
   @Column({nullable: true})
   userPw: string;
 
-  @Column()
+  @Column({nullable: true})
   userName: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true , nullable: true})
   userPhone: string;
 
   @Column()
   userEmail: string;
 
-  @Column('date')
+  @Column('date', {nullable: true})
   userBirth: Date;
 
   @OneToOne(() => Account, (account) => account.user, { nullable: true })
