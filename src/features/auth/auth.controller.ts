@@ -5,6 +5,7 @@ import { Request, Response } from 'express';
 import { JwtAuthGuard } from './guard/jwt-auth-guard';
 import { AuthUserDto } from './auth-user.dto';
 import { NaverAuthGuard } from './guard/naver-auth-guard';
+import { GoogleAuthGuard } from './guard/google-auth-guard';
 
 @Controller('auth')
 export class AuthController {
@@ -37,6 +38,18 @@ export class AuthController {
   }
 
   @Post()
+  @Get('google')
+  @UseGuards(GoogleAuthGuard)
+  async googleLogin(){
+    return;
+  }
+
+  @Get('google/callback')
+  @UseGuards(GoogleAuthGuard)
+  async googleCallback(@Req() req: Request, @Res() res:Response){
+    return await this.setupAuthResponse(res, req.user);
+  }
+
   @UseGuards(JwtAuthGuard)
   async signup(@Req() req: any, @Res() res: Response, @Body() authUserDto: AuthUserDto) {
     const userInfo = req.user;
