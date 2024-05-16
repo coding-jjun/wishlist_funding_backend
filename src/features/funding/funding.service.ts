@@ -8,7 +8,6 @@ import { FundTheme } from 'src/enums/fund-theme.enum';
 import { FriendStatus } from 'src/enums/friend-status.enum';
 import { Friend } from 'src/entities/friend.entity';
 import { GiftService } from '../gift/gift.service';
-import { ResponseGiftDto } from '../gift/dto/response-gift.dto';
 import { FundingDto } from './dto/funding.dto';
 import { UpdateFundingDto } from './dto/update-funding.dto';
 import { Image } from 'src/entities/image.entity';
@@ -42,7 +41,7 @@ export class FundingService {
     limit: number,
     lastFundId?: number, // 마지막으로 로드된 항목의 id 값
     lastEndAtDate?: Date, // 마지막으로 로드된 항목의 endAt 값
-  ): Promise<{ fundings: Funding[]; count: number; lastFundId: number }> {
+  ): Promise<{ fundings: FundingDto[]; count: number; lastFundId: number }> {
     const queryBuilder =
       await this.fundingRepository.createQueryBuilder('funding');
 
@@ -155,9 +154,14 @@ export class FundingService {
         }
         break;
     }
-
+    
     queryBuilder.take(limit);
-    const fundings = await queryBuilder.getMany();
+    
+    queryBuilder
+      .leftJoinAndSelect('funding.fundUser', 'user')
+      .leftJoinAndSelect('user.image', 'img');
+    
+    const fundings = (await queryBuilder.getMany()).map(funding => new FundingDto(funding));
 
     return {
       fundings: fundings,
@@ -191,6 +195,18 @@ export class FundingService {
       gifts,
       images.map((img) => img.imgUrl),
     );
+  }
+
+  async findMyFunds(
+    userId: number,
+  ): Promise<any> {
+    const fundings = await this.fundingRepository
+    .createQueryBuilder('funding')
+    .where('funding.fundUser = :userId', { userId })
+    .andWhere('funding.endAt > :now', { now: new Date() })
+    .getMany();
+
+    return fundings;
   }
 
   async create(

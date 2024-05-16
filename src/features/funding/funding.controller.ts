@@ -17,7 +17,6 @@ import {
 import { FundingService } from './funding.service';
 import { CreateFundingDto } from './dto/create-funding.dto';
 import { UpdateFundingDto } from './dto/update-funding.dto';
-import { Funding } from 'src/entities/funding.entity';
 import { FundTheme } from 'src/enums/fund-theme.enum';
 import { GiftArray } from '../gift/dto/request-gift.dto';
 import { GiftService } from '../gift/gift.service';

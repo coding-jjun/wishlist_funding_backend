@@ -16,12 +16,14 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AddressService } from '../address/address.service';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
+import { FundingService } from '../funding/funding.service';
 
 @Controller('user')
 export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly addrService: AddressService,
+    private readonly fundService: FundingService,
   ) {}
 
   @Get('/:userId')
@@ -41,12 +43,19 @@ export class UserController {
     }
   }
 
-  // @Get('/:userId/fundings')
-  // async getUserFunding(
-  //     @Param('userId', ParseIntPipe) id: number,
-  // ): Promise<Funding[]> {
-  //     return await this.fundingService.getUserFundings(userId);
-  // }
+  @Get('/:userId/fundings')
+  async getUserFunding(
+      @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<CommonResponse> {
+    try {
+      return {
+        message: '사용자의 펀딩 조회에 성공하였습니다.',
+        data: await this.fundService.findMyFunds(userId),
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
 
   // @Get('/:userId/account')
   // async getUserAccount(
