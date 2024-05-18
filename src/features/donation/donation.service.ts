@@ -55,7 +55,10 @@ export class DonationService {
     return result;
   }
 
-  async createOrFindDonator(userId: number, guest: CreateGuestDto) {
+  async createOrFindDonator(
+    userId: number,
+    guest: CreateGuestDto,
+  ): Promise<User> {
     if (guest) {
       const { userNick, userPhone, accBank, accNum } = guest;
       const user = new User();
@@ -64,17 +67,20 @@ export class DonationService {
       user.userNick = userNick;
       user.userPhone = userPhone;
       // user.accId = 1;
-      return await this.userRepo.save(user);
+      return this.userRepo.save(user);
     }
-    return await this.userRepo.findOne({ where: { userId } });
+    return this.userRepo.findOne({ where: { userId } });
   }
 
   async updateFundingSum(funding: Funding, donAmnt: number) {
+    funding.fundSum += donAmnt;
     // TODO 펀딩 목표금액 달성 확인 후 Notification
-    return await this.fundingRepo.save({
-      fundId: funding.fundId,
-      fundSum: funding.fundSum + donAmnt,
-    });
+    await this.fundingRepo.update(
+      { fundId: funding.fundId },
+      { fundSum: funding.fundSum },
+    );
+
+    return funding;
   }
 
   // CREATE
@@ -89,10 +95,8 @@ export class DonationService {
 
     const funding = await this.fundingRepo.findOne({ where: { fundUuid } });
 
-    Logger.log(JSON.stringify(user));
-    Logger.log(JSON.stringify(funding));
-
     const updateFunding = await this.updateFundingSum(funding, donAmnt);
+    Logger.log('왔니2');
 
     const donation = new Donation();
     donation.user = user;

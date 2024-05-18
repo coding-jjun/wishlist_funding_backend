@@ -15,7 +15,7 @@ export class RollingPaper {
   rollId: number;
 
   @OneToOne(() => Donation, { cascade: true })
-  @JoinColumn({ name: 'donId', referencedColumnName: 'donId' })
+  @JoinColumn({ name: 'rollId', referencedColumnName: 'donId' })
   donation: Donation;
 
   @Column()
