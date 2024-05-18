@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsNumber, IsUrl } from 'class-validator';
 import { CreateGuestDto } from './create-guest.dto';
 
 export class CreateDonationDto {
@@ -8,9 +8,11 @@ export class CreateDonationDto {
   @IsNumber()
   donAmnt: number;
 
-  @IsNotEmpty()
+  @IsOptional()
+  @IsString()
   rollMsg: string;
 
-  @IsNotEmpty()
+  @IsOptional()
+  @IsUrl()
   rollImg: string;
 }
