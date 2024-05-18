@@ -7,6 +7,7 @@ import {
   DeleteDateColumn,
 } from 'typeorm';
 import { Donation } from './donation.entity';
+import { Image } from './image.entity';
 
 @Entity()
 export class RollingPaper {
@@ -20,9 +21,10 @@ export class RollingPaper {
   @Column()
   fundId: number;
 
-  // @OneToOne(() => Image, img => img.imgId)
-  // @JoinColumn({ name: 'rollImg' })
-  // rollImg: string;
+  @Column('int', { nullable: true })
+  @OneToOne(() => Image, (image) => image.imgId)
+  @JoinColumn({ name: 'defaultImgId' })
+  defaultImgId: number;
 
   @Column({ default: '축하해요' })
   rollMsg: string;

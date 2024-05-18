@@ -7,9 +7,10 @@ import { Donation } from 'src/entities/donation.entity';
 import { RollingPaper } from 'src/entities/rolling-paper.entity';
 import { Funding } from 'src/entities/funding.entity';
 import { User } from 'src/entities/user.entity';
+import { Image } from 'src/entities/image.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Donation, RollingPaper, Funding, User])],
+  imports: [TypeOrmModule.forFeature([Donation, RollingPaper, Funding, User, Image])],
   controllers: [DonationController],
   providers: [DonationService, RollingPaperService],
 })
