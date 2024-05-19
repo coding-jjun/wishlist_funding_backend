@@ -8,11 +8,15 @@ import { Comment } from 'src/entities/comment.entity';
 import { Friend } from 'src/entities/friend.entity';
 import { GiftService } from '../gift/gift.service';
 import { Gift } from 'src/entities/gift.entity';
+import { Image } from 'src/entities/image.entity';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Funding, User, Comment, Friend, Gift])],
+  imports: [
+    TypeOrmModule.forFeature([Funding, User, Comment, Friend, Gift, Image]),
+  ],
   controllers: [FundingController],
-  providers: [FundingService, GiftService],
-  exports: [FundingService]
+  providers: [FundingService, GiftService, GiftogetherExceptions],
+  exports: [FundingService],
 })
 export class FundingModule {}

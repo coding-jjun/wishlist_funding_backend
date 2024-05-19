@@ -1,4 +1,10 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { User } from './user.entity';
 
 @Entity()
@@ -7,7 +13,7 @@ export class Address {
   addrId: number;
 
   @ManyToOne(() => User, (user) => user.addresses)
-  @JoinColumn({ name: 'userId'})
+  @JoinColumn({ name: 'userId' })
   addrUser: User;
 
   @Column({ nullable: false })
@@ -21,6 +27,12 @@ export class Address {
 
   @Column({ nullable: false })
   addrZip: string;
+
+  @Column()
+  recvName: string;
+
+  @Column()
+  recvPhone: string;
 
   @Column({ default: false })
   isDef: boolean;

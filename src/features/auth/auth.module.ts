@@ -11,16 +11,15 @@ import { JwtStrategy } from './strategy/jwt-strategy';
 import { NaverStrategy } from './strategy/naver-strategy';
 import { GoogleStrategy } from './strategy/google-strategy';
 
-@Module({ 
+@Module({
   imports: [
     forwardRef(() => UserModule),
-    JwtModule.register({ 
+    JwtModule.register({
       secret: process.env.JWT_SECRET,
     }),
 
     TypeOrmModule.forFeature([User]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
-
   ],
   controllers: [AuthController],
   providers: [AuthService, KakaoStrategy, JwtStrategy, NaverStrategy, GoogleStrategy],

@@ -40,9 +40,7 @@ export class CommentController {
    * @returns Comment[]
    */
   @Get()
-  async findMany(
-    @Query('fundId') fundId: number
-  ): Promise<CommonResponse> {
+  async findMany(@Query('fundId') fundId: number): Promise<CommonResponse> {
     Logger.log(`fundId: ${fundId}`);
     if (!fundId) {
       throw new HttpException(

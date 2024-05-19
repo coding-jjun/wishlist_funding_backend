@@ -93,7 +93,7 @@ import { AuthModule } from './features/auth/auth.module';
     ImageModule,
     GiftModule,
     ExceptionModule,
-    AuthModule
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
@@ -101,7 +101,7 @@ import { AuthModule } from './features/auth/auth.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: TransformInterceptor,
-    }
+    },
   ],
 })
 export class AppModule {}

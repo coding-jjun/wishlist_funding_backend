@@ -9,6 +9,5 @@ import { OpenBankToken } from 'src/entities/open-bank-token.entity';
   imports: [TypeOrmModule.forFeature([OpenBankToken])],
   controllers: [TokenController],
   providers: [TokenService, OpenBankApiClient],
-  
 })
 export class TokenModule {}

@@ -1,7 +1,6 @@
 import { IsOptional } from 'class-validator';
 
-export class AuthUserDto{
-  
+export class AuthUserDto {
   @IsOptional()
   userNick?: string;
 

@@ -22,28 +22,28 @@ export class User {
   @PrimaryGeneratedColumn()
   userId: number;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   authId: string;
 
-  @Column({default: AuthType.Jwt})
+  @Column({ default: AuthType.Jwt })
   authType: AuthType;
 
   @Column({ unique: true })
   userNick: string;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   userPw: string;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   userName: string;
 
-  @Column({ unique: true , nullable: true})
+  @Column({ unique: true, nullable: true })
   userPhone: string;
 
-  @Column()
+  @Column({nullable: true})
   userEmail: string;
 
-  @Column('date', {nullable: true})
+  @Column('date', { nullable: true })
   userBirth: Date;
 
   @OneToOne(() => Account, (account) => account.user, { nullable: true })

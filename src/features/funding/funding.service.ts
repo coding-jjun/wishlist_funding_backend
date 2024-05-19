@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Funding } from 'src/entities/funding.entity';
-import { Repository,Like, MoreThan, Brackets } from 'typeorm';
+import { Repository, Like, MoreThan, Brackets } from 'typeorm';
 import { CreateFundingDto } from './dto/create-funding.dto';
 import { User } from 'src/entities/user.entity';
 import { FundTheme } from 'src/enums/fund-theme.enum';
@@ -11,6 +11,9 @@ import { GiftService } from '../gift/gift.service';
 import { ResponseGiftDto } from '../gift/dto/response-gift.dto';
 import { FundingDto } from './dto/funding.dto';
 import { UpdateFundingDto } from './dto/update-funding.dto';
+import { Image } from 'src/entities/image.entity';
+import { ImageType } from 'src/enums/image-type.enum';
+import { DefaultImageId } from 'src/enums/default-image-id';
 
 @Injectable()
 export class FundingService {
@@ -20,9 +23,12 @@ export class FundingService {
 
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    
+
     @InjectRepository(Friend)
     private friendRepository: Repository<Friend>,
+
+    @InjectRepository(Image)
+    private imageRepository: Repository<Image>,
 
     private giftService: GiftService,
   ) {}
@@ -33,46 +39,67 @@ export class FundingService {
     fundThemes: FundTheme[],
     status: 'ongoing' | 'ended',
     sort: 'endAtAsc' | 'endAtDesc' | 'regAtAsc' | 'regAtDesc',
-    limit: number,  
+    limit: number,
     lastFundId?: number, // 마지막으로 로드된 항목의 id 값
     lastEndAtDate?: Date, // 마지막으로 로드된 항목의 endAt 값
-  ): Promise<{ fundings: Funding[], count: number, lastFundId: number}> {
-    const queryBuilder = await this.fundingRepository.createQueryBuilder('funding');
+  ): Promise<{ fundings: Funding[]; count: number; lastFundId: number }> {
+    const queryBuilder =
+      await this.fundingRepository.createQueryBuilder('funding');
 
-    const friendIds = await this.friendRepository.createQueryBuilder('friend')
-    .where('friend.status = :status', { status: FriendStatus.Friend })
-    .andWhere(new Brackets(qb => {
-      qb.where('friend.userId = :userId', { userId })
-        .orWhere('friend.friendId = :userId', { userId });
-    }))
-    .select('CASE WHEN friend.userId = :userId THEN friend.friendId ELSE friend.userId END', 'friendId')
-    .setParameter('userId', userId)
-    .getRawMany();
+    const friendIds = await this.friendRepository
+      .createQueryBuilder('friend')
+      .where('friend.status = :status', { status: FriendStatus.Friend })
+      .andWhere(
+        new Brackets((qb) => {
+          qb.where('friend.userId = :userId', { userId }).orWhere(
+            'friend.friendId = :userId',
+            { userId },
+          );
+        }),
+      )
+      .select(
+        'CASE WHEN friend.userId = :userId THEN friend.friendId ELSE friend.userId END',
+        'friendId',
+      )
+      .setParameter('userId', userId)
+      .getRawMany();
 
-    const friendIdsArray = friendIds.map(friend => friend.friendId);
+    const friendIdsArray = friendIds.map((friend) => friend.friendId);
 
-    if (friendIdsArray.length > 0) { // 친구 목록이 있는 경우
+    if (friendIdsArray.length > 0) {
+      // 친구 목록이 있는 경우
       if (fundPublFilter === 'all') {
-          queryBuilder.andWhere('funding.fundPubl = :publ AND funding.fundUser NOT IN (:...ids)', { publ: true, ids: friendIdsArray });
+        queryBuilder.andWhere(
+          'funding.fundPubl = :publ AND funding.fundUser NOT IN (:...ids)',
+          { publ: true, ids: friendIdsArray },
+        );
       } else if (fundPublFilter === 'friends') {
-          queryBuilder.andWhere('funding.fundUser IN (:...ids)', { ids: friendIdsArray });
+        queryBuilder.andWhere('funding.fundUser IN (:...ids)', {
+          ids: friendIdsArray,
+        });
       } else if (fundPublFilter === 'both') {
-          queryBuilder.andWhere('(funding.fundPubl = :publ OR funding.fundUser IN (:...ids))', { publ: true, ids: friendIdsArray });
+        queryBuilder.andWhere(
+          '(funding.fundPubl = :publ OR funding.fundUser IN (:...ids))',
+          { publ: true, ids: friendIdsArray },
+        );
       }
-    } else { // 친구 목록이 비어 있는 경우
+    } else {
+      // 친구 목록이 비어 있는 경우
       if (fundPublFilter === 'all') {
-          queryBuilder.andWhere('funding.fundPubl = :publ', { publ: true });
+        queryBuilder.andWhere('funding.fundPubl = :publ', { publ: true });
       } else if (fundPublFilter === 'friends') {
-          // 친구가 없으면 친구에 의한 펀딩은 결과 없음
-          queryBuilder.andWhere('1=0');
+        // 친구가 없으면 친구에 의한 펀딩은 결과 없음
+        queryBuilder.andWhere('1=0');
       } else if (fundPublFilter === 'both') {
-          // 친구가 없어도 공개 펀딩은 조회
-          queryBuilder.andWhere('funding.fundPubl = :publ', { publ: true });
+        // 친구가 없어도 공개 펀딩은 조회
+        queryBuilder.andWhere('funding.fundPubl = :publ', { publ: true });
       }
     }
 
     if (fundThemes && fundThemes.length > 0) {
-      queryBuilder.andWhere('funding.fundTheme IN (:...themes)', { themes: fundThemes });
+      queryBuilder.andWhere('funding.fundTheme IN (:...themes)', {
+        themes: fundThemes,
+      });
     }
 
     const currentDate = new Date();
@@ -84,27 +111,47 @@ export class FundingService {
 
     switch (sort) {
       case 'endAtAsc':
-        queryBuilder.orderBy('funding.endAt', 'ASC').addOrderBy('funding.fundId', 'ASC');
+        queryBuilder
+          .orderBy('funding.endAt', 'ASC')
+          .addOrderBy('funding.fundId', 'ASC');
         if (lastEndAtDate && lastFundId) {
-          queryBuilder.andWhere('(funding.endAt > :lastEndAtDate OR (funding.endAt = :lastEndAtDate AND funding.fundId > :lastFundId))', { lastEndAtDate, lastFundId });
+          queryBuilder.andWhere(
+            '(funding.endAt > :lastEndAtDate OR (funding.endAt = :lastEndAtDate AND funding.fundId > :lastFundId))',
+            { lastEndAtDate, lastFundId },
+          );
         }
         break;
       case 'endAtDesc':
-        queryBuilder.orderBy('funding.endAt', 'DESC').addOrderBy('funding.fundId', 'ASC');
+        queryBuilder
+          .orderBy('funding.endAt', 'DESC')
+          .addOrderBy('funding.fundId', 'ASC');
         if (lastEndAtDate && lastFundId) {
-          queryBuilder.andWhere('(funding.endAt < :lastEndAtDate OR (funding.endAt = :lastEndAtDate And funding.fundId > :lastFundId))', { lastEndAtDate, lastFundId });
+          queryBuilder.andWhere(
+            '(funding.endAt < :lastEndAtDate OR (funding.endAt = :lastEndAtDate And funding.fundId > :lastFundId))',
+            { lastEndAtDate, lastFundId },
+          );
         }
         break;
       case 'regAtAsc':
-        queryBuilder.orderBy('funding.regAt', 'ASC').addOrderBy('funding.fundId', 'ASC');
+        queryBuilder
+          .orderBy('funding.regAt', 'ASC')
+          .addOrderBy('funding.fundId', 'ASC');
         if (lastEndAtDate && lastFundId) {
-          queryBuilder.andWhere('(funding.regAt > :lastEndAtDate OR (funding.regAt = :lastEndAtDate AND funding.fundId > :lastFundId))', { lastEndAtDate, lastFundId });
+          queryBuilder.andWhere(
+            '(funding.regAt > :lastEndAtDate OR (funding.regAt = :lastEndAtDate AND funding.fundId > :lastFundId))',
+            { lastEndAtDate, lastFundId },
+          );
         }
         break;
       case 'regAtDesc':
-        queryBuilder.orderBy('funding.regAt', 'DESC').addOrderBy('funding.fundId', 'ASC');
+        queryBuilder
+          .orderBy('funding.regAt', 'DESC')
+          .addOrderBy('funding.fundId', 'ASC');
         if (lastEndAtDate && lastFundId) {
-          queryBuilder.andWhere('(funding.regAt < :lastEndAtDate OR (funding.regAt = :lastEndAtDate AND funding.fundId > :lastFundId))', { lastEndAtDate, lastFundId });
+          queryBuilder.andWhere(
+            '(funding.regAt < :lastEndAtDate OR (funding.regAt = :lastEndAtDate AND funding.fundId > :lastFundId))',
+            { lastEndAtDate, lastFundId },
+          );
         }
         break;
     }
@@ -119,15 +166,37 @@ export class FundingService {
     };
   }
 
-  findOne(fundUuid: string): Promise<Funding> {
-    return this.fundingRepository.findOne({
-      where: {
-        fundUuid
-      }
+  async findOne(fundUuid: string): Promise<FundingDto> {
+    const fund = await this.fundingRepository.findOne({
+      relations: { fundUser: true },
+      where: { fundUuid },
     });
+    const gifts = (await this.giftService.findAllGift(fund.fundId)).gifts;
+
+    if (fund.defaultImgId) {
+      // fund 기본 이미지로 DTO를 생성한다.
+      const img = await this.imageRepository.findOne({
+        where: { imgId: DefaultImageId.Funding },
+      });
+
+      return new FundingDto(fund, gifts, [img.imgUrl]);
+    }
+
+    const images = await this.imageRepository.find({
+      where: { imgType: ImageType.Funding, subId: fund.fundId },
+    });
+
+    return new FundingDto(
+      fund,
+      gifts,
+      images.map((img) => img.imgUrl),
+    );
   }
 
-  async create(createFundingDto: CreateFundingDto, accessToken: string): Promise<FundingDto> {
+  async create(
+    createFundingDto: CreateFundingDto,
+    accessToken: string,
+  ): Promise<FundingDto> {
     // TODO - accessToken -> User 객체로 변환하기
     const users = await this.userRepository.find();
     const user = users[0];
@@ -140,15 +209,35 @@ export class FundingService {
       createFundingDto.fundTheme,
       createFundingDto.fundPubl,
     );
-    
-    await this.fundingRepository.save(funding);
-    
-    const gifts = await this.giftService.createOrUpdateGift(funding.fundId, createFundingDto.gifts);
-    
-    return new FundingDto(funding, gifts);
+
+    const funding_save = await this.fundingRepository.save(funding);
+
+    if (createFundingDto.fundImg.length > 0) {
+      // subId = fundId, imgType = "Funding" Image 객체를 만든다.
+      const images = createFundingDto.fundImg.map(
+        (url) => new Image(url, ImageType.Funding, funding_save.fundId),
+      );
+
+      this.imageRepository.save(images);
+    } else {
+      // defaultImgId 필드에 funding 기본 이미지 ID를 넣는다.
+      await this.fundingRepository.update(funding_save.fundId, {
+        defaultImgId: DefaultImageId.Funding,
+      });
+    }
+
+    const gifts = await this.giftService.createOrUpdateGift(
+      funding.fundId,
+      createFundingDto.gifts,
+    );
+
+    return new FundingDto(funding_save, gifts);
   }
 
-  async update(fundUuid: string, updateFundingDto: UpdateFundingDto): Promise<FundingDto> {
+  async update(
+    fundUuid: string,
+    updateFundingDto: UpdateFundingDto,
+  ): Promise<FundingDto> {
     Logger.log(updateFundingDto);
     const { fundTitle, fundCont, fundImg, fundTheme, endAt } = updateFundingDto;
     const funding = await this.fundingRepository.findOne({
@@ -168,7 +257,9 @@ export class FundingService {
 
     // endAt이 앞당겨지면 안된다.
     if (funding.endAt > endAt) {
-      Logger.log(`funding.endAt: ${JSON.stringify(JSON.stringify(funding.endAt))}, endAt: ${JSON.stringify(endAt)}`);
+      Logger.log(
+        `funding.endAt: ${JSON.stringify(JSON.stringify(funding.endAt))}, endAt: ${JSON.stringify(endAt)}`,
+      );
       throw new HttpException(
         'endAt property should not go backward!!',
         HttpStatus.BAD_REQUEST,

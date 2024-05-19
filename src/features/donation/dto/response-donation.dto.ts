@@ -2,12 +2,12 @@ import { Donation } from 'src/entities/donation.entity';
 import { User } from 'src/entities/user.entity';
 import { DonationStatus } from 'src/enums/donation-status.enum';
 
-export class ResponseDonationDTO{
-  donator : User;
+export class ResponseDonationDTO {
+  donator: User;
 
-  rollId : number;
+  rollId: number;
 
-  donId : number;
+  donId: number;
 
   orderId: string;
 
@@ -15,7 +15,7 @@ export class ResponseDonationDTO{
 
   regAt: Date;
 
-  constructor(donation: Donation, rollId:number){
+  constructor(donation: Donation, rollId: number) {
     this.donator = donation.user;
     this.rollId = rollId;
     this.donId = donation.donId;
@@ -23,5 +23,4 @@ export class ResponseDonationDTO{
     this.donationStatus = donation.donationStatus;
     this.regAt = donation.regAt;
   }
-
 }

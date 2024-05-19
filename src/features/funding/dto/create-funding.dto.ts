@@ -1,4 +1,11 @@
-import { IsDate, IsDateString, Min } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsDate,
+  IsDateString,
+  IsUrl,
+  Min,
+  ValidateNested,
+} from 'class-validator';
 import { Funding } from 'src/entities/funding.entity';
 import { FundTheme } from 'src/enums/fund-theme.enum';
 import { RequestGiftDto } from 'src/features/gift/dto/request-gift.dto';
@@ -6,6 +13,7 @@ import { RequestGiftDto } from 'src/features/gift/dto/request-gift.dto';
 export class CreateFundingDto {
   fundTitle: string;
   fundCont: string;
+  @IsUrl({}, { each: true })
   fundImg: string[];
   fundTheme?: FundTheme;
   fundPubl?: boolean;
@@ -19,6 +27,7 @@ export class CreateFundingDto {
   @IsDateString()
   endAt: Date;
 
-  // TODO - GiftCreateDto
-  gifts: RequestGiftDto[]
+  @ValidateNested({ each: true })
+  @Type(() => RequestGiftDto)
+  gifts: RequestGiftDto[];
 }

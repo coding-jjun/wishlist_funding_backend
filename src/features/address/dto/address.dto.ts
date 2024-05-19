@@ -1,4 +1,4 @@
-import { Address } from "src/entities/address.entity";
+import { Address } from 'src/entities/address.entity';
 
 export class AddressDto {
   addrId: number;
@@ -7,6 +7,8 @@ export class AddressDto {
   addrRoad: string;
   addrDetl: string;
   addrZip: string;
+  recvName: string;
+  recvPhone: string;
   isDef: boolean;
 
   constructor(address: Address) {
@@ -16,6 +18,8 @@ export class AddressDto {
     this.addrRoad = address.addrRoad;
     this.addrDetl = address.addrDetl;
     this.addrZip = address.addrZip;
+    this.recvName = address.recvName;
+    this.recvPhone = address.recvPhone;
     this.isDef = address.isDef;
   }
 }
