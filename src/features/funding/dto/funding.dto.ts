@@ -4,7 +4,9 @@ import { ResponseGiftDto } from 'src/features/gift/dto/response-gift.dto';
 export class FundingDto {
   fundId: number;
   fundUuid: string;
-  fundUser: number;
+  fundUserId: number;
+  fundUserNick: string;
+  // fundUserImg: string;
   fundTitle: string;
   fundCont: string;
   fundTheme: string;
@@ -23,7 +25,9 @@ export class FundingDto {
   ) {
     this.fundId = funding.fundId;
     this.fundUuid = funding.fundUuid;
-    this.fundUser = funding.fundUser?.userId;
+    this.fundUserId = funding.fundUser?.userId;
+    this.fundUserNick = funding.fundUser?.userNick;
+    // this.fundUserImg = funding.fundUser.image.imgUrl;
     this.fundTitle = funding.fundTitle;
     this.fundCont = funding.fundCont;
     this.fundTheme = funding.fundTheme;
