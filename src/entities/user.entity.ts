@@ -40,7 +40,7 @@ export class User {
   @Column({ unique: true, nullable: true })
   userPhone: string;
 
-  @Column()
+  @Column({nullable: true})
   userEmail: string;
 
   @Column('date', { nullable: true })

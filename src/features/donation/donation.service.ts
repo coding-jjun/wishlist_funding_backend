@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Donation } from 'src/entities/donation.entity';
@@ -8,6 +8,8 @@ import { CreateGuestDto } from './dto/create-guest.dto';
 import { Funding } from 'src/entities/funding.entity';
 import { User } from 'src/entities/user.entity';
 import { ResponseDonationDTO } from './dto/response-donation.dto';
+import { RollingPaperService } from '../rolling-paper/rolling-paper.service';
+import { CreateRollingPaperDto } from '../rolling-paper/dto/create-rolling-paper.dto';
 
 @Injectable()
 export class DonationService {
@@ -23,6 +25,8 @@ export class DonationService {
 
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+
+    private readonly rollService: RollingPaperService,
 
     // private readonly imgService : ImageService
   ) {}
@@ -51,8 +55,11 @@ export class DonationService {
     return result;
   }
 
-  async createOrFindDonator(userId: number, guest: CreateGuestDto) {
-    if (guest !== null) {
+  async createOrFindDonator(
+    userId: number,
+    guest: CreateGuestDto,
+  ): Promise<User> {
+    if (guest) {
       const { userNick, userPhone, accBank, accNum } = guest;
       const user = new User();
       // TODO 주소관련 정보
@@ -60,30 +67,20 @@ export class DonationService {
       user.userNick = userNick;
       user.userPhone = userPhone;
       // user.accId = 1;
-      return await this.userRepo.save(user);
+      return this.userRepo.save(user);
     }
-    return await this.userRepo.findOne({ where: { userId } });
+    return this.userRepo.findOne({ where: { userId } });
   }
 
   async updateFundingSum(funding: Funding, donAmnt: number) {
     funding.fundSum += donAmnt;
     // TODO 펀딩 목표금액 달성 확인 후 Notification
-    return await this.fundingRepo.save(funding);
-  }
+    await this.fundingRepo.update(
+      { fundId: funding.fundId },
+      { fundSum: funding.fundSum },
+    );
 
-  async createRollingPaper(
-    fundId: number,
-    donation: Donation,
-    rollMsg: string,
-    rollImg: string,
-  ) {
-    const rollingPaper = new RollingPaper();
-    rollingPaper.rollId = donation.donId;
-    rollingPaper.donation = donation;
-    rollingPaper.rollMsg = rollMsg;
-    rollingPaper.fundId = fundId;
-    // TODO create RolllingPaper Image
-    return await this.rollingPaperRepo.save(rollingPaper);
+    return funding;
   }
 
   // CREATE
@@ -99,6 +96,7 @@ export class DonationService {
     const funding = await this.fundingRepo.findOne({ where: { fundUuid } });
 
     const updateFunding = await this.updateFundingSum(funding, donAmnt);
+    Logger.log('왔니2');
 
     const donation = new Donation();
     donation.user = user;
@@ -110,11 +108,14 @@ export class DonationService {
 
     const savedDonation = await this.donationRepo.save(donation);
 
-    const rollingPaper = await this.createRollingPaper(
+    const rollingPaper = await this.rollService.createRollingPaper(
       funding.fundId,
       savedDonation,
-      createDonationDto.rollMsg,
-      createDonationDto.rollImg,
+      new CreateRollingPaperDto(
+        savedDonation.donId,
+        createDonationDto.rollMsg,
+        createDonationDto.rollImg,
+      ),
     );
 
     return new ResponseDonationDTO(savedDonation, rollingPaper.rollId);
