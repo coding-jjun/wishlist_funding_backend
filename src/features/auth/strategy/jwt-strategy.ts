@@ -14,13 +14,16 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(tokenInfo: any) {
+  async validate(tokenInfo: any, done:any) {
     console.log('----------- jwt strategy --------------');
-
-    // 신규 회원 추가 정보 입력
-    if (tokenInfo.type === 'once') {
+    
+    // 신규 회원 추가 정보 입력 : 일회용 -> access 토큰 발급
+    if(tokenInfo.type === 'once'){
       const user = await this.authService.validateUser(tokenInfo.userEmail);
-      return { type: 'once', user: user };
+      const accessToken = await this.authService.createAccessToken(tokenInfo.userEmail);
+      const refreshToken = await this.authService.createRefreshToken(tokenInfo.userEmail);
+
+      done(null, {type: 'login', accessToken, refreshToken, user})
     }
   }
 }

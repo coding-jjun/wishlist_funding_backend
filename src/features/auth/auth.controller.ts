@@ -2,17 +2,19 @@ import {
   Controller,
   Get,
   Body,
-  Post,
+  Patch,
   Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
+
 import { AuthService } from './auth.service';
 import { KakaoAuthGuard } from './guard/kakao-auth-guard';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from './guard/jwt-auth-guard';
 import { AuthUserDto } from './auth-user.dto';
 import { NaverAuthGuard } from './guard/naver-auth-guard';
+import { GoogleAuthGuard } from './guard/google-auth-guard';
 
 @Controller('auth')
 export class AuthController {
@@ -38,28 +40,31 @@ export class AuthController {
 
   @Get('naver/callback')
   @UseGuards(NaverAuthGuard)
-  async naverCallback(@Req() req: Request, @Res() res: Response) {
+  async naverCallback(@Req() req: Request, @Res() res:Response){
     return await this.setupAuthResponse(res, req.user);
   }
 
-  @Post()
+  @Get('google')
+  @UseGuards(GoogleAuthGuard)
+  async googleLogin(){
+    return;
+  }
+
+  @Get('google/callback')
+  @UseGuards(GoogleAuthGuard)
+  async googleCallback(@Req() req: Request, @Res() res:Response){
+    return await this.setupAuthResponse(res, req.user);
+  }
+
+  @Patch()
   @UseGuards(JwtAuthGuard)
   async signup(
     @Req() req: any,
     @Res() res: Response,
     @Body() authUserDto: AuthUserDto,
   ) {
-    const userInfo = req.user;
-
-    if (userInfo.type === 'once') {
-      console.log('updateUser : ', userInfo);
-      const user = await this.authService.saveAuthUser(
-        authUserDto,
-        userInfo.user,
-      );
-      res.json({ user: user });
-    }
-    res.end();
+    req.user.user = await this.authService.saveAuthUser(authUserDto, req.user);
+    return await this.setupAuthResponse(res, req.user);
   }
 
   async setupAuthResponse(res: Response, userInfo: any) {
