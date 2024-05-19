@@ -29,15 +29,18 @@ export class ImageController {
     )
     files: Express.Multer.File[],
   ): Promise<CommonResponse> {
-    const uploadedImages: ImageDto[] = [];
+    const uploadedImages = new ImageDto;
+    const urls = [];
 
     for (const file of files) {
-      const imagedto: ImageDto = await this.imageService.upload(
+      const url = await this.imageService.upload(
         file.originalname,
         file.buffer,
       );
-      uploadedImages.push(imagedto);
+      urls.push(url);
     }
+
+    uploadedImages.urls = urls;
 
     return {
       message: '성공적으로 파일이 업로드 되었습니다.',

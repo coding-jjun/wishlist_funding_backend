@@ -1,3 +1,3 @@
 export class ImageDto {
-  url: string;
+  urls: string[];
 }
