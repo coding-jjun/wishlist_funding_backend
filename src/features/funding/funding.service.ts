@@ -34,7 +34,7 @@ export class FundingService {
 
   async findAll(
     userId: number,
-    fundPublFilter: 'all' | 'friends' | 'both',
+    fundPublFilter: 'all' | 'friends' | 'both' | 'mine',
     fundThemes: FundTheme[],
     status: 'ongoing' | 'ended',
     sort: 'endAtAsc' | 'endAtDesc' | 'regAtAsc' | 'regAtDesc',
@@ -44,6 +44,8 @@ export class FundingService {
   ): Promise<{ fundings: FundingDto[]; count: number; lastFundId: number }> {
     const queryBuilder =
       await this.fundingRepository.createQueryBuilder('funding');
+
+    queryBuilder.where('funding.fundUser != :userId', { userId }); 
 
     const friendIds = await this.friendRepository
       .createQueryBuilder('friend')
