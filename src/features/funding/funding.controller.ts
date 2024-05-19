@@ -29,49 +29,6 @@ export class FundingController {
     private readonly giftService: GiftService,
   ) {}
 
-  @Get('/user/:userId')
-  async findAll(
-    @Param('userId') userId: number,
-    @Query('fundPublFilter', new DefaultValuePipe('both'))
-    fundPublFilter: 'all' | 'friends' | 'both',
-    @Query(
-      'fundThemes',
-      new DefaultValuePipe([
-        FundTheme.Anniversary,
-        FundTheme.Birthday,
-        FundTheme.Donation,
-      ]),
-    )
-    fundThemes: FundTheme | FundTheme[],
-    @Query('status', new DefaultValuePipe('ongoing'))
-    status: 'ongoing' | 'ended',
-    @Query('sort', new DefaultValuePipe('endAtDesc'))
-    sort: 'endAtAsc' | 'endAtDesc' | 'regAtAsc' | 'regAtDesc',
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
-    @Query('lastFundId', new DefaultValuePipe(0), ParseIntPipe)
-    lastFundId?: number,
-    @Query('lastEndAt', new DefaultValuePipe(undefined)) lastEndAt?: string,
-  ): Promise<CommonResponse> {
-    try {
-      const themesArray = Array.isArray(fundThemes) ? fundThemes : [fundThemes];
-      const lastEndAtDate = lastEndAt ? new Date(lastEndAt) : undefined;
-      const data = await this.fundingService.findAll(
-        userId,
-        fundPublFilter,
-        themesArray,
-        status,
-        sort,
-        limit,
-        lastFundId,
-        lastEndAtDate,
-      );
-
-      return { message: 'Success', data };
-    } catch (error) {
-      throw new HttpException('Failed to get fundings', HttpStatus.BAD_REQUEST);
-    }
-  }
-
   @Post()
   async create(
     @Body() createFundingDto: CreateFundingDto,

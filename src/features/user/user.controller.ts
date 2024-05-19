@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   HttpException,
@@ -9,6 +10,7 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Query,
   Request,
 } from '@nestjs/common';
 import { UserService } from './user.service';
@@ -17,6 +19,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { AddressService } from '../address/address.service';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { FundingService } from '../funding/funding.service';
+import { FundTheme } from 'src/enums/fund-theme.enum';
 
 @Controller('user')
 export class UserController {
@@ -43,19 +46,62 @@ export class UserController {
     }
   }
 
-  @Get('/:userId/fundings')
-  async getUserFunding(
-      @Param('userId', ParseIntPipe) userId: number,
+  @Get(':userId/funding')
+  async findAll(
+    @Param('userId') userId: number,
+    @Query('fundPublFilter', new DefaultValuePipe('both'))
+    fundPublFilter: 'all' | 'friends' | 'both',
+    @Query(
+      'fundThemes',
+      new DefaultValuePipe([
+        FundTheme.Anniversary,
+        FundTheme.Birthday,
+        FundTheme.Donation,
+      ]),
+    )
+    fundThemes: FundTheme | FundTheme[],
+    @Query('status', new DefaultValuePipe('ongoing'))
+    status: 'ongoing' | 'ended',
+    @Query('sort', new DefaultValuePipe('endAtDesc'))
+    sort: 'endAtAsc' | 'endAtDesc' | 'regAtAsc' | 'regAtDesc',
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query('lastFundId', new DefaultValuePipe(0), ParseIntPipe)
+    lastFundId?: number,
+    @Query('lastEndAt', new DefaultValuePipe(undefined)) lastEndAt?: string,
   ): Promise<CommonResponse> {
     try {
-      return {
-        message: '사용자의 펀딩 조회에 성공하였습니다.',
-        data: await this.fundService.findMyFunds(userId),
-      };
+      const themesArray = Array.isArray(fundThemes) ? fundThemes : [fundThemes];
+      const lastEndAtDate = lastEndAt ? new Date(lastEndAt) : undefined;
+      const data = await this.fundService.findAll(
+        userId,
+        fundPublFilter,
+        themesArray,
+        status,
+        sort,
+        limit,
+        lastFundId,
+        lastEndAtDate,
+      );
+
+      return { message: 'Success', data };
     } catch (error) {
-      throw error;
+      throw new HttpException('Failed to get fundings', HttpStatus.BAD_REQUEST);
     }
   }
+
+  // @Get('/:userId/fundings')
+  // async getUserFunding(
+  //     @Param('userId', ParseIntPipe) userId: number,
+  // ): Promise<CommonResponse> {
+  //   try {
+  //     return {
+  //       message: '사용자의 펀딩 조회에 성공하였습니다.',
+  //       data: await this.fundService.findMyFunds(userId),
+  //     };
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // }
 
   // @Get('/:userId/account')
   // async getUserAccount(

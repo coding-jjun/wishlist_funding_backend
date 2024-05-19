@@ -13,6 +13,7 @@ import { UpdateFundingDto } from './dto/update-funding.dto';
 import { Image } from 'src/entities/image.entity';
 import { ImageType } from 'src/enums/image-type.enum';
 import { DefaultImageId } from 'src/enums/default-image-id';
+import { query } from 'express';
 
 @Injectable()
 export class FundingService {
@@ -45,55 +46,59 @@ export class FundingService {
     const queryBuilder =
       await this.fundingRepository.createQueryBuilder('funding');
 
-    queryBuilder.where('funding.fundUser != :userId', { userId }); 
-
-    const friendIds = await this.friendRepository
-      .createQueryBuilder('friend')
-      .where('friend.status = :status', { status: FriendStatus.Friend })
-      .andWhere(
-        new Brackets((qb) => {
-          qb.where('friend.userId = :userId', { userId }).orWhere(
-            'friend.friendId = :userId',
-            { userId },
-          );
-        }),
-      )
-      .select(
-        'CASE WHEN friend.userId = :userId THEN friend.friendId ELSE friend.userId END',
-        'friendId',
-      )
-      .setParameter('userId', userId)
-      .getRawMany();
-
-    const friendIdsArray = friendIds.map((friend) => friend.friendId);
-
-    if (friendIdsArray.length > 0) {
-      // 친구 목록이 있는 경우
-      if (fundPublFilter === 'all') {
-        queryBuilder.andWhere(
-          'funding.fundPubl = :publ AND funding.fundUser NOT IN (:...ids)',
-          { publ: true, ids: friendIdsArray },
-        );
-      } else if (fundPublFilter === 'friends') {
-        queryBuilder.andWhere('funding.fundUser IN (:...ids)', {
-          ids: friendIdsArray,
-        });
-      } else if (fundPublFilter === 'both') {
-        queryBuilder.andWhere(
-          '(funding.fundPubl = :publ OR funding.fundUser IN (:...ids))',
-          { publ: true, ids: friendIdsArray },
-        );
-      }
+    if (fundPublFilter === 'mine') {
+      queryBuilder.where('funding.fundUser = :userId', { userId });
     } else {
-      // 친구 목록이 비어 있는 경우
-      if (fundPublFilter === 'all') {
-        queryBuilder.andWhere('funding.fundPubl = :publ', { publ: true });
-      } else if (fundPublFilter === 'friends') {
-        // 친구가 없으면 친구에 의한 펀딩은 결과 없음
-        queryBuilder.andWhere('1=0');
-      } else if (fundPublFilter === 'both') {
-        // 친구가 없어도 공개 펀딩은 조회
-        queryBuilder.andWhere('funding.fundPubl = :publ', { publ: true });
+      queryBuilder.where('funding.fundUser != :userId', { userId });
+
+      const friendIds = await this.friendRepository
+        .createQueryBuilder('friend')
+        .where('friend.status = :status', { status: FriendStatus.Friend })
+        .andWhere(
+          new Brackets((qb) => {
+            qb.where('friend.userId = :userId', { userId }).orWhere(
+              'friend.friendId = :userId',
+              { userId },
+            );
+          }),
+        )
+        .select(
+          'CASE WHEN friend.userId = :userId THEN friend.friendId ELSE friend.userId END',
+          'friendId',
+        )
+        .setParameter('userId', userId)
+        .getRawMany();
+
+      const friendIdsArray = friendIds.map((friend) => friend.friendId);
+
+      if (friendIdsArray.length > 0) {
+        // 친구 목록이 있는 경우
+        if (fundPublFilter === 'all') {
+          queryBuilder.andWhere(
+            'funding.fundPubl = :publ AND funding.fundUser NOT IN (:...ids)',
+            { publ: true, ids: friendIdsArray },
+          );
+        } else if (fundPublFilter === 'friends') {
+          queryBuilder.andWhere('funding.fundUser IN (:...ids)', {
+            ids: friendIdsArray,
+          });
+        } else if (fundPublFilter === 'both') {
+          queryBuilder.andWhere(
+            '(funding.fundPubl = :publ OR funding.fundUser IN (:...ids))',
+            { publ: true, ids: friendIdsArray },
+          );
+        }
+      } else {
+        // 친구 목록이 비어 있는 경우
+        if (fundPublFilter === 'all') {
+          queryBuilder.andWhere('funding.fundPubl = :publ', { publ: true });
+        } else if (fundPublFilter === 'friends') {
+          // 친구가 없으면 친구에 의한 펀딩은 결과 없음
+          queryBuilder.andWhere('1=0');
+        } else if (fundPublFilter === 'both') {
+          // 친구가 없어도 공개 펀딩은 조회
+          queryBuilder.andWhere('funding.fundPubl = :publ', { publ: true });
+        }
       }
     }
 
@@ -199,17 +204,17 @@ export class FundingService {
     );
   }
 
-  async findMyFunds(
-    userId: number,
-  ): Promise<any> {
-    const fundings = await this.fundingRepository
-    .createQueryBuilder('funding')
-    .where('funding.fundUser = :userId', { userId })
-    .andWhere('funding.endAt > :now', { now: new Date() })
-    .getMany();
+  // async findMyFunds(
+  //   userId: number,
+  // ): Promise<any> {
+  //   const fundings = await this.fundingRepository
+  //   .createQueryBuilder('funding')
+  //   .where('funding.fundUser = :userId', { userId })
+  //   .andWhere('funding.endAt > :now', { now: new Date() })
+  //   .getMany();
 
-    return fundings;
-  }
+  //   return fundings;
+  // }
 
   async create(
     createFundingDto: CreateFundingDto,
