@@ -13,7 +13,7 @@ export class ImageService {
     return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.amazonaws.com/${filename}`;
   }
 
-  async upload(filename: string, file: Buffer): Promise<ImageDto> {
+  async upload(filename: string, file: Buffer): Promise<string> {
     await this.s3Client.send(
       new PutObjectCommand({
         Bucket: process.env.AWS_S3_BUCKET_NAME,
@@ -22,9 +22,7 @@ export class ImageService {
       }),
     );
 
-    return {
-      url: this.getObjectUrlOf(filename),
-    };
+    return this.getObjectUrlOf(filename);
   }
 }
 

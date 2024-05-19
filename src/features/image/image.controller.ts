@@ -1,17 +1,15 @@
 import {
   Controller,
   FileTypeValidator,
-  Logger,
   MaxFileSizeValidator,
   ParseFilePipe,
   Post,
-  UploadedFile,
+  UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { ImageService } from './image.service';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
-import { timestamp } from 'rxjs';
 import { ImageDto } from './dto/image.dto';
 
 @Controller('image')
@@ -19,26 +17,34 @@ export class ImageController {
   constructor(private readonly imageService: ImageService) {}
 
   @Post()
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(
-    @UploadedFile(
+  @UseInterceptors(FilesInterceptor('files'))
+  async uploadFiles(
+    @UploadedFiles(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 100_000 }),
-          new FileTypeValidator({ fileType: 'image' }),
+          new MaxFileSizeValidator({ maxSize: 1_000_000 }),
+          new FileTypeValidator({ fileType: 'image/*' }),
         ],
       }),
     )
-    file: Express.Multer.File,
+    files: Express.Multer.File[],
   ): Promise<CommonResponse> {
-    const imagedto: ImageDto = await this.imageService.upload(
-      file.originalname,
-      file.buffer,
-    );
+    const uploadedImages = new ImageDto;
+    const urls = [];
+
+    for (const file of files) {
+      const url = await this.imageService.upload(
+        file.originalname,
+        file.buffer,
+      );
+      urls.push(url);
+    }
+
+    uploadedImages.urls = urls;
 
     return {
       message: '성공적으로 파일이 업로드 되었습니다.',
-      data: imagedto,
+      data: uploadedImages,
     };
   }
 }
