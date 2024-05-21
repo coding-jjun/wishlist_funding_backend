@@ -96,7 +96,6 @@ export class DonationService {
     const funding = await this.fundingRepo.findOne({ where: { fundUuid } });
 
     const updateFunding = await this.updateFundingSum(funding, donAmnt);
-    Logger.log('왔니2');
 
     const donation = new Donation();
     donation.user = user;
