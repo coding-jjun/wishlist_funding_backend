@@ -63,18 +63,27 @@ export class AuthController {
     @Res() res: Response,
     @Body() authUserDto: AuthUserDto,
   ) {
-    req.user.user = await this.authService.saveAuthUser(authUserDto, req.user);
+    req.user.user = await this.authService.saveAuthUser(authUserDto, req.user.user);
     return await this.setupAuthResponse(res, req.user);
   }
 
-  async setupAuthResponse(res: Response, userInfo: any) {
-    if (userInfo.type === 'login') {
-      res.cookie('access_token', userInfo.accessToken);
-      res.cookie('refresh_token', userInfo.refreshToken);
-      res.json({ user: userInfo.user });
-    } else if (userInfo.type === 'once') {
-      res.cookie('once', userInfo.onceToken);
-      res.json({ user: userInfo.user });
+  async setupAuthResponse(res: Response, userInfo: any){
+    switch(userInfo.type){
+      case 'login':
+        res.clearCookie('once');
+        res.cookie('access_token', userInfo.accessToken);
+        res.cookie('refresh_token', userInfo.refreshToken);
+        res.json({user: userInfo.user});
+        break
+
+      case 'once' :
+        res.cookie('once', userInfo.onceToken);
+        res.json({user: userInfo.user});
+        break
+
+      case 'other' :
+        res.json("다른 SNS 로 가입한 회원입니다.");
+        break
     }
     return res;
   }

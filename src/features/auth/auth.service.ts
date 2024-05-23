@@ -3,6 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from 'src/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
+import { UserInfo } from 'src/interfaces/user-info.interface';
+import { AuthType } from 'src/enums/auth-type.enum';
+
 
 @Injectable()
 export class AuthService {
@@ -21,9 +24,12 @@ export class AuthService {
     return new Date(year, month, day);
   }
 
-  async getNewToken(userEmail: string, type: string, expiresIn: string) {
+  /**
+   * 새로운 Token 생성
+   */
+  async getNewToken(userId: number, type: string, expiresIn: string) {
     const payload = {
-      userEmail: userEmail,
+      userId: userId,
       time: new Date(),
       type: type,
     };
@@ -34,25 +40,31 @@ export class AuthService {
     });
   }
 
-  async onceToken(userEmail: string) {
-    return await this.getNewToken(userEmail, 'once', '20m');
+
+  async createOnceToken(userId: number) {
+    return await this.getNewToken(userId, 'once', '20m');
   }
 
-  async createAccessToken(userEmail: string) {
-    return await this.getNewToken(userEmail, 'access', '10m');
+  async createAccessToken(userId: number) {
+    return await this.getNewToken(userId, 'access', '10m');
   }
 
-  async createRefreshToken(userEmail: string) {
-    const token = await this.getNewToken(userEmail, 'refresh', '50m');
+  async createRefreshToken(userId: number) {
+    const token = await this.getNewToken(userId, 'refresh', '50m');
 
     // TODO refresh token 암호화
     return token;
   }
 
+  /**
+   * 
+   * token 유효성 검사
+   */
   async tokenValidate(token: string) {
     return await this.jwtService.verify(token, {
       secret: process.env.JWT_SECRET,
     });
+    // TODO 토큰 유효성 예외
   }
 
   async filterNulls(obj: any) {
@@ -65,17 +77,39 @@ export class AuthService {
     return filtered;
   }
 
+  /**
+   * 
+   * SNS 회원가입, 회원가입 중 추가정보을 저장할 때 사용
+   */
   async saveAuthUser(userInfo: any, existUser?: User, imgUrl?: string) {
     const user = existUser || new User();
     if (imgUrl) {
       // TODO 이미지 객체 생성
     }
+    // TODO 중복값에 대한 예외 처리 (userPhone, userNick)
     const filteredUserInfo = await this.filterNulls(userInfo);
-    Object.assign(user, filteredUserInfo);
 
-    return await this.userRepository.save(user);
+    if(filteredUserInfo){
+
+      Object.assign(user, filteredUserInfo);
+      return await this.userRepository.save(user);
+    }
+    // TODO 예외처리
+    return null;
   }
 
+  /**
+   * 
+   * Token 에서 추출한 userId 로 User 객체 반환
+   */
+  async getUser(userId: number){
+    return await this.userRepository.findOneBy({userId});
+  }
+
+  /**
+   * 
+   * 회원가입시 이전 가입이력 확인을 위해 userEmail 검증 
+   */
   async validateUser(userEmail: string) {
     const user = this.userRepository.findOne({
       where: { userEmail: userEmail },
@@ -86,4 +120,5 @@ export class AuthService {
       return user;
     }
   }
+
 }
