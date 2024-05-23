@@ -19,9 +19,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     
     // 신규 회원 추가 정보 입력 : 일회용 -> access 토큰 발급
     if(tokenInfo.type === 'once'){
-      const user = await this.authService.validateUser(tokenInfo.userEmail);
-      const accessToken = await this.authService.createAccessToken(tokenInfo.userEmail);
-      const refreshToken = await this.authService.createRefreshToken(tokenInfo.userEmail);
+      const user = await this.authService.getUser(tokenInfo.userId);
+      const accessToken = await this.authService.createAccessToken(user.userId);
+      const refreshToken = await this.authService.createRefreshToken(user.userId);
 
       done(null, {type: 'login', accessToken, refreshToken, user})
     }

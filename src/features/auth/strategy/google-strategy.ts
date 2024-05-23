@@ -28,35 +28,34 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google'){
       // TODO 구글 이메일 에러
       done(null, false);
     }
-    const userEmail = googleAccount.email;
-    console.log("let's make userInfo");
+
     const userInfo : UserInfo = {
       authType: AuthType.Google,
       authId: googleAccount.sub,
       userNick: googleAccount.name,
-      userEmail: userEmail,
+      userEmail: googleAccount.email,
     }
 
-    const user = await this.authService.validateUser(userEmail);
+    const user = await this.authService.validateUser(googleAccount.email);
 
     // 기존 회원 -> 로그인
     if(user){
 
-      const accessToken = await this.authService.createAccessToken(userEmail);
-      const refreshToken = await this.authService.createRefreshToken(userEmail);
+      const accessToken = await this.authService.createAccessToken(user.userId);
+      const refreshToken = await this.authService.createRefreshToken(user.userId);
 
       done(null, {type: 'login', accessToken, refreshToken, user})
       
     // 신규 회원 -> 회원가입
     }else{
-      const onceToken = await this.authService.onceToken(userEmail);
-
+      
       let imgUrl = null;
       if(googleAccount.picture){
         // imgUrl = googleAccount.picture;
       }
-
+      
       const user = await this.authService.saveAuthUser(userInfo, imgUrl);
+      const onceToken = await this.authService.createOnceToken(user.userId);
       done(null, {type: 'once', onceToken, user})
     }
   }
