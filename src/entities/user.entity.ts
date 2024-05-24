@@ -16,6 +16,8 @@ import { Account } from './account.entity';
 import { Image } from './image.entity';
 import { Address } from './address.entity';
 import { AuthType } from 'src/enums/auth-type.enum';
+import { ValidateNested } from 'class-validator';
+import { DefaultImageId } from 'src/enums/default-image-id';
 
 @Entity()
 export class User {
@@ -40,7 +42,7 @@ export class User {
   @Column({ unique: true, nullable: true })
   userPhone: string;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   userEmail: string;
 
   @Column('date', { nullable: true })
@@ -49,10 +51,6 @@ export class User {
   @OneToOne(() => Account, (account) => account.user, { nullable: true })
   @JoinColumn({ name: 'userAcc' })
   account: Account;
-
-  @ManyToOne(() => Image, { nullable: true })
-  @JoinColumn({ name: 'userImg' })
-  image: Image;
 
   @CreateDateColumn()
   regAt: Date;
@@ -72,4 +70,13 @@ export class User {
   @OneToMany(() => Address, (address) => address.addrUser)
   addresses: Address[];
   user: Promise<Date>;
+
+  @Column('int', {nullable: false, default: DefaultImageId.User})
+  @OneToOne(() => Image, (image) => image.subId)
+  userImgId: number;
+
+  @ValidateNested()
+  @OneToOne(() => Image, (image) => image.subId)
+  @JoinColumn({ name: 'userImgId' })
+  image: Image;
 }
