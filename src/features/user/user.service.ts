@@ -9,6 +9,7 @@ import { Image } from 'src/entities/image.entity';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { ImageType } from 'src/enums/image-type.enum';
 import { DefaultImageId } from 'src/enums/default-image-id';
+import { UserDto } from './dto/user.dto';
 
 @Injectable()
 export class UserService {
@@ -30,7 +31,7 @@ export class UserService {
   }
 
   // 사용자 생성
-  async createUser(createUserDto: CreateUserDto): Promise<User> {
+  async createUser(createUserDto: CreateUserDto): Promise<UserDto> {
     const dto = createUserDto;
     const user = new User();
 
@@ -57,13 +58,22 @@ export class UserService {
     }
 
     /// Image
+    let userImg: string;
     if (dto.userImg) {
       // custom image
+      userImg = dto.userImg;
       const image = new Image(dto.userImg!, ImageType.User, userSaved.userId);
 
       this.imgRepository.save(image);
     } else {
       // default image
+      const defaultImage = await this.imgRepository.findOne({
+        where: {
+          imgId: DefaultImageId.User,
+        },
+      });
+      userImg = defaultImage.imgUrl;
+
       userSaved.defaultImgId = DefaultImageId.User;
       this.userRepository.update(
         { userId },
@@ -71,7 +81,17 @@ export class UserService {
       );
     }
 
-    return userSaved;
+    return new UserDto(
+      userSaved.userNick,
+      userSaved.userName,
+      userSaved.userPhone,
+      userSaved.userBirth,
+      userSaved.authType,
+      userImg,
+      userSaved.userId,
+      userSaved.userEmail,
+      userSaved.authId,
+    );
   }
 
   async updateUser(
