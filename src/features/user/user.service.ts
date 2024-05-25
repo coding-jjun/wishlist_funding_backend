@@ -6,6 +6,10 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Account } from 'src/entities/account.entity';
 import { Image } from 'src/entities/image.entity';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { ImageType } from 'src/enums/image-type.enum';
+import { DefaultImageId } from 'src/enums/default-image-id';
+import { UserDto } from './dto/user.dto';
 
 @Injectable()
 export class UserService {
@@ -16,6 +20,8 @@ export class UserService {
     private readonly accRepository: Repository<Account>,
     @InjectRepository(Image)
     private readonly imgRepository: Repository<Image>,
+
+    private readonly g2gException: GiftogetherExceptions,
   ) {}
 
   // 사용자 정보 조회
@@ -25,29 +31,67 @@ export class UserService {
   }
 
   // 사용자 생성
-  async createUser(createUserDto: CreateUserDto): Promise<User> {
+  async createUser(createUserDto: CreateUserDto): Promise<UserDto> {
+    const dto = createUserDto;
     const user = new User();
 
-    user.userNick = createUserDto.userNick;
-    user.userPw = createUserDto.userPw;
-    user.userName = createUserDto.userName;
-    user.userPhone = createUserDto.userPhone;
-    user.userBirth = createUserDto.userBirth;
-    user.userEmail = createUserDto.userEmail;
-    if (createUserDto.userAcc) {
+    user.userNick = dto.userNick;
+    user.userPw = dto.userPw;
+    user.userName = dto.userName;
+    user.userPhone = dto.userPhone;
+    user.userBirth = dto.userBirth;
+    user.userEmail = dto.userEmail;
+
+    const userSaved = await this.userRepository.save(user);
+    const userId = userSaved.userId;
+
+    /// Account
+    if (dto.userAcc) {
       const account = await this.accRepository.findOneBy({
-        accId: createUserDto.userAcc,
+        accId: dto.userAcc,
       });
-      user.account = account;
-    }
-    if (createUserDto.userImg) {
-      const image = await this.imgRepository.findOneBy({
-        imgId: createUserDto.userImg,
-      });
-      user.image = image;
+
+      if (account) {
+        userSaved.account = account;
+        this.userRepository.update({ userId }, { account: account });
+      }
     }
 
-    return await this.userRepository.save(user);
+    /// Image
+    let userImg: string;
+    if (dto.userImg) {
+      // custom image
+      userImg = dto.userImg;
+      const image = new Image(dto.userImg!, ImageType.User, userSaved.userId);
+
+      this.imgRepository.save(image);
+    } else {
+      // default image
+      const defaultImage = await this.imgRepository.findOne({
+        where: {
+          imgId: DefaultImageId.User,
+        },
+      });
+      userImg = defaultImage.imgUrl;
+
+      userSaved.defaultImgId = DefaultImageId.User;
+      this.userRepository.update(
+        { userId },
+        { defaultImgId: userSaved.defaultImgId },
+      );
+    }
+
+    return new UserDto(
+      userSaved.userNick,
+      userSaved.userName,
+      userSaved.userPhone,
+      userSaved.userBirth,
+      userSaved.authType,
+      userImg,
+      userSaved.userId,
+      userSaved.userEmail,
+      userSaved.authId,
+    );
   }
 
   async updateUser(
