@@ -10,6 +10,7 @@ import { UserModule } from '../user/user.module';
 import { JwtStrategy } from './strategy/jwt-strategy';
 import { NaverStrategy } from './strategy/naver-strategy';
 import { GoogleStrategy } from './strategy/google-strategy';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { GoogleStrategy } from './strategy/google-strategy';
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, KakaoStrategy, JwtStrategy, NaverStrategy, GoogleStrategy],
+  providers: [AuthService, KakaoStrategy, JwtStrategy, NaverStrategy, GoogleStrategy, GiftogetherExceptions],
   exports: [PassportModule, AuthService]
 })
 export class AuthModule {}

@@ -66,4 +66,22 @@ export class GiftogetherExceptions {
   );
 
   // Notification
+
+  // Auth
+  JwtNotExpired = new GiftogetherException(
+    ErrorMsg.JwtNotExpired,
+    ErrorCode.JwtNotExpired,
+    HttpStatus.BAD_REQUEST,
+  );
+  JwtExpired = new GiftogetherException(
+    ErrorMsg.JwtExpired,
+    ErrorCode.JwtExpired,
+    HttpStatus.BAD_REQUEST,
+  );
+  NotValidToken = new GiftogetherException(
+    ErrorMsg.NotValidToken,
+    ErrorCode.NotValidToken,
+    HttpStatus.BAD_REQUEST,
+  );
+
 }
