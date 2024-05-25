@@ -71,12 +71,14 @@ export class User {
   addresses: Address[];
   user: Promise<Date>;
 
-  @Column('int', {nullable: false, default: DefaultImageId.User})
-  @OneToOne(() => Image, (image) => image.subId)
-  userImgId: number;
+  @Column('int', { nullable: true })
+  @OneToOne(() => Image, (image) => image.imgId)
+  defaultImgId?: number;
 
+  /**
+   * defaultImgId가 NULL일 경우, Image.subId로 조회할 수 있습니다.
+   */
   @ValidateNested()
   @OneToOne(() => Image, (image) => image.subId)
-  @JoinColumn({ name: 'userImgId' })
   image: Image;
 }
