@@ -78,7 +78,6 @@ export class User {
   /**
    * defaultImgId가 NULL일 경우, Image.subId로 조회할 수 있습니다.
    */
-  @ValidateNested()
   @OneToOne(() => Image, (image) => image.subId)
   image: Image;
 }
