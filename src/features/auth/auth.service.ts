@@ -60,21 +60,58 @@ export class AuthService {
       }
     );
 
+    const refreshToken = new RefreshToken();
+    refreshToken.userId = userId;
+    refreshToken.refreshToken = token;
 
+    time.setDate(time.getDate() + 7);
+    refreshToken.expiresAt = time;
 
-    // TODO refresh token 암호화
+    await this.refreshRepository.save(refreshToken);
     return token;
   }
 
   /**
-   * 
-   * token 유효성 검사
+   * refresh token 디코딩 및 유효성 검사
    */
-  async tokenValidate(token: string) {
-    return await this.jwtService.verify(token, {
-      secret: process.env.JWT_SECRET,
-    });
-    // TODO 토큰 유효성 예외
+  async verifyRefreshToken(refreshToken: string){
+    try{
+      return await this.jwtService.verify(refreshToken, {
+        secret: process.env.JWT_REFRESH_SECRET,
+      });
+    }catch(error){
+      throw this.jwtException.NotValidToken;
+    }
+
+  }
+
+    /**
+   * 
+   * refresh token 유효성 검사
+   */
+  async validateRefreshToken(refreshToken: string, refreshInfo: any){
+    const storedRefresh = await this.refreshRepository.findOne({where: {userId: refreshInfo.userId}});
+
+    if(!storedRefresh){
+      throw this.jwtException.NotValidToken;
+    }
+
+    if(refreshInfo.userId !== storedRefresh.userId){
+      throw this.jwtException.NotValidToken;
+    }
+    
+    if(refreshToken !== storedRefresh.refreshToken){
+      throw this.jwtException.NotValidToken;
+    }
+    
+    if(new Date() > storedRefresh.expiresAt){
+      throw this.jwtException.RefreshExpire;
+    }
+    
+    if(!storedRefresh.isActive){
+      throw this.jwtException.NotValidToken;
+    }
+    return true;
   }
 
   async filterNulls(obj: any) {

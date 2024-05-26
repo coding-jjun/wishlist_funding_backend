@@ -15,6 +15,8 @@ import { JwtAuthGuard } from './guard/jwt-auth-guard';
 import { AuthUserDto } from './auth-user.dto';
 import { NaverAuthGuard } from './guard/naver-auth-guard';
 import { GoogleAuthGuard } from './guard/google-auth-guard';
+import { JwtRefreshGuard } from './guard/jwt-refresh-guard';
+import { CommonResponse } from 'src/interfaces/common-response.interface';
 
 @Controller('auth')
 export class AuthController {
@@ -82,4 +84,14 @@ export class AuthController {
     res.json({user: userInfo.user, needReissue: userInfo.needReissue});
     return res;
   }
+
+  @Get('/token')
+  @UseGuards(JwtRefreshGuard)
+  async reIssueAccessToken(): Promise<CommonResponse>{
+    return {
+      message: 'Access Token 재발급 완료',
+      data: true
+    }; 
+  }
+  
 }
