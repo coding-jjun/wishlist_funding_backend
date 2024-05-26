@@ -83,5 +83,15 @@ export class GiftogetherExceptions {
     ErrorCode.NotValidToken,
     HttpStatus.UNAUTHORIZED,
   );
+  TokenMissing = new GiftogetherException(
+    ErrorMsg.TokenMissing,
+    ErrorCode.TokenMissing,
+    HttpStatus.BAD_REQUEST,
+  );
+  RefreshExpire = new GiftogetherException(
+    ErrorMsg.RefreshExpire,
+    ErrorCode.RefreshExpire,
+    HttpStatus.UNAUTHORIZED,
+  );
 
 }

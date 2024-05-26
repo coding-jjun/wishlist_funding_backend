@@ -29,4 +29,6 @@ export enum ErrorCode {
   JwtNotExpired = '0900',
   JwtExpired = '0901',
   NotValidToken = '0902',
+  TokenMissing = '0903',
+  RefreshExpire = '0904',
 }
