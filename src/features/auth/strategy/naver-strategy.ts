@@ -38,7 +38,7 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
     }
     // console.log("username : ", naverAccount.name);
 
-    const user = await this.authService.validateUser(naverAccount.email);
+    const user = await this.authService.validateUser(naverAccount.email, AuthType.Naver);
 
     // 기존 회원 -> 로그인
     if (user) {

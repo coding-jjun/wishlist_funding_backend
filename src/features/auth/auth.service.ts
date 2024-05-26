@@ -161,15 +161,21 @@ export class AuthService {
    * 
    * 회원가입시 이전 가입이력 확인을 위해 userEmail 검증 
    */
-  async validateUser(userEmail: string) {
-    const user = this.userRepository.findOne({
+  async validateUser(userEmail: string, authType: AuthType) {
+    const user = await this.userRepository.findOne({
       where: { userEmail: userEmail },
     });
+
+    if(user.authType !== authType){
+      throw this.jwtException.UserAlreadyExists
+    }
+
     if (!user) {
       return null;
-    } else {
-      return user;
     }
+    return user;
+
+  }
   }
 
 }

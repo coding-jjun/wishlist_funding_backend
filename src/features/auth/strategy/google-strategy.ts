@@ -36,7 +36,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google'){
       userEmail: googleAccount.email,
     }
 
-    const user = await this.authService.validateUser(googleAccount.email);
+    const user = await this.authService.validateUser(googleAccount.email, AuthType.Google);
 
     // 기존 회원 -> 로그인
     if(user){

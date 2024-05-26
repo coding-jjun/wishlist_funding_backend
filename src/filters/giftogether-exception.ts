@@ -93,5 +93,9 @@ export class GiftogetherExceptions {
     ErrorCode.RefreshExpire,
     HttpStatus.UNAUTHORIZED,
   );
-
+  UserAlreadyExists = new GiftogetherException(
+    ErrorMsg.UserAlreadyExists,
+    ErrorCode.UserAlreadyExists,
+    HttpStatus.CONFLICT,
+  );
 }
