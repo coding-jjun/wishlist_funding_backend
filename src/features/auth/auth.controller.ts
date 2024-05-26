@@ -73,18 +73,13 @@ export class AuthController {
         res.clearCookie('once');
         res.cookie('access_token', userInfo.accessToken);
         res.cookie('refresh_token', userInfo.refreshToken);
-        res.json({user: userInfo.user});
         break
 
       case 'once' :
         res.cookie('once', userInfo.onceToken);
-        res.json({user: userInfo.user});
-        break
-
-      case 'other' :
-        res.json("다른 SNS 로 가입한 회원입니다.");
         break
     }
+    res.json({user: userInfo.user, needReissue: userInfo.needReissue});
     return res;
   }
 }
