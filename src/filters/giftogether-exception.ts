@@ -76,12 +76,12 @@ export class GiftogetherExceptions {
   JwtExpired = new GiftogetherException(
     ErrorMsg.JwtExpired,
     ErrorCode.JwtExpired,
-    HttpStatus.BAD_REQUEST,
+    HttpStatus.UNAUTHORIZED,
   );
   NotValidToken = new GiftogetherException(
     ErrorMsg.NotValidToken,
     ErrorCode.NotValidToken,
-    HttpStatus.BAD_REQUEST,
+    HttpStatus.UNAUTHORIZED,
   );
 
 }
