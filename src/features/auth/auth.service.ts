@@ -30,33 +30,37 @@ export class AuthService {
     return new Date(year, month, day);
   }
 
-  /**
-   * 새로운 Token 생성
-   */
-  async getNewToken(userId: number, type: string, expiresIn: string) {
-    const payload = {
-      userId: userId,
-      time: new Date(),
-      type: type,
-    };
-
-    return this.jwtService.sign(payload, {
-      secret: process.env.JWT_SECRET,
-      expiresIn: expiresIn,
-    });
+  async createOnceToken(userId: number): Promise<string> {
+    return this.jwtService.sign(
+      { userId, time: new Date(), type: 'once' },
+      {
+        secret: process.env.JWT_SECRET,
+        expiresIn: '20m',
+      }
+    );
   }
 
-
-  async createOnceToken(userId: number) {
-    return await this.getNewToken(userId, 'once', '20m');
+  async createAccessToken(userId: number): Promise<string> {
+    return this.jwtService.sign(
+      { userId, time: new Date(), type: 'access' },
+      {
+        secret: process.env.JWT_SECRET,
+        expiresIn: '10m',
+      }
+    );
   }
 
-  async createAccessToken(userId: number) {
-    return await this.getNewToken(userId, 'access', '10m');
-  }
+  async createRefreshToken(userId: number): Promise<string> {
+    const time = new Date();
+    const token =  this.jwtService.sign(
+      { userId, time: time, type: 'refresh' },
+      {
+        secret: process.env.JWT_REFRESH_SECRET,
+        expiresIn: '7d',
+      }
+    );
 
-  async createRefreshToken(userId: number) {
-    const token = await this.getNewToken(userId, 'refresh', '50m');
+
 
     // TODO refresh token 암호화
     return token;
