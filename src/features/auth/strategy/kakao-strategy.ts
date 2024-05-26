@@ -30,7 +30,6 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
     const userInfo: UserInfo = {
       authType: AuthType.Kakao,
       authId: resProfile.id,
-      userNick: kakaoAccount.profile.nickname,
       userName: kakaoAccount.name || null,
       userEmail: kakaoAccount.email,
       userPhone: kakaoAccount.phone_number || null,
@@ -48,7 +47,14 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
       done(null, { type: 'login', accessToken, refreshToken, user });
 
       // 신규 회원 -> 회원가입
-    } else {      
+    } else {
+      
+      const userNick = kakaoAccount.profile.nickname;
+      const isValid = await this.authService.validUserNick(userNick);
+      if(isValid){
+        userInfo.userNick = userNick;
+      }
+      
       if (kakaoAccount.has_birthyear && kakaoAccount.has_birthday) {
         userInfo.userBirth = await this.authService.parseDate(
           kakaoAccount.birthyear,

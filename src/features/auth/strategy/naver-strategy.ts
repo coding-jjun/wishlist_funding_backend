@@ -31,7 +31,6 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
     const userInfo: UserInfo = {
       authType: AuthType.Naver,
       authId: naverAccount.id,
-      userNick: naverAccount.nickname,
       userName: naverAccount.name || null,
       userEmail: naverAccount.email,
       userPhone: naverAccount.mobile || null,
@@ -49,6 +48,11 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
 
       // 신규 회원 -> 회원가입
     } else {
+      const userNick = naverAccount.nickname;
+      const isValid = await this.authService.validUserNick(userNick);
+      if(isValid){
+        userInfo.userNick = userNick;
+      }
 
       if (naverAccount.birthyear && naverAccount.birthday) {
         userInfo.userBirth = await this.authService.parseDate(

@@ -176,6 +176,15 @@ export class AuthService {
     return user;
 
   }
+
+  async validUserNick(userNick: string){
+    const user = await this.userRepository.findOne({
+      where: {userNick: userNick}
+    });
+    if(user){
+      return false;
+    }
+    return true;
   }
 
 }
