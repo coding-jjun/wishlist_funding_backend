@@ -50,8 +50,6 @@ export class AddressService {
         'addr.addrRoad',
         'addr.addrDetl',
         'addr.addrZip',
-        'addr.recvName',
-        'addr.recvPhone',
         'addr.isDef',
       ])
       .where('addr.userId = :userId', { userId })

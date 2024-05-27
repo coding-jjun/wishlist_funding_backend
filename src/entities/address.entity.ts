@@ -28,12 +28,6 @@ export class Address {
   @Column({ nullable: false })
   addrZip: string;
 
-  @Column()
-  recvName: string;
-
-  @Column()
-  recvPhone: string;
-
   @Column({ default: false })
   isDef: boolean;
 }
