@@ -50,7 +50,7 @@ export class UserController {
   async findAll(
     @Param('userId') userId: number,
     @Query('fundPublFilter', new DefaultValuePipe('both'))
-    fundPublFilter: 'all' | 'friends' | 'both',
+    fundPublFilter: 'all' | 'friends' | 'both' | 'mine',
     @Query(
       'fundThemes',
       new DefaultValuePipe([

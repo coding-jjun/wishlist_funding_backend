@@ -27,7 +27,13 @@ export class Funding {
     fundCont: string,
     fundGoal: number,
     endAt: Date,
-    fundTheme?: FundTheme,
+    fundTheme: FundTheme,
+    fundAddrRoad: string,
+    fundAddrDetl: string,
+    fundAddrZip: string,
+    fundRecvName: string,
+    fundRecvPhone: string,
+    fundRecvReq?: string,
     fundPubl?: boolean,
   ) {
     this.fundUser = fundUser;
@@ -37,6 +43,12 @@ export class Funding {
     this.endAt = endAt;
     this.fundTheme = fundTheme;
     this.fundPubl = fundPubl;
+    this.fundAddrRoad = fundAddrRoad;
+    this.fundAddrDetl = fundAddrDetl;
+    this.fundAddrZip = fundAddrZip;
+    this.fundRecvName = fundRecvName;
+    this.fundRecvPhone = fundRecvPhone;
+    this.fundRecvReq = fundRecvReq;
   }
 
   @PrimaryGeneratedColumn()
@@ -73,6 +85,34 @@ export class Funding {
   @Column('int', { default: 0 })
   fundSum: number;
 
+  @Column()
+  fundAddrRoad: string;
+
+  @Column()
+  fundAddrDetl: string;
+
+  @Column()
+  fundAddrZip: string;
+
+  @Column()
+  fundRecvName: string;
+
+  @Column()
+  fundRecvPhone: string;
+
+  @Column({ nullable: true })
+  fundRecvReq: string;
+
+  @Column('date')
+  // @Column('timestamptz')
+  endAt: Date;
+
+  @CreateDateColumn()
+  regAt: Date;
+
+  @UpdateDateColumn()
+  uptAt: Date;
+  
   @OneToMany(() => Comment, (comment) => comment.funding)
   comments: Comment[];
 
@@ -94,18 +134,4 @@ export class Funding {
   @ValidateNested()
   @OneToMany(() => Image, (image) => image.subId)
   images: Image[];
-
-  /**
-   * TODO - timestamptz를 사용할지, 일반 date를 사용할지 결정해야함.
-   * timestamptz는 시간 & 타임존을 포함하고 date는 말 그대로 날짜만 저장함
-   */
-  @Column('date')
-  // @Column('timestamptz')
-  endAt: Date;
-
-  @CreateDateColumn()
-  regAt: Date;
-
-  @UpdateDateColumn()
-  uptAt: Date;
 }

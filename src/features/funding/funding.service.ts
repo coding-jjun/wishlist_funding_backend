@@ -230,6 +230,12 @@ export class FundingService {
       createFundingDto.fundGoal,
       createFundingDto.endAt,
       createFundingDto.fundTheme,
+      createFundingDto.fundAddrRoad,
+      createFundingDto.fundAddrDetl,
+      createFundingDto.fundAddrZip,
+      createFundingDto.fundRecvName || user.userName,
+      createFundingDto.fundRecvPhone || user.userPhone,
+      createFundingDto.fundRecvReq,
       createFundingDto.fundPubl,
     );
 
