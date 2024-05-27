@@ -42,7 +42,7 @@ export class FundingService {
     limit: number,
     lastFundId?: number, // 마지막으로 로드된 항목의 id 값
     lastEndAtDate?: Date, // 마지막으로 로드된 항목의 endAt 값
-  ): Promise<{ fundings: FundingDto[]; count: number; lastFundId: number }> {
+  ): Promise<{ fundings: FundingDto[]; count: number; lastFundId: number, lastEndAt: Date }> {
     const queryBuilder =
       await this.fundingRepository.createQueryBuilder('funding');
 
@@ -174,6 +174,7 @@ export class FundingService {
       fundings: fundings,
       count: fundings.length,
       lastFundId: fundings[fundings.length - 1]?.fundId,
+      lastEndAt: sort[0] === "e" ? fundings[fundings.length - 1]?.endAt : fundings[fundings.length - 1]?.regAt
     };
   }
 
