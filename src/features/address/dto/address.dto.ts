@@ -7,6 +7,9 @@ export class AddressDto {
   addrRoad: string;
   addrDetl: string;
   addrZip: string;
+  recvName: string;
+  recvPhone: string;
+  recvReq: string;
   isDef: boolean;
 
   constructor(address: Address) {
@@ -16,6 +19,9 @@ export class AddressDto {
     this.addrRoad = address.addrRoad;
     this.addrDetl = address.addrDetl;
     this.addrZip = address.addrZip;
+    this.recvName = address.recvName;
+    this.recvPhone = address.recvPhone;
+    this.recvReq = address.recvReq;
     this.isDef = address.isDef;
   }
 }
