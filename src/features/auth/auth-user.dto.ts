@@ -1,21 +1,21 @@
-import { IsOptional } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
 
 export class AuthUserDto {
-  @IsOptional()
-  userNick?: string;
+  @IsNotEmpty()
+  userNick: string;
 
-  @IsOptional()
-  userName?: string;
+  @IsNotEmpty()
+  userName: string;
 
-  @IsOptional()
-  userPhone?: string;
+  @IsNotEmpty()
+  userPhone: string;
 
-  @IsOptional()
-  userBirth?: Date;
+  @IsNotEmpty()
+  userBirth: Date;
 
-  @IsOptional()
-  userAcc?: number;
+  @IsNotEmpty()
+  userAcc: number;
 
-  @IsOptional()
-  userImg?: number;
+  @IsNotEmpty()
+  userImg: number;
 }

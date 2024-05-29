@@ -5,6 +5,8 @@ import { User } from 'src/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { UserInfo } from 'src/interfaces/user-info.interface';
 import { AuthType } from 'src/enums/auth-type.enum';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { RefreshToken } from 'src/entities/refresh-token.entity';
 
 
 @Injectable()
@@ -12,7 +14,11 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(RefreshToken)
+    private readonly refreshRepository: Repository<RefreshToken>,
     private jwtService: JwtService,
+    private readonly jwtException: GiftogetherExceptions,
+
   ) {}
 
   async parseDate(yearString: string, birthday: string): Promise<Date> {
@@ -24,47 +30,88 @@ export class AuthService {
     return new Date(year, month, day);
   }
 
-  /**
-   * 새로운 Token 생성
-   */
-  async getNewToken(userId: number, type: string, expiresIn: string) {
-    const payload = {
-      userId: userId,
-      time: new Date(),
-      type: type,
-    };
-
-    return this.jwtService.sign(payload, {
-      secret: process.env.JWT_SECRET,
-      expiresIn: expiresIn,
-    });
+  async createOnceToken(userId: number): Promise<string> {
+    return this.jwtService.sign(
+      { userId, time: new Date(), type: 'once' },
+      {
+        secret: process.env.JWT_SECRET,
+        expiresIn: '20m',
+      }
+    );
   }
 
-
-  async createOnceToken(userId: number) {
-    return await this.getNewToken(userId, 'once', '20m');
+  async createAccessToken(userId: number): Promise<string> {
+    return this.jwtService.sign(
+      { userId, time: new Date(), type: 'access' },
+      {
+        secret: process.env.JWT_SECRET,
+        expiresIn: '10m',
+      }
+    );
   }
 
-  async createAccessToken(userId: number) {
-    return await this.getNewToken(userId, 'access', '10m');
-  }
+  async createRefreshToken(userId: number): Promise<string> {
+    const time = new Date();
+    const token =  this.jwtService.sign(
+      { userId, time: time, type: 'refresh' },
+      {
+        secret: process.env.JWT_REFRESH_SECRET,
+        expiresIn: '7d',
+      }
+    );
 
-  async createRefreshToken(userId: number) {
-    const token = await this.getNewToken(userId, 'refresh', '50m');
+    const refreshToken = new RefreshToken();
+    refreshToken.userId = userId;
+    refreshToken.refreshToken = token;
 
-    // TODO refresh token 암호화
+    time.setDate(time.getDate() + 7);
+    refreshToken.expiresAt = time;
+
+    await this.refreshRepository.save(refreshToken);
     return token;
   }
 
   /**
-   * 
-   * token 유효성 검사
+   * refresh token 디코딩 및 유효성 검사
    */
-  async tokenValidate(token: string) {
-    return await this.jwtService.verify(token, {
-      secret: process.env.JWT_SECRET,
-    });
-    // TODO 토큰 유효성 예외
+  async verifyRefreshToken(refreshToken: string){
+    try{
+      return await this.jwtService.verify(refreshToken, {
+        secret: process.env.JWT_REFRESH_SECRET,
+      });
+    }catch(error){
+      throw this.jwtException.NotValidToken;
+    }
+
+  }
+
+    /**
+   * 
+   * refresh token 유효성 검사
+   */
+  async validateRefreshToken(refreshToken: string, refreshInfo: any){
+    const storedRefresh = await this.refreshRepository.findOne({where: {userId: refreshInfo.userId}});
+
+    if(!storedRefresh){
+      throw this.jwtException.NotValidToken;
+    }
+
+    if(refreshInfo.userId !== storedRefresh.userId){
+      throw this.jwtException.NotValidToken;
+    }
+    
+    if(refreshToken !== storedRefresh.refreshToken){
+      throw this.jwtException.NotValidToken;
+    }
+    
+    if(new Date() > storedRefresh.expiresAt){
+      throw this.jwtException.RefreshExpire;
+    }
+    
+    if(!storedRefresh.isActive){
+      throw this.jwtException.NotValidToken;
+    }
+    return true;
   }
 
   async filterNulls(obj: any) {
@@ -103,22 +150,41 @@ export class AuthService {
    * Token 에서 추출한 userId 로 User 객체 반환
    */
   async getUser(userId: number){
-    return await this.userRepository.findOneBy({userId});
+    const user =  await this.userRepository.findOneBy({userId});
+    if(!user){
+      throw this.jwtException.UserNotFound;
+    }
+    return user;
   }
 
   /**
    * 
    * 회원가입시 이전 가입이력 확인을 위해 userEmail 검증 
    */
-  async validateUser(userEmail: string) {
-    const user = this.userRepository.findOne({
+  async validateUser(userEmail: string, authType: AuthType) {
+    const user = await this.userRepository.findOne({
       where: { userEmail: userEmail },
     });
+
+    if(user.authType !== authType){
+      throw this.jwtException.UserAlreadyExists
+    }
+
     if (!user) {
       return null;
-    } else {
-      return user;
     }
+    return user;
+
+  }
+
+  async validUserNick(userNick: string){
+    const user = await this.userRepository.findOne({
+      where: {userNick: userNick}
+    });
+    if(user){
+      return false;
+    }
+    return true;
   }
 
 }

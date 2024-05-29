@@ -5,7 +5,7 @@ export interface UserInfo {
 
   authType: AuthType;
 
-  userNick: string;
+  userNick?: string;
 
   userName?: string | null;
 

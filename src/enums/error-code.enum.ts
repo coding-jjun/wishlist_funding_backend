@@ -24,4 +24,12 @@ export enum ErrorCode {
   AlreadyFriend = '0801',
 
   // Notification
+
+  // Jwt
+  JwtNotExpired = '0900',
+  JwtExpired = '0901',
+  NotValidToken = '0902',
+  TokenMissing = '0903',
+  RefreshExpire = '0904',
+  UserAlreadyExists = '0905'
 }

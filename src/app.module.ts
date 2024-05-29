@@ -35,6 +35,7 @@ import { ExceptionModule } from './filters/exception.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TransformInterceptor } from './transform/transform.interceptor';
 import { AuthModule } from './features/auth/auth.module';
+import { RefreshToken } from './entities/refresh-token.entity';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { AuthModule } from './features/auth/auth.module';
         Account,
         Gift,
         GiftogetherError,
+        RefreshToken
       ],
       ssl: {
         ca: readFileSync('global-bundle.pem'),

@@ -32,11 +32,10 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google'){
     const userInfo : UserInfo = {
       authType: AuthType.Google,
       authId: googleAccount.sub,
-      userNick: googleAccount.name,
       userEmail: googleAccount.email,
     }
 
-    const user = await this.authService.validateUser(googleAccount.email);
+    const user = await this.authService.validateUser(googleAccount.email, AuthType.Google);
 
     // 기존 회원 -> 로그인
     if(user){
@@ -47,7 +46,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google'){
       done(null, {type: 'login', accessToken, refreshToken, user})
       
     // 신규 회원 -> 회원가입
-    }else{
+    }else{     
+      const userNick = googleAccount.name;
+      const isValid = await this.authService.validUserNick(userNick);
+      if(isValid){
+        userInfo.userNick = userNick;
+      }
       
       let imgUrl = null;
       if(googleAccount.picture){
