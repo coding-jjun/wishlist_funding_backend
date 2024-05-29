@@ -15,11 +15,5 @@ export class UpdateAddressDto {
   addrZip: string;
 
   @IsNotEmpty()
-  recvName: string;
-
-  @IsNotEmpty()
-  recvPhone: string;
-
-  @IsNotEmpty()
   isDef: boolean;
 }
