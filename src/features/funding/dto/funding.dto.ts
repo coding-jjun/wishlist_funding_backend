@@ -13,6 +13,12 @@ export class FundingDto {
   fundPubl: boolean;
   fundGoal: number;
   fundSum: number;
+  fundAddrRoad: string;
+  fundAddrDetl: string;
+  fundAddrZip: string;
+  fundRecvName: string;
+  fundRecvPhone: string;
+  fundRecvReq?: string;
   regAt: Date;
   endAt: Date;
   gifts: ResponseGiftDto[];
@@ -34,6 +40,12 @@ export class FundingDto {
     this.fundPubl = funding.fundPubl;
     this.fundGoal = funding.fundGoal;
     this.fundSum = funding.fundSum;
+    this.fundAddrRoad = funding.fundAddrRoad;
+    this.fundAddrDetl = funding.fundAddrDetl;
+    this.fundAddrZip = funding.fundAddrZip;
+    this.fundRecvName = funding.fundRecvName;
+    this.fundRecvPhone = funding.fundRecvPhone;
+    this.fundRecvReq = funding.fundRecvReq;
     this.regAt = funding.regAt;
     this.endAt = funding.endAt;
     this.gifts = gifts || [];

@@ -18,6 +18,15 @@ export class CreateAddressDto {
   @IsNotEmpty()
   addrZip: string;
 
+  @IsOptional()
+  recvName: string;
+
+  @IsOptional()
+  recvPhone: string;
+
+  @IsOptional()
+  recvReq: string;
+
   @IsNotEmpty()
   isDef: boolean;
 }

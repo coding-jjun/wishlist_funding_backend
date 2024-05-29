@@ -27,6 +27,9 @@ export class AddressService {
     address.addrDetl = createAddressDto.addrDetl;
     address.addrZip = createAddressDto.addrZip;
     address.addrNick = createAddressDto.addrNick;
+    address.recvName = createAddressDto.recvName;
+    address.recvPhone = createAddressDto.recvPhone;
+    address.recvReq = createAddressDto.recvReq;
     address.isDef = createAddressDto.isDef;
 
     const user = await this.userRepository.findOne({
@@ -50,6 +53,9 @@ export class AddressService {
         'addr.addrRoad',
         'addr.addrDetl',
         'addr.addrZip',
+        'addr.recvName',
+        'addr.recvPhone',
+        'addr.recvReq',
         'addr.isDef',
       ])
       .where('addr.userId = :userId', { userId })
@@ -80,6 +86,9 @@ export class AddressService {
     addr.addrRoad = updateAddressDto.addrRoad;
     addr.addrDetl = updateAddressDto.addrDetl;
     addr.addrZip = updateAddressDto.addrZip;
+    addr.recvName = updateAddressDto.recvName;
+    addr.recvPhone = updateAddressDto.recvPhone;
+    addr.recvReq = updateAddressDto.recvReq;
     addr.isDef = updateAddressDto.isDef;
 
     return await this.addrRepository.save(addr);
