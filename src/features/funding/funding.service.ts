@@ -166,7 +166,7 @@ export class FundingService {
     
     queryBuilder
       .leftJoinAndSelect('funding.fundUser', 'user')
-      .leftJoinAndSelect('user.image', 'img');
+      // .leftJoinAndSelect('user.image', 'img');
     
     const fundings = (await queryBuilder.getMany()).map(funding => new FundingDto(funding));
 

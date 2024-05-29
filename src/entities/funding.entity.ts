@@ -131,7 +131,6 @@ export class Funding {
   @OneToOne(() => Image, (image) => image.imgId)
   defaultImgId: number;
 
-  @ValidateNested()
   @OneToMany(() => Image, (image) => image.subId)
   images: Image[];
 }
