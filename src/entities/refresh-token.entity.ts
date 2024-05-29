@@ -1,9 +1,12 @@
-import { Column, Entity } from "typeorm";
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class RefreshToken{
 
-  @Column({unique: true})
+  @PrimaryGeneratedColumn()
+  private tokenId: number;
+
+  @Column()
   userId: number;
 
   @Column()
