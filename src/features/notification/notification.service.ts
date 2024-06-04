@@ -4,18 +4,23 @@ import { Repository } from 'typeorm';
 import { Notification } from 'src/entities/notification.entity';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
+import { User } from 'src/entities/user.entity';
 
 @Injectable()
 export class NotificationService {
   constructor(
     @InjectRepository(Notification)
     private notificationRepository: Repository<Notification>,
+
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
   async findAllByUser(userId: number): Promise<Notification[]> {
     const notifications = await this.notificationRepository
       .createQueryBuilder('notification')
       .where('notification.recvId = :userId', { userId })
+      // .leftJoinAndSelect('')
       .getMany();
 
     return notifications;
@@ -25,9 +30,11 @@ export class NotificationService {
     createNotificationDto: CreateNotificationDto,
   ): Promise<Notification> {
     const noti = new Notification();
+    const receiver = await this.userRepository.findOneBy({ userId: createNotificationDto.recvId })
+    const sender = await this.userRepository.findOneBy({ userId: createNotificationDto.sendId })
 
-    noti.sendId = createNotificationDto.sendId;
-    noti.recvId = createNotificationDto.recvId;
+    noti.sendId = sender;
+    noti.recvId = receiver;
     noti.notiType = createNotificationDto.notiType;
     noti.reqType = createNotificationDto.reqType;
     noti.subId = createNotificationDto.subId;
