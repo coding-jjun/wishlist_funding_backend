@@ -25,13 +25,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     if (!authorization) {
       throw this.jwtException.TokenMissing;
     }
+    
     try {
-      // Strategy 실행
       await super.canActivate(context);
-      const res = await super.canActivate(context);
-      if(!res){
-        throw this.jwtException.NotValidToken;
-      }
       return true;
 
     } catch (error) {

@@ -142,18 +142,6 @@ export class AuthService {
       return await this.userRepository.save(user);
     }
     // TODO 예외처리
-    return null;
-  }
-
-  /**
-   * 
-   * Token 에서 추출한 userId 로 User 객체 반환
-   */
-  async getUser(userId: number){
-    const user =  await this.userRepository.findOneBy({userId});
-    if(!user){
-      throw this.jwtException.UserNotFound;
-    }
     return user;
   }
 

@@ -35,26 +35,12 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
       userPhone: kakaoAccount.phone_number || null,
 
     }
-    // userName, userPhone 이 같다면 다른 SNS 로 로그인한 회원
-    // await this.authService.
-    const user = await this.authService.validateUser(kakaoAccount.email, AuthType.Kakao);
 
-    // 기존 회원 -> 로그인
-    if(user){
-      const accessToken = await this.authService.createAccessToken(user.userId);
-      const refreshToken = await this.authService.createRefreshToken(user.userId);
+    // user == 로그인
+    let user = await this.authService.validateUser(kakaoAccount.email, AuthType.Kakao);
 
-      done(null, { type: 'login', accessToken, refreshToken, user });
-
-      // 신규 회원 -> 회원가입
-    } else {
-      
-      const userNick = kakaoAccount.profile.nickname;
-      const isValid = await this.authService.validUserNick(userNick);
-      if(isValid){
-        userInfo.userNick = userNick;
-      }
-      
+    // ! user == 회원 가입
+    if(! user){      
       if (kakaoAccount.has_birthyear && kakaoAccount.has_birthday) {
         userInfo.userBirth = await this.authService.parseDate(
           kakaoAccount.birthyear,
@@ -66,10 +52,8 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
       if (kakaoAccount.profile.is_default_image) {
         imgUrl = kakaoAccount.profile.thumbnail_image_url;
       }
-
-      const user = await this.authService.saveAuthUser(userInfo, imgUrl);
-      const onceToken = await this.authService.createOnceToken(user.userId);
-      done(null, { type: 'once', onceToken, user });
+      user = await this.authService.saveAuthUser(userInfo, imgUrl);
     }
+    done(null, user);
   }
 }
