@@ -10,6 +10,7 @@ import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { ImageType } from 'src/enums/image-type.enum';
 import { DefaultImageId } from 'src/enums/default-image-id';
 import { UserDto } from './dto/user.dto';
+import { isMongoId } from 'class-validator';
 
 @Injectable()
 export class UserService {
@@ -139,14 +140,32 @@ export class UserService {
     );
   }
 
-  async deleteUser(userId: number): Promise<User> {
+  async deleteUser(userId: number): Promise<UserDto> {
     const user = await this.userRepository.findOne({ where: { userId } });
     if (!user) {
-      throw HttpException;
+      throw this.g2gException.UserAlreadyDeleted;
     }
     await this.userRepository.softDelete(user.userId);
 
-    return user;
+    const image = user.defaultImgId
+      ? await this.imgRepository.findOne({
+          where: { imgId: user.defaultImgId },
+        })
+      : await this.imgRepository.findOne({
+          where: { imgType: ImageType.User, subId: user.userId },
+        });
+
+    return new UserDto(
+      user.userNick,
+      user.userName,
+      user.userPhone,
+      user.userBirth,
+      user.authType,
+      image.imgUrl,
+      user.userId,
+      user.userEmail,
+      user.authId,
+    );
   }
 
   // 사용자 계좌 조회

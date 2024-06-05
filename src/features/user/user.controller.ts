@@ -159,16 +159,9 @@ export class UserController {
   async deleteUser(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<CommonResponse> {
-    try {
-      return {
-        message: '사용자 정보 삭제에 성공하였습니다.',
-        data: await this.userService.deleteUser(userId),
-      };
-    } catch (error) {
-      throw new HttpException(
-        'Failed to create delete user',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    return {
+      message: '사용자 정보 삭제에 성공하였습니다.',
+      data: await this.userService.deleteUser(userId),
+    };
   }
 }

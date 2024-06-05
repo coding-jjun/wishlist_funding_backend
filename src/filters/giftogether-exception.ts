@@ -59,6 +59,12 @@ export class GiftogetherExceptions {
     HttpStatus.BAD_REQUEST,
   );
 
+  UserAlreadyDeleted = new GiftogetherException(
+    ErrorMsg.UserAlreadyDeleted,
+    ErrorCode.UserAlreadyDeleted,
+    HttpStatus.BAD_REQUEST,
+  );
+
   // Friend
   AlreadySendRequest = new GiftogetherException(
     ErrorMsg.AlreadySendRequest,
