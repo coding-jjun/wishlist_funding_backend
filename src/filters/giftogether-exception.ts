@@ -53,6 +53,12 @@ export class GiftogetherExceptions {
     HttpStatus.BAD_REQUEST,
   );
 
+  UserNotUpdated = new GiftogetherException(
+    ErrorMsg.UserNotUpdated,
+    ErrorCode.UserNotUpdated,
+    HttpStatus.BAD_REQUEST,
+  );
+
   // Friend
   AlreadySendRequest = new GiftogetherException(
     ErrorMsg.AlreadySendRequest,

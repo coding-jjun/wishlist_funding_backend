@@ -20,6 +20,7 @@ import { AddressService } from '../address/address.service';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { FundingService } from '../funding/funding.service';
 import { FundTheme } from 'src/enums/fund-theme.enum';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 @Controller('user')
 export class UserController {
@@ -27,6 +28,7 @@ export class UserController {
     private readonly userService: UserService,
     private readonly addrService: AddressService,
     private readonly fundService: FundingService,
+    private readonly g2gExceptions: GiftogetherExceptions,
   ) {}
 
   @Get('/:userId')
@@ -149,7 +151,7 @@ export class UserController {
         data: await this.userService.updateUser(userId, updateUserDto),
       };
     } catch (error) {
-      throw new HttpException('Failed to update user', HttpStatus.BAD_REQUEST);
+      throw this.g2gExceptions.UserNotUpdated;
     }
   }
 
