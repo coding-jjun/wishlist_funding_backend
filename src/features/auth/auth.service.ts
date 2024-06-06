@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from 'src/entities/user.entity';
@@ -8,6 +8,7 @@ import { AuthType } from 'src/enums/auth-type.enum';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { RefreshToken } from 'src/entities/refresh-token.entity';
 
+import { RedisClientType } from '@redis/client';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +19,8 @@ export class AuthService {
     private readonly refreshRepository: Repository<RefreshToken>,
     private jwtService: JwtService,
     private readonly jwtException: GiftogetherExceptions,
+    @Inject('REDIS_CLIENT')
+    private readonly redisClient: RedisClientType,
 
   ) {}
 

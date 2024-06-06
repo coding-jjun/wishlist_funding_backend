@@ -1,11 +1,14 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import { ExecutionContext, Inject, Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { RedisClientType } from '@redis/client';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
   constructor(
     private readonly jwtException: GiftogetherExceptions,
+    @Inject('REDIS_CLIENT')
+    private readonly redisClient: RedisClientType,
   ) {
     super('jwt');
   }
