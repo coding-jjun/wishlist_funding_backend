@@ -18,7 +18,6 @@ export class JwtRefreshGuard extends AuthGuard('jwt'){
    * @returns 
    */
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    console.log('----------- jwt guard --------------');
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();
     
@@ -26,18 +25,21 @@ export class JwtRefreshGuard extends AuthGuard('jwt'){
       throw this.jwtException.TokenMissing;
     }
 
-    // Refresh token 유효 검사
     const refreshToken = request.cookies['refresh_token'];
-    const refreshInfo = await this.authService.verifyRefreshToken(refreshToken);
 
-    const isValid = await this.authService.validateRefreshToken(refreshToken, refreshInfo);
-
+    const tokenInfo = await this.authService.verifyRefreshToken(refreshToken);
+    const userId = tokenInfo.userId;
+    
+    const isInBlackList = await this.authService.isBlackListToken(userId, refreshToken);
+    if(isInBlackList){
+      throw this.jwtException.NotValidToken;
+    }
+    
+    const isValid = await this.authService.validateRefresh(userId, refreshToken);
     if(!isValid){
       throw this.jwtException.NotValidToken;
     }
-
-    const reIssueToken = await this.authService.createAccessToken(refreshInfo.userId);
-    
+    const reIssueToken = await this.authService.createAccessToken(userId);
     response.cookie('access_token', reIssueToken);
     return true;
 

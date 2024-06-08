@@ -46,15 +46,9 @@ export class AuthService {
         expiresIn: '7d',
       }
     );
-
-    const refreshToken = new RefreshToken();
-    refreshToken.userId = userId;
-    refreshToken.refreshToken = token;
-
-    time.setDate(time.getDate() + 7);
-    refreshToken.expiresAt = time;
-
-    await this.refreshRepository.save(refreshToken);
+    await this.redisClient.set(`user:${userId}`, token, {
+      EX: 60 * 60 * 24 * 7, // 7일 동안 유효
+    });  
     return token;
   }
 
@@ -72,34 +66,21 @@ export class AuthService {
 
   }
 
-    /**
-   * 
-   * refresh token 유효성 검사
-   */
-  async validateRefreshToken(refreshToken: string, refreshInfo: any){
-    const storedRefresh = await this.refreshRepository.findOne({where: {userId: refreshInfo.userId}});
-
-    if(!storedRefresh){
-      throw this.jwtException.NotValidToken;
-    }
-
-    if(refreshInfo.userId !== storedRefresh.userId){
-      throw this.jwtException.NotValidToken;
-    }
-    
-    if(refreshToken !== storedRefresh.refreshToken){
-      throw this.jwtException.NotValidToken;
-    }
-    
-    if(new Date() > storedRefresh.expiresAt){
-      throw this.jwtException.RefreshExpire;
-    }
-    
-    if(!storedRefresh.isActive){
-      throw this.jwtException.NotValidToken;
+async validateRefresh(userId: string, refreshToken: string): Promise<boolean> {
+  try {
+    const storedToken = await this.redisClient.get(`user:${userId}`);
+    console.log(userId, storedToken, refreshToken);
+    if (refreshToken !== storedToken) {
+      return false;
     }
     return true;
+
+  } catch (error) {
+    throw this.jwtException.RedisServerError;
   }
+  }
+  
+
 
   async filterNulls(obj: any) {
     const filtered = {};
