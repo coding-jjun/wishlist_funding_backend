@@ -28,30 +28,19 @@ export class AuthService {
     return new Date(year, month, day);
   }
 
-  async createOnceToken(userId: number): Promise<string> {
-    return this.jwtService.sign(
-      { userId, time: new Date(), type: 'once' },
-      {
-        secret: process.env.JWT_SECRET,
-        expiresIn: '20m',
-      }
-    );
-  }
-
   async createAccessToken(userId: number): Promise<string> {
     return this.jwtService.sign(
-      { userId, time: new Date(), type: 'access' },
+      { userId, time: new Date()},
       {
         secret: process.env.JWT_SECRET,
-        expiresIn: '10m',
+        expiresIn: '30m',
       }
     );
   }
-
   async createRefreshToken(userId: number): Promise<string> {
     const time = new Date();
-    const token =  this.jwtService.sign(
-      { userId, time: time, type: 'refresh' },
+    const token = this.jwtService.sign(
+      { userId: userId, time: time },
       {
         secret: process.env.JWT_REFRESH_SECRET,
         expiresIn: '7d',
