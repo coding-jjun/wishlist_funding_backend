@@ -91,7 +91,7 @@ if __name__ == "__main__":
             MIN_FUND_ID: {MIN_FUND_ID},
             MAX_FUND_ID: {MAX_FUND_ID}"""
         )
-        for i, _ in enumerate(range(ARG_NUMBER), start=1):
+        for _ in range(ARG_NUMBER):
             try:
                 match ARG_TABLE:
                     case "account":
@@ -126,7 +126,7 @@ if __name__ == "__main__":
                         }
                     case "address":
                         kwargs = {
-                            "userId": i,
+                            "userId": fake.random_int(min=MIN_USER_ID, max=MAX_USER_ID),
                             "addrRoad": fake.street_address(),
                             "addrDetl": fake.address(),
                             "addrZip": fake.postcode(),
@@ -134,8 +134,8 @@ if __name__ == "__main__":
                         }
                     case "comment":
                         kwargs = {
-                            "fundId": i,
-                            "authorId": i,
+                            "fundId": fake.random_int(min=1, max=MAX_FUND_ID),
+                            "authorId": fake.random_int(min=1, max=MAX_USER_ID),
                             "content": fake.sentence(),
                         }
                     case "donation":
@@ -146,7 +146,7 @@ if __name__ == "__main__":
                             "orderId": fake.word(),
                             "donAmnt": fake.random_int(min=1000, max=100_000_000),
                             "fundId": fake.random_int(min=MIN_FUND_ID, max=MAX_FUND_ID),
-                            "userId": i,
+                            "userId": fake.random_int(min=MIN_USER_ID, max=MAX_USER_ID),
                         }
                     case "friend":
                         kwargs = {
@@ -168,12 +168,7 @@ if __name__ == "__main__":
                             "fundTheme" : fake.word(ext_word_list=["Birthday", "Anniversary", "Donation"]),
                             "fundGoal" : fake.random_int(min=1000, max=100_000_000),
                             "endAt" : fake.future_date(end_date=date(2055, 3, 29)).strftime("%Y-%m-%d"),
-                            "fundUser" : i,
-                            "fundAddrRoad": fake.word(),
-                            "fundAddrDetl": fake.word(),
-                            "fundAddrZip": fake.word(),
-                            "fundRecvName": fake.name(),
-                            "fundRecvPhone": fake.phone_number(),
+                            "fundUser" : fake.random_int(min=MIN_USER_ID, max=MAX_USER_ID),
                         }
                     case "gratitude":
                         # TODO - fundId와 같이 1대1로 물려있음. 만들 때 항상 중복여부를 검사하기 때문에 삽입하기 까다롭다.
@@ -228,7 +223,6 @@ if __name__ == "__main__":
                         }
                     case "user":
                         kwargs = {
-                            "userId": i,
                             "userNick": fake.safe_color_name()
                             + " "
                             + fake.first_name()
@@ -240,6 +234,7 @@ if __name__ == "__main__":
                             "userEmail": fake.email(),
                             "userBirth": fake.date(),
                             "userAcc": None,
+                            "userImg": None,
                         }
 
                 exec_insertion(conn, ARG_TABLE, **kwargs)
