@@ -11,6 +11,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { ImageService } from './image.service';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { ImageDto } from './dto/image.dto';
+import { v4 as uuidv4 } from 'uuid';
 
 @Controller('image')
 export class ImageController {
@@ -29,14 +30,17 @@ export class ImageController {
     )
     files: Express.Multer.File[],
   ): Promise<CommonResponse> {
-    const uploadedImages = new ImageDto;
+    const uploadedImages = new ImageDto();
     const urls = [];
 
     for (const file of files) {
-      const url = await this.imageService.upload(
-        file.originalname,
-        file.buffer,
-      );
+      const regex = /\.([0-9a-z]+)(?:[\?#]|$)/i;
+      const match = file.originalname.match(regex);
+      const extension = match[1];
+
+      const filename = uuidv4() + "." + extension;
+
+      const url = await this.imageService.upload(filename, file.buffer);
       urls.push(url);
     }
 
