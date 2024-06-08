@@ -122,13 +122,14 @@ async validateRefresh(userId: string, refreshToken: string): Promise<boolean> {
       where: { userEmail: userEmail },
     });
 
-    if(user.authType !== authType){
-      throw this.jwtException.UserAlreadyExists
-    }
-
     if (!user) {
       return null;
     }
+
+    if(user.authType !== authType && userEmail === user.userEmail){
+      throw this.jwtException.UserAlreadyExists
+    }
+
     return user;
 
   }
