@@ -66,7 +66,8 @@ export class AuthController {
     @Body() authUserDto: AuthUserDto,
   ) {
     req.user = await this.authService.saveAuthUser(authUserDto, req.user);
-    return await this.setupAuthResponse(res, req.user);
+    res.json({user: req.user});
+    return res;
   }
 
   /**
