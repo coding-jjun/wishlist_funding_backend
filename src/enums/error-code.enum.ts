@@ -31,5 +31,7 @@ export enum ErrorCode {
   NotValidToken = '0902',
   TokenMissing = '0903',
   RefreshExpire = '0904',
-  UserAlreadyExists = '0905'
+  UserAlreadyExists = '0905',
+  FailedLogout = '0906',
+  RedisServerError = '0907',
 }

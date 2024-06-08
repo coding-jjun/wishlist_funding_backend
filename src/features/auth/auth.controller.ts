@@ -90,4 +90,17 @@ export class AuthController {
     }; 
   }
   
+  @Get('/logout')
+  @UseGuards(JwtAuthGuard)
+  async logout(@Req() req: any): Promise<CommonResponse>{
+    const accessToken = req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.cookies['refresh_token'];
+    await this.authService.logout(req.user.userId, accessToken, refreshToken);
+    return {
+      message: '로그아웃 성공',
+      data: true
+    }
+  }
+
+
 }

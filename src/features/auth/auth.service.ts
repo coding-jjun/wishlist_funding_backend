@@ -173,4 +173,43 @@ export class AuthService {
     return true;
   }
 
+  async verifyAccessToken(accessToken: string){
+    try{
+      return await this.jwtService.verify(accessToken, {
+        secret: process.env.JWT_SECRET,
+      });
+    }catch(error){
+      throw this.jwtException.NotValidToken;
+    }
+
+  }
+
+  async isBlackListToken(userId: string, token: string): Promise<boolean> {
+    try {
+      const result = await this.redisClient.get(`black:${userId}:${token}`);
+      return result !== null;
+    } catch (error) {
+      console.error('Redis server error:', error);
+      throw this.jwtException.RedisServerError;
+    }
+  }
+  async logout(userId: string, accessToken: string, refreshToken: string) {
+    try {
+
+      const accessKey = `black:${userId}:${accessToken}`;
+      await this.redisClient.set(accessKey, ' ');
+      await this.redisClient.expire(accessKey, 60 * 30);
+  
+      const refreshKey = `black:${userId}:${refreshToken}`;
+      await this.redisClient.set(refreshKey, ' ');
+      await this.redisClient.expire(refreshKey, 60 * 60 * 24 * 7);
+  
+      await this.redisClient.del(`user:${userId}`);
+
+    } catch (error) {
+      throw this.jwtException.FailedLogout;
+    }
+  }
+  
+
 }

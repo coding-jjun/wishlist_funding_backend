@@ -2,6 +2,7 @@ import { ExecutionContext, Inject, Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { RedisClientType } from '@redis/client';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { AuthService } from '../auth.service';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -9,6 +10,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     private readonly jwtException: GiftogetherExceptions,
     @Inject('REDIS_CLIENT')
     private readonly redisClient: RedisClientType,
+    private readonly authService: AuthService,
   ) {
     super('jwt');
   }
@@ -20,15 +22,21 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    */
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    console.log('----------- jwt guard --------------');
-    const request = context.switchToHttp().getRequest();
 
     // 헤더에 토큰 존재 유무 확인
-    const { authorization } = request.headers;
+    const { authorization } = context.switchToHttp().getRequest().headers;
     if (!authorization) {
       throw this.jwtException.TokenMissing;
     }
-    
+    const accessToken = authorization.split(' ')[1];
+
+    const tokenInfo = await this.authService.verifyAccessToken(accessToken);
+
+    const isInBlackList = await this.authService.isBlackListToken(tokenInfo.userId, accessToken);
+    if(isInBlackList){
+      throw this.jwtException.NotValidToken;
+    }
+
     try {
       await super.canActivate(context);
       return true;
