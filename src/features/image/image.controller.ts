@@ -11,6 +11,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { ImageService } from './image.service';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { ImageDto } from './dto/image.dto';
+import * as sharp from 'sharp';
 
 @Controller('image')
 export class ImageController {
@@ -22,21 +23,21 @@ export class ImageController {
     @UploadedFiles(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 1_000_000 }),
           new FileTypeValidator({ fileType: 'image/*' }),
         ],
       }),
     )
     files: Express.Multer.File[],
   ): Promise<CommonResponse> {
-    const uploadedImages = new ImageDto;
+    const uploadedImages = new ImageDto();
     const urls = [];
 
     for (const file of files) {
-      const url = await this.imageService.upload(
-        file.originalname,
-        file.buffer,
-      );
+      const buffer = await sharp(file.buffer)
+        .resize(300)
+        .toBuffer();
+
+      const url = await this.imageService.upload(file.originalname, buffer);
       urls.push(url);
     }
 
