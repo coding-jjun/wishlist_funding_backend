@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -25,9 +25,26 @@ export class UserService {
   ) {}
 
   // 사용자 정보 조회
-  async getUserInfo(id: number): Promise<User> {
-    const user = await this.userRepository.findOneBy({ userId: id });
-    return user;
+  async getUserInfo(id: number): Promise<UserDto> {
+    const user = await this.userRepository.findOne({
+      where: { userId: id },
+    });
+    const where = user.defaultImgId
+      ? { imgId: user.defaultImgId }
+      : { imgType: ImageType.User, subId: user.userId };
+    const image = await this.imgRepository.findOne({ where });
+
+    return new UserDto(
+      user.userNick,
+      user.userName,
+      user.userPhone,
+      user.userBirth,
+      user.authType,
+      image.imgUrl,
+      user.userId,
+      user.userEmail,
+      user.authId,
+    );
   }
 
   // 사용자 생성
