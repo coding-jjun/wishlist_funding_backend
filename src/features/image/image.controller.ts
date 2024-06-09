@@ -12,6 +12,7 @@ import { ImageService } from './image.service';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { ImageDto } from './dto/image.dto';
 import { v4 as uuidv4 } from 'uuid';
+import * as sharp from 'sharp';
 
 @Controller('image')
 export class ImageController {
@@ -23,7 +24,6 @@ export class ImageController {
     @UploadedFiles(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 1_000_000 }),
           new FileTypeValidator({ fileType: 'image/*' }),
         ],
       }),
@@ -34,13 +34,17 @@ export class ImageController {
     const urls = [];
 
     for (const file of files) {
+      const buffer = await sharp(file.buffer)
+        .resize(300)
+        .toBuffer();
+
       const regex = /\.([0-9a-z]+)(?:[\?#]|$)/i;
       const match = file.originalname.match(regex);
       const extension = match[1];
 
       const filename = uuidv4() + "." + extension;
 
-      const url = await this.imageService.upload(filename, file.buffer);
+      const url = await this.imageService.upload(filename, buffer);
       urls.push(url);
     }
 
