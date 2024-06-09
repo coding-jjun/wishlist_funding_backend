@@ -110,4 +110,14 @@ export class GiftogetherExceptions {
     ErrorCode.UserAlreadyExists,
     HttpStatus.CONFLICT,
   );
+  FailedLogout = new GiftogetherException(
+    ErrorMsg.FailedLogout,
+    ErrorCode.FailedLogout,
+    HttpStatus.BAD_REQUEST,
+  );
+  RedisServerError = new GiftogetherException(
+    ErrorMsg.RedisServerError,
+    ErrorCode.RedisServerError,
+    HttpStatus.CONFLICT,
+  );
 }

@@ -65,23 +65,20 @@ export class AuthController {
     @Res() res: Response,
     @Body() authUserDto: AuthUserDto,
   ) {
-    req.user.user = await this.authService.saveAuthUser(authUserDto, req.user.user);
-    return await this.setupAuthResponse(res, req.user);
+    req.user = await this.authService.saveUser(req.user, authUserDto);
+    res.json({user: req.user});
+    return res;
   }
 
-  async setupAuthResponse(res: Response, userInfo: any){
-    switch(userInfo.type){
-      case 'login':
-        res.clearCookie('once');
-        res.cookie('access_token', userInfo.accessToken);
-        res.cookie('refresh_token', userInfo.refreshToken);
-        break
-
-      case 'once' :
-        res.cookie('once', userInfo.onceToken);
-        break
-    }
-    res.json({user: userInfo.user, needReissue: userInfo.needReissue});
+  /**
+   * 토큰을 발급받고 cookie 에 설정 후 사용자에게 응답한다.
+   */
+  async setupAuthResponse(res: Response, user: any){
+    const accessToken = await this.authService.createAccessToken(user.userId);
+    const refreshToken = await this.authService.createRefreshToken(user.userId);
+    res.cookie('access_token', accessToken);
+    res.cookie('refresh_token', refreshToken);
+    res.json({user: user});
     return res;
   }
 
@@ -94,4 +91,17 @@ export class AuthController {
     }; 
   }
   
+  @Get('/logout')
+  @UseGuards(JwtAuthGuard)
+  async logout(@Req() req: any): Promise<CommonResponse>{
+    const accessToken = req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.cookies['refresh_token'];
+    await this.authService.logout(req.user.userId, accessToken, refreshToken);
+    return {
+      message: '로그아웃 성공',
+      data: true
+    }
+  }
+
+
 }

@@ -26,7 +26,6 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
     done: any,
   ) {
     const naverAccount = profile._json as any;
-    console.log('-------------------- naver validate -----------------------');
 
     const userInfo: UserInfo = {
       authType: AuthType.Naver,
@@ -35,25 +34,12 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
       userEmail: naverAccount.email,
       userPhone: naverAccount.mobile || null,
     }
-    // console.log("username : ", naverAccount.name);
 
-    const user = await this.authService.validateUser(naverAccount.email, AuthType.Naver);
+    // user == 로그인
+    let user = await this.authService.validateUser(naverAccount.email, AuthType.Naver);
 
-    // 기존 회원 -> 로그인
-    if (user) {
-      const accessToken = await this.authService.createAccessToken(user.userId);
-      const refreshToken = await this.authService.createRefreshToken(user.userId);
-
-      done(null, { type: 'login', accessToken, refreshToken, user });
-
-      // 신규 회원 -> 회원가입
-    } else {
-      const userNick = naverAccount.nickname;
-      const isValid = await this.authService.validUserNick(userNick);
-      if(isValid){
-        userInfo.userNick = userNick;
-      }
-
+    // ! user == 회원 가입
+    if (! user) {
       if (naverAccount.birthyear && naverAccount.birthday) {
         userInfo.userBirth = await this.authService.parseDate(
           naverAccount.birthyear,
@@ -63,13 +49,11 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
 
       let imgUrl = null;
       if (naverAccount.profile_image) {
-        // TODO 이미지 객체 생성
-        // imgUrl = naverAccount.profile_image;
+        imgUrl = naverAccount.profile_image;
       }
-
-      const user = await this.authService.saveAuthUser(userInfo, imgUrl);
-      const onceToken = await this.authService.createOnceToken(user.userId);
-      done(null, { type: 'once', onceToken, user });
+      user = await this.authService.saveAuthUser(userInfo, imgUrl);
     }
+    done(null, user);
+    
   }
 }

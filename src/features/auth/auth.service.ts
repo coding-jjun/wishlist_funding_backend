@@ -1,23 +1,26 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from 'src/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
-import { UserInfo } from 'src/interfaces/user-info.interface';
 import { AuthType } from 'src/enums/auth-type.enum';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
-import { RefreshToken } from 'src/entities/refresh-token.entity';
-
+import { Image } from 'src/entities/image.entity';
+import { ImageType } from 'src/enums/image-type.enum';
+import { RedisClientType } from '@redis/client';
+import { DefaultImageId } from 'src/enums/default-image-id';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(RefreshToken)
-    private readonly refreshRepository: Repository<RefreshToken>,
+    @InjectRepository(Image)
+    private readonly imgRepository: Repository<Image>,
     private jwtService: JwtService,
     private readonly jwtException: GiftogetherExceptions,
+    @Inject('REDIS_CLIENT')
+    private readonly redisClient: RedisClientType,
 
   ) {}
 
@@ -30,44 +33,27 @@ export class AuthService {
     return new Date(year, month, day);
   }
 
-  async createOnceToken(userId: number): Promise<string> {
-    return this.jwtService.sign(
-      { userId, time: new Date(), type: 'once' },
-      {
-        secret: process.env.JWT_SECRET,
-        expiresIn: '20m',
-      }
-    );
-  }
-
   async createAccessToken(userId: number): Promise<string> {
     return this.jwtService.sign(
-      { userId, time: new Date(), type: 'access' },
+      { userId, time: new Date()},
       {
         secret: process.env.JWT_SECRET,
-        expiresIn: '10m',
+        expiresIn: '30m',
       }
     );
   }
-
   async createRefreshToken(userId: number): Promise<string> {
     const time = new Date();
-    const token =  this.jwtService.sign(
-      { userId, time: time, type: 'refresh' },
+    const token = this.jwtService.sign(
+      { userId: userId, time: time },
       {
         secret: process.env.JWT_REFRESH_SECRET,
         expiresIn: '7d',
       }
     );
-
-    const refreshToken = new RefreshToken();
-    refreshToken.userId = userId;
-    refreshToken.refreshToken = token;
-
-    time.setDate(time.getDate() + 7);
-    refreshToken.expiresAt = time;
-
-    await this.refreshRepository.save(refreshToken);
+    await this.redisClient.set(`user:${userId}`, token, {
+      EX: 60 * 60 * 24 * 7, // 7일 동안 유효
+    });  
     return token;
   }
 
@@ -85,34 +71,21 @@ export class AuthService {
 
   }
 
-    /**
-   * 
-   * refresh token 유효성 검사
-   */
-  async validateRefreshToken(refreshToken: string, refreshInfo: any){
-    const storedRefresh = await this.refreshRepository.findOne({where: {userId: refreshInfo.userId}});
-
-    if(!storedRefresh){
-      throw this.jwtException.NotValidToken;
-    }
-
-    if(refreshInfo.userId !== storedRefresh.userId){
-      throw this.jwtException.NotValidToken;
-    }
-    
-    if(refreshToken !== storedRefresh.refreshToken){
-      throw this.jwtException.NotValidToken;
-    }
-    
-    if(new Date() > storedRefresh.expiresAt){
-      throw this.jwtException.RefreshExpire;
-    }
-    
-    if(!storedRefresh.isActive){
-      throw this.jwtException.NotValidToken;
+async validateRefresh(userId: string, refreshToken: string): Promise<boolean> {
+  try {
+    const storedToken = await this.redisClient.get(`user:${userId}`);
+    console.log(userId, storedToken, refreshToken);
+    if (refreshToken !== storedToken) {
+      return false;
     }
     return true;
+
+  } catch (error) {
+    throw this.jwtException.RedisServerError;
   }
+  }
+  
+
 
   async filterNulls(obj: any) {
     const filtered = {};
@@ -142,18 +115,6 @@ export class AuthService {
       return await this.userRepository.save(user);
     }
     // TODO 예외처리
-    return null;
-  }
-
-  /**
-   * 
-   * Token 에서 추출한 userId 로 User 객체 반환
-   */
-  async getUser(userId: number){
-    const user =  await this.userRepository.findOneBy({userId});
-    if(!user){
-      throw this.jwtException.UserNotFound;
-    }
     return user;
   }
 
@@ -166,13 +127,14 @@ export class AuthService {
       where: { userEmail: userEmail },
     });
 
-    if(user.authType !== authType){
-      throw this.jwtException.UserAlreadyExists
-    }
-
     if (!user) {
       return null;
     }
+
+    if(user.authType !== authType && userEmail === user.userEmail){
+      throw this.jwtException.UserAlreadyExists
+    }
+
     return user;
 
   }
@@ -186,5 +148,44 @@ export class AuthService {
     }
     return true;
   }
+
+  async verifyAccessToken(accessToken: string){
+    try{
+      return await this.jwtService.verify(accessToken, {
+        secret: process.env.JWT_SECRET,
+      });
+    }catch(error){
+      throw this.jwtException.NotValidToken;
+    }
+
+  }
+
+  async isBlackListToken(userId: string, token: string): Promise<boolean> {
+    try {
+      const result = await this.redisClient.get(`black:${userId}:${token}`);
+      return result !== null;
+    } catch (error) {
+      console.error('Redis server error:', error);
+      throw this.jwtException.RedisServerError;
+    }
+  }
+  async logout(userId: string, accessToken: string, refreshToken: string) {
+    try {
+
+      const accessKey = `black:${userId}:${accessToken}`;
+      await this.redisClient.set(accessKey, ' ');
+      await this.redisClient.expire(accessKey, 60 * 30);
+  
+      const refreshKey = `black:${userId}:${refreshToken}`;
+      await this.redisClient.set(refreshKey, ' ');
+      await this.redisClient.expire(refreshKey, 60 * 60 * 24 * 7);
+  
+      await this.redisClient.del(`user:${userId}`);
+
+    } catch (error) {
+      throw this.jwtException.FailedLogout;
+    }
+  }
+  
 
 }

@@ -34,4 +34,6 @@ export enum ErrorMsg {
   TokenMissing = '토큰이 없습니다.',
   RefreshExpire = '로그인 세션이 만료되었습니다. 다시 로그인해 주세요.',
   UserAlreadyExists = '다른 계정으로 이미 가입된 사용자입니다.',
+  FailedLogout = '로그아웃에 실패했습니다. 다시 시도해 주세요.',
+  RedisServerError = '로그아웃을 처리하는 중에 서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.',
 }

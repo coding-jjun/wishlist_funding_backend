@@ -21,7 +21,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google'){
       // scope += 'https://www.googleapis.com/auth/user.phonenumbers.read', 'https://www.googleapis.com/auth/user.birthday.read', 'https://www.googleapis.com/auth/user.addresses.read'
     });
   }
-  async validate(access_token: string, refresh_token: string, profile: Profile, done:any) {
+  async validate(
+    access_token: string,
+    refresh_token: string,
+    profile: Profile,
+    done: any,
+  ) {
 
     const googleAccount = profile._json;
     if(!googleAccount.email_verified){
@@ -35,33 +40,18 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google'){
       userEmail: googleAccount.email,
     }
 
-    const user = await this.authService.validateUser(googleAccount.email, AuthType.Google);
+    // user == 로그인
+    let user = await this.authService.validateUser(googleAccount.email, AuthType.Google);
 
-    // 기존 회원 -> 로그인
-    if(user){
-
-      const accessToken = await this.authService.createAccessToken(user.userId);
-      const refreshToken = await this.authService.createRefreshToken(user.userId);
-
-      done(null, {type: 'login', accessToken, refreshToken, user})
-      
-    // 신규 회원 -> 회원가입
-    }else{     
-      const userNick = googleAccount.name;
-      const isValid = await this.authService.validUserNick(userNick);
-      if(isValid){
-        userInfo.userNick = userNick;
-      }
-      
+    // ! user == 회원 가입
+    if(! user){
       let imgUrl = null;
       if(googleAccount.picture){
-        // imgUrl = googleAccount.picture;
+        imgUrl = googleAccount.picture;
       }
-      
-      const user = await this.authService.saveAuthUser(userInfo, imgUrl);
-      const onceToken = await this.authService.createOnceToken(user.userId);
-      done(null, {type: 'once', onceToken, user})
+      user = await this.authService.saveAuthUser(userInfo, imgUrl);
     }
+    done(null, user);
   }
 }
 

@@ -1,13 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { AuthService } from '../auth.service';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/entities/user.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
-    private authService: AuthService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly jwtException: GiftogetherExceptions,
   ) {
     super({
@@ -24,18 +27,13 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
    * @param done 
    */
   async validate(tokenInfo: any, done:any) {
-    console.log('----------- jwt strategy --------------');
-
-    // 회원 가입 : 회원 가입시 추가 정보 입력 (토큰 발급)
-    if(tokenInfo.type === 'once'){
-      const user = await this.authService.getUser(tokenInfo.userId);
-      const accessToken = await this.authService.createAccessToken(user.userId);
-      const refreshToken = await this.authService.createRefreshToken(user.userId);
-
-      done(null, {type: 'login', accessToken, refreshToken, user})
+    // 사용자 인증/인가
+    const userId = tokenInfo.userId;
+    const user =  await this.userRepository.findOneBy({userId});
+    if(!user){
+      throw this.jwtException.UserNotFound;
     }
-
-    done(null, true)
+    done(null, user)
   }
 }
 
