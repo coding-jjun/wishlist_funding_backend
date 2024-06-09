@@ -5,13 +5,18 @@ import { User } from 'src/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { AuthType } from 'src/enums/auth-type.enum';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { Image } from 'src/entities/image.entity';
+import { ImageType } from 'src/enums/image-type.enum';
 import { RedisClientType } from '@redis/client';
+import { DefaultImageId } from 'src/enums/default-image-id';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Image)
+    private readonly imgRepository: Repository<Image>,
     private jwtService: JwtService,
     private readonly jwtException: GiftogetherExceptions,
     @Inject('REDIS_CLIENT')
