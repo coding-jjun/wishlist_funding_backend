@@ -41,10 +41,7 @@ export class UserController {
         data: await this.userService.getUserInfo(userId),
       };
     } catch (error) {
-      throw new HttpException(
-        'Failed to get user info',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw this.g2gExceptions.UserNotFound;
     }
   }
 
