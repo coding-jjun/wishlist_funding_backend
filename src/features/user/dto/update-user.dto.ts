@@ -1,9 +1,6 @@
-import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsUrl } from 'class-validator';
 
 export class UpdateUserDto {
-  @IsNotEmpty()
-  userId: number;
-
   @IsNotEmpty()
   userNick: string;
 
@@ -26,6 +23,7 @@ export class UpdateUserDto {
   @IsNumber()
   userAcc: number;
 
-  @IsNotEmpty()
-  userImg: number;
+  @IsOptional()
+  @IsUrl()
+  userImg?: string;
 }

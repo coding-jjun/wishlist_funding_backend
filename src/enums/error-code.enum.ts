@@ -18,6 +18,8 @@ export enum ErrorCode {
 
   // User
   UserNotFound = '0700',
+  UserNotUpdated = '0701',
+  UserAlreadyDeleted = '0702',
 
   // Friend
   AlreadySendRequest = '0800',
