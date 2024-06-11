@@ -5,12 +5,14 @@ import { Profile, Strategy } from 'passport-kakao';
 import { AuthService } from '../auth.service';
 import { AuthType } from 'src/enums/auth-type.enum';
 import { UserInfo } from 'src/interfaces/user-info.interface';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 @Injectable()
 export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
   constructor(
     private readonly configService: ConfigService,
     private readonly authService: AuthService,
+    private readonly g2gException: GiftogetherExceptions,
   ) {
     super({
       clientID: configService.get<string>('KAKAO_CLIENT_ID'),
@@ -32,15 +34,30 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
       authId: resProfile.id,
       userName: kakaoAccount.name || null,
       userEmail: kakaoAccount.email,
-      userPhone: kakaoAccount.phone_number || null,
-
     }
 
     // user == 로그인
     let user = await this.authService.validateUser(kakaoAccount.email, AuthType.Kakao);
 
     // ! user == 회원 가입
-    if(! user){      
+    if(! user){
+
+      // 닉네임 유효성 검증
+      const isValidNick = await this.authService.validUserInfo("userNick", kakaoAccount.profile.nickname);
+      if(isValidNick){
+        userInfo.userNick = kakaoAccount.profile.nickname;
+      }
+    
+      // 핸드폰 번호 유효성 검증
+      if(kakaoAccount.phone_number){
+        
+        const isValidPhone = await this.authService.validUserInfo("userPhone", kakaoAccount.phone_number);
+        if(! isValidPhone){
+          throw this.g2gException.UserAlreadyExists;
+        }
+        userInfo.userPhone = kakaoAccount.phone_number;
+      }
+        
       if (kakaoAccount.has_birthyear && kakaoAccount.has_birthday) {
         userInfo.userBirth = await this.authService.parseDate(
           kakaoAccount.birthyear,

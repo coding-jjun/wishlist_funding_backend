@@ -139,11 +139,17 @@ async validateRefresh(userId: string, refreshToken: string): Promise<boolean> {
 
   }
 
-  async validUserNick(userNick: string){
+
+  // DB 에서 회원 propertyName(컬럼) 중 이미 사용중인 값인지 확인 (가입전 닉네임, 전화번호...)
+  async validUserInfo(propertyName: string, propertyValue: string){
+    // 동적으로 조건 생성
+    const condition = {};
+    condition[propertyName] = propertyValue;  
     const user = await this.userRepository.findOne({
-      where: {userNick: userNick}
+      where: condition
     });
-    if(user){
+  
+    if (user) {
       return false;
     }
     return true;

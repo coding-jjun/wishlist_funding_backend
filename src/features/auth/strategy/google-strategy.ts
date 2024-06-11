@@ -38,6 +38,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google'){
       authType: AuthType.Google,
       authId: googleAccount.sub,
       userEmail: googleAccount.email,
+      userName: googleAccount.name,
     }
 
     // user == 로그인
@@ -46,6 +47,11 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google'){
     // ! user == 회원 가입
     if(! user){
       let imgUrl = null;
+      const isValidNick = await this.authService.validUserInfo("userNick", googleAccount.given_name);
+      if(isValidNick){
+        userInfo.userNick = googleAccount.given_name;
+      }
+
       if(googleAccount.picture){
         imgUrl = googleAccount.picture;
       }

@@ -30,7 +30,7 @@ export class User {
   @Column({ default: AuthType.Jwt })
   authType: AuthType;
 
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   userNick: string;
 
   @Column({ nullable: true })
