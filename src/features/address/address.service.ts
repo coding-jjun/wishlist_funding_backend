@@ -85,11 +85,15 @@ export class AddressService {
     addrId: number,
     updateAddressDto: UpdateAddressDto,
   ): Promise<Address> {
-    const addr = await this.addrRepository.findOne({ where: { addrId } });
+        const addr = await this.addrRepository.findOne({
+      where: { addrId },
+      relations: ['addrUser']
+    });
     if (!addr) {
       throw new NotFoundException('배송지를 조회할 수 없습니다.');
     }
 
+    addr.addrUser = addr.addrUser;
     addr.addrNick = updateAddressDto.addrNick;
     addr.addrRoad = updateAddressDto.addrRoad;
     addr.addrDetl = updateAddressDto.addrDetl;
@@ -102,12 +106,15 @@ export class AddressService {
   }
 
   async remove(addrId: number): Promise<Address> {
-    const addr = await this.addrRepository.findOne({ where: { addrId } });
+    const addr = await this.addrRepository.findOne({
+      where: { addrId },
+      relations: ['addrUser']
+    });
     if (!addr) {
       throw new NotFoundException('배송지를 조회할 수 없습니다.');
     }
     try {
-      const result = await this.addrRepository.softDelete({ addrId });
+      const result = await this.addrRepository.delete({ addrId });
       // 예외가 발생하지 않으면 삭제 작업이 성공적으로 수행된 것으로 간주
       return addr;
     } catch (error) {
