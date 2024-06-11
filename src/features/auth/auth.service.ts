@@ -9,6 +9,7 @@ import { Image } from 'src/entities/image.entity';
 import { ImageType } from 'src/enums/image-type.enum';
 import { RedisClientType } from '@redis/client';
 import { DefaultImageId } from 'src/enums/default-image-id';
+import { UserDto } from '../user/dto/user.dto';
 
 @Injectable()
 export class AuthService {
@@ -114,8 +115,18 @@ async validateRefresh(userId: string, refreshToken: string): Promise<boolean> {
       Object.assign(user, filteredUserInfo);
       return await this.userRepository.save(user);
     }
-    // TODO 예외처리
-    return user;
+
+    return new UserDto(
+      userSaved.userNick,
+      userSaved.userName,
+      userSaved.userPhone,
+      userSaved.userBirth,
+      userSaved.authType,
+      imgUrl,
+      userSaved.userId,
+      userSaved.userEmail,
+      userSaved.authId,
+    )
   }
 
   /**
@@ -135,7 +146,18 @@ async validateRefresh(userId: string, refreshToken: string): Promise<boolean> {
       throw this.jwtException.UserAlreadyExists
     }
 
-    return user;
+
+    return new UserDto(
+      user.userNick,
+      user.userName,
+      user.userPhone,
+      user.userBirth,
+      user.authType,
+      image.imgUrl,
+      user.userId,
+      user.userEmail,
+      user.authId,
+    );
 
   }
 
