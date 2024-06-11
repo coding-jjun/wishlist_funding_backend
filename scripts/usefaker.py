@@ -60,42 +60,12 @@ if __name__ == "__main__":
         dbname=os.getenv("DB_DEV_DATABASE"),
     ) as conn:
 
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT \"userId\" FROM public.user ORDER BY \"userId\" ASC LIMIT 1")
-            MIN_USER_ID = int(unwrap_or(cursor.fetchone(), (0,))[0])
-            cursor.execute("SELECT \"userId\" from public.user ORDER BY \"userId\" DESC LIMIT 1")
-            MAX_USER_ID = int(unwrap_or(cursor.fetchone(), (0,))[0])
-            cursor.execute("SELECT \"accId\" from public.account ORDER BY \"accId\" DESC LIMIT 1")
-            MAX_ACC_ID = int(unwrap_or(cursor.fetchone(), (0,))[0])
-            cursor.execute("SELECT \"imgId\" from public.image ORDER BY \"imgId\" DESC LIMIT 1")
-            MAX_IMG_ID = int(unwrap_or(cursor.fetchone(), (0,))[0])
-            cursor.execute("SELECT \"fundId\" from public.funding ORDER BY \"fundId\" ASC LIMIT 1")
-            MIN_FUND_ID = int(unwrap_or(cursor.fetchone(), (0,))[0])
-            cursor.execute("SELECT \"fundId\" from public.funding ORDER BY \"fundId\" DESC LIMIT 1")
-            MAX_FUND_ID = int(unwrap_or(cursor.fetchone(), (0,))[0])
-            cursor.execute("SELECT \"gratId\" from public.gratitude ORDER BY \"gratId\" DESC LIMIT 1")
-            MAX_GRAT_ID = int(unwrap_or(cursor.fetchone(), (0,))[0])
-            cursor.execute("SELECT \"gratId\" from public.gratitude ORDER BY \"gratId\" ASC LIMIT 1")
-            MIN_GRAT_ID = int(unwrap_or(cursor.fetchone(), (0,))[0])
-            cursor.execute("SELECT \"donId\" FROM public.donation ORDER BY \"donId\" ASC LIMIT 1")
-            MIN_DON_ID = int(unwrap_or(cursor.fetchone(), (0,))[0])
-            cursor.execute("SELECT \"donId\" FROM public.donation ORDER BY \"donId\" DESC LIMIT 1")
-            MAX_DON_ID = int(unwrap_or(cursor.fetchone(), (0,))[0])
-
-        print(
-            f"""
-            MIN_USER_ID: {MIN_USER_ID},
-            MAX_USER_ID: {MAX_USER_ID},
-            MAX_ACC_ID: {MAX_ACC_ID},
-            MAX_IMG_ID: {MAX_IMG_ID},
-            MIN_FUND_ID: {MIN_FUND_ID},
-            MAX_FUND_ID: {MAX_FUND_ID}"""
-        )
-        for _ in range(ARG_NUMBER):
+        for i, _ in enumerate(range(ARG_NUMBER), start=1):
             try:
                 match ARG_TABLE:
                     case "account":
                         kwargs = {
+                            "accId": i,
                             "bank": fake.word(
                                 ext_word_list=[
                                     "Kakaobank",
@@ -126,7 +96,8 @@ if __name__ == "__main__":
                         }
                     case "address":
                         kwargs = {
-                            "userId": fake.random_int(min=MIN_USER_ID, max=MAX_USER_ID),
+                            "addrId": i,
+                            "userId": i,
                             "addrRoad": fake.street_address(),
                             "addrDetl": fake.address(),
                             "addrZip": fake.postcode(),
@@ -134,26 +105,26 @@ if __name__ == "__main__":
                         }
                     case "comment":
                         kwargs = {
-                            "fundId": fake.random_int(min=1, max=MAX_FUND_ID),
-                            "authorId": fake.random_int(min=1, max=MAX_USER_ID),
+                            "comId": i,
+                            "fundId": i,
+                            "authorId": 1,
                             "content": fake.sentence(),
                         }
                     case "donation":
                         kwargs = {
+                            "donId": i,
                             "donationStatus": fake.word(
                                 ext_word_list=["Donated", "WaitingRefund", "RefundComplete"]
                             ),
                             "orderId": fake.word(),
                             "donAmnt": fake.random_int(min=1000, max=100_000_000),
-                            "fundId": fake.random_int(min=MIN_FUND_ID, max=MAX_FUND_ID),
-                            "userId": fake.random_int(min=MIN_USER_ID, max=MAX_USER_ID),
+                            "fundId": i,
+                            "userId": 1,
                         }
                     case "friend":
                         kwargs = {
-                            "userId": fake.random_int(min=MIN_USER_ID, max=MAX_USER_ID),
-                            "friendId": fake.random_int(
-                                min=MIN_USER_ID, max=MAX_USER_ID
-                            ),
+                            "userId": i,
+                            "friendId": i + 1,
                             "status": fake.word(
                                 ext_word_list=[
                                     "Friend",
@@ -163,16 +134,25 @@ if __name__ == "__main__":
                         }
                     case "funding":
                         kwargs = {
+                            "fundId": i,
                             "fundTitle": fake.paragraph(nb_sentences=1),
                             "fundCont" : fake.paragraph(nb_sentences=2),
                             "fundTheme" : fake.word(ext_word_list=["Birthday", "Anniversary", "Donation"]),
                             "fundGoal" : fake.random_int(min=1000, max=100_000_000),
                             "endAt" : fake.future_date(end_date=date(2055, 3, 29)).strftime("%Y-%m-%d"),
-                            "fundUser" : fake.random_int(min=MIN_USER_ID, max=MAX_USER_ID),
+                            "fundUser" : 1,
+                        }
+                    case "gift":
+                        kwargs = {
+                            "giftId": i,
+                            "giftUrl": fake.uri(),
                         }
                     case "gratitude":
-                        # TODO - fundId와 같이 1대1로 물려있음. 만들 때 항상 중복여부를 검사하기 때문에 삽입하기 까다롭다.
-                        pass
+                        kwargs = {
+                            "gratId": i,
+                            "gratTitle": fake.sentence(),
+                            "gratCont": fake.paragraph(),
+                        }
                     case "image":
                         kwargs = {
                             "imgUrl": "https://picsum.photos/200",
