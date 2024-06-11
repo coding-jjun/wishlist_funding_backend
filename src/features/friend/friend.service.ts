@@ -9,6 +9,7 @@ import {
   GiftogetherException,
   GiftogetherExceptions,
 } from 'src/filters/giftogether-exception';
+import { NotiType } from 'src/enums/notification.enum';
 
 @Injectable()
 export class FriendService {
@@ -73,7 +74,7 @@ export class FriendService {
   /**
    * 친구 신청
    */
-  async createFriend(friendDto: FriendDto): Promise<{ result; message }> {
+  async createFriend(friendDto: FriendDto): Promise<{ result; message; notiType; }> {
     const { userId, friendId } = friendDto;
 
     // const user = await this.userRepository.findOne({ where: { userId }});
@@ -108,9 +109,11 @@ export class FriendService {
           // Accept friend request
           friendship.status = FriendStatus.Friend;
           const result = await this.friendRepository.save(friendship);
+          const notiType = NotiType.AcceptFollow;
           return {
             result,
             message: '친구 추가 요청을 수락하였습니다.',
+            notiType
           };
         } else {
           // Request already sent
@@ -125,9 +128,11 @@ export class FriendService {
         status: FriendStatus.Requested,
       });
       const result = await this.friendRepository.save(newFriendship);
+      const notiType = NotiType.IncomingFollow
       return {
         result,
         message: '친구 추가를 요청하였습니다.',
+        notiType
       };
     }
   }

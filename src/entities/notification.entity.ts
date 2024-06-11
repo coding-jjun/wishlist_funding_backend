@@ -31,10 +31,10 @@ export class Notification {
   @Column({ type: 'enum', enum: NotiType })
   notiType: NotiType;
 
-  @Column({ type: 'enum', enum: ReqType })
+  @Column({ type: 'enum', enum: ReqType, nullable: true })
   reqType: ReqType;
 
-  @Column()
+  @Column({ nullable: true })
   subId: number;
 
   @CreateDateColumn()
