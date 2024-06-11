@@ -12,8 +12,12 @@ import { FundingDto } from './dto/funding.dto';
 import { UpdateFundingDto } from './dto/update-funding.dto';
 import { Image } from 'src/entities/image.entity';
 import { ImageType } from 'src/enums/image-type.enum';
-import { DefaultImageId } from 'src/enums/default-image-id';
+import {
+  DefaultImageId,
+  defaultFundingImageIds,
+} from 'src/enums/default-image-id';
 import { query } from 'express';
+import assert from 'assert';
 
 @Injectable()
 export class FundingService {
@@ -42,7 +46,12 @@ export class FundingService {
     limit: number,
     lastFundId?: number, // 마지막으로 로드된 항목의 id 값
     lastEndAtDate?: Date, // 마지막으로 로드된 항목의 endAt 값
-  ): Promise<{ fundings: FundingDto[]; count: number; lastFundId: number, lastEndAt: Date }> {
+  ): Promise<{
+    fundings: FundingDto[];
+    count: number;
+    lastFundId: number;
+    lastEndAt: Date;
+  }> {
     const queryBuilder =
       await this.fundingRepository.createQueryBuilder('funding');
 
@@ -161,20 +170,24 @@ export class FundingService {
         }
         break;
     }
-    
+
     queryBuilder.take(limit);
-    
-    queryBuilder
-      .leftJoinAndSelect('funding.fundUser', 'user')
-      // .leftJoinAndSelect('user.image', 'img');
-    
-    const fundings = (await queryBuilder.getMany()).map(funding => new FundingDto(funding));
+
+    queryBuilder.leftJoinAndSelect('funding.fundUser', 'user');
+    // .leftJoinAndSelect('user.image', 'img');
+
+    const fundings = (await queryBuilder.getMany()).map(
+      (funding) => new FundingDto(funding),
+    );
 
     return {
       fundings: fundings,
       count: fundings.length,
       lastFundId: fundings[fundings.length - 1]?.fundId,
-      lastEndAt: sort[0] === "e" ? fundings[fundings.length - 1]?.endAt : fundings[fundings.length - 1]?.regAt
+      lastEndAt:
+        sort[0] === 'e'
+          ? fundings[fundings.length - 1]?.endAt
+          : fundings[fundings.length - 1]?.regAt,
     };
   }
 
@@ -251,8 +264,13 @@ export class FundingService {
       this.imageRepository.save(images);
     } else {
       // defaultImgId 필드에 funding 기본 이미지 ID를 넣는다.
+      assert(
+        createFundingDto.defaultImgId &&
+          defaultFundingImageIds.includes(createFundingDto.defaultImgId),
+      );
+
       await this.fundingRepository.update(funding_save.fundId, {
-        defaultImgId: DefaultImageId.Funding,
+        defaultImgId: createFundingDto.defaultImgId,
       });
     }
 

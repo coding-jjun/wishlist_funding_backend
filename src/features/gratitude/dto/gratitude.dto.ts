@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsUrl } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsUrl } from 'class-validator';
 
 export class GratitudeDto {
   @IsNotEmpty()
@@ -11,9 +11,14 @@ export class GratitudeDto {
   @IsUrl({}, { each: true })
   gratImg: string[];
 
-  constructor(gratTitle: string, gratCont: string, gratImg?: string[]) {
+  @IsNumber()
+  @IsOptional()
+  defaultImgId?: number;
+
+  constructor(gratTitle: string, gratCont: string, gratImg?: string[], defaultImgId?: number) {
     this.gratTitle = gratTitle;
     this.gratCont = gratCont;
     this.gratImg = gratImg || [];
+    this.defaultImgId = defaultImgId;
   }
 }

@@ -24,6 +24,10 @@ export class CreateFundingDto {
   @IsUrl({}, { each: true })
   fundImg: string[];
 
+  @IsNumber()
+  @IsOptional()
+  defaultImgId?: number;
+
   @IsNotEmpty()
   fundTheme: FundTheme;
 

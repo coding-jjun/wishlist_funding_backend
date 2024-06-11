@@ -26,4 +26,8 @@ export class UpdateUserDto {
   @IsOptional()
   @IsUrl()
   userImg?: string;
+
+  @IsNumber()
+  @IsOptional()
+  defaultImgId?: number;
 }

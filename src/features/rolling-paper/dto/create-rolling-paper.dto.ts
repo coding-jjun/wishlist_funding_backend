@@ -15,9 +15,19 @@ export class CreateRollingPaperDto {
   @IsUrl()
   rollImg?: string;
 
-  constructor(donId: number, rollMsg?: string, rollImg?: string) {
+  @IsNumber()
+  @IsOptional()
+  defaultImgId?: number;
+
+  constructor(
+    donId: number,
+    rollMsg?: string,
+    rollImg?: string,
+    defaultImgId?: number,
+  ) {
     this.donId = donId;
     this.rollMsg = rollMsg;
     this.rollImg = rollImg;
+    this.defaultImgId = defaultImgId;
   }
 }

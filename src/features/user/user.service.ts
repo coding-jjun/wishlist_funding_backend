@@ -8,9 +8,13 @@ import { Account } from 'src/entities/account.entity';
 import { Image } from 'src/entities/image.entity';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { ImageType } from 'src/enums/image-type.enum';
-import { DefaultImageId } from 'src/enums/default-image-id';
+import {
+  DefaultImageId,
+  defaultUserImageIds,
+} from 'src/enums/default-image-id';
 import { UserDto } from './dto/user.dto';
 import { isMongoId } from 'class-validator';
+import assert from 'assert';
 
 @Injectable()
 export class UserService {
@@ -85,14 +89,18 @@ export class UserService {
       this.imgRepository.save(image);
     } else {
       // default image
+      assert(
+        dto.defaultImgId && defaultUserImageIds.includes(dto.defaultImgId),
+      );
+
       const defaultImage = await this.imgRepository.findOne({
         where: {
-          imgId: DefaultImageId.User,
+          imgId: dto.defaultImgId!,
         },
       });
       userImg = defaultImage.imgUrl;
 
-      userSaved.defaultImgId = DefaultImageId.User;
+      userSaved.defaultImgId = dto.defaultImgId!;
       this.userRepository.update(
         { userId },
         { defaultImgId: userSaved.defaultImgId },

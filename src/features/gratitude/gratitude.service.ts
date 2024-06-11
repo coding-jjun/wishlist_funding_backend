@@ -6,8 +6,12 @@ import { GratitudeDto } from './dto/gratitude.dto';
 import { Funding } from 'src/entities/funding.entity';
 import { Image } from 'src/entities/image.entity';
 import { ImageType } from 'src/enums/image-type.enum';
-import { DefaultImageId } from 'src/enums/default-image-id';
+import {
+  DefaultImageId,
+  defaultGratitudeImageIds,
+} from 'src/enums/default-image-id';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import assert from 'assert';
 
 @Injectable()
 export class GratitudeService {
@@ -75,8 +79,13 @@ export class GratitudeService {
       );
     } else {
       // defaultImgId 필드에 gratitude 기본 이미지 ID를 넣는다.
+      assert(
+        gratitudeDto.defaultImgId &&
+          defaultGratitudeImageIds.includes(gratitudeDto.defaultImgId),
+      );
+
       await this.gratitudeRepo.update(grat.gratId, {
-        defaultImgId: DefaultImageId.Gratitude,
+        defaultImgId: gratitudeDto.defaultImgId,
       });
     }
 
