@@ -65,11 +65,10 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
         );
       }
 
-      let imgUrl = null;
       if (kakaoAccount.profile.is_default_image) {
-        imgUrl = kakaoAccount.profile.thumbnail_image_url;
+        userInfo.userImg = kakaoAccount.profile.thumbnail_image_url;
       }
-      user = await this.authService.saveAuthUser(userInfo, imgUrl);
+      user = await this.authService.createUser(userInfo);
     }
     done(null, user);
   }

@@ -12,6 +12,7 @@ import { NaverStrategy } from './strategy/naver-strategy';
 import { GoogleStrategy } from './strategy/google-strategy';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { Image } from 'src/entities/image.entity';
+import { Account } from 'src/entities/account.entity';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { Image } from 'src/entities/image.entity';
       secret: process.env.JWT_SECRET,
     }),
 
-    TypeOrmModule.forFeature([User, Image]),
+    TypeOrmModule.forFeature([User, Image, Account]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
   controllers: [AuthController],

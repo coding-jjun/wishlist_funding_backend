@@ -46,16 +46,15 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google'){
 
     // ! user == 회원 가입
     if(! user){
-      let imgUrl = null;
       const isValidNick = await this.authService.validUserInfo("userNick", googleAccount.given_name);
       if(isValidNick){
         userInfo.userNick = googleAccount.given_name;
       }
 
       if(googleAccount.picture){
-        imgUrl = googleAccount.picture;
+        userInfo.userImg = googleAccount.picture;
       }
-      user = await this.authService.saveAuthUser(userInfo, imgUrl);
+      user = await this.authService.createUser(userInfo);
     }
     done(null, user);
   }

@@ -65,12 +65,10 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
           naverAccount.birthday,
         );
       }
-
-      let imgUrl = null;
       if (naverAccount.profile_image) {
-        imgUrl = naverAccount.profile_image;
+        userInfo.userImg = naverAccount.profile_image;
       }
-      user = await this.authService.saveAuthUser(userInfo, imgUrl);
+      user = await this.authService.createUser(userInfo);
     }
     done(null, user);
     

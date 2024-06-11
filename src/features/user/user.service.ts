@@ -2,7 +2,6 @@ import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Account } from 'src/entities/account.entity';
 import { Image } from 'src/entities/image.entity';
@@ -45,70 +44,6 @@ export class UserService {
       user.userId,
       user.userEmail,
       user.authId,
-    );
-  }
-
-  // 사용자 생성
-  async createUser(createUserDto: CreateUserDto): Promise<UserDto> {
-    const dto = createUserDto;
-    const user = new User();
-
-    user.userNick = dto.userNick;
-    user.userPw = dto.userPw;
-    user.userName = dto.userName;
-    user.userPhone = dto.userPhone;
-    user.userBirth = dto.userBirth;
-    user.userEmail = dto.userEmail;
-
-    const userSaved = await this.userRepository.save(user);
-    const userId = userSaved.userId;
-
-    /// Account
-    if (dto.userAcc) {
-      const account = await this.accRepository.findOneBy({
-        accId: dto.userAcc,
-      });
-
-      if (account) {
-        userSaved.account = account;
-        this.userRepository.update({ userId }, { account: account });
-      }
-    }
-
-    /// Image
-    let userImg: string;
-    if (dto.userImg) {
-      // custom image
-      userImg = dto.userImg;
-      const image = new Image(dto.userImg!, ImageType.User, userSaved.userId);
-
-      this.imgRepository.save(image);
-    } else {
-      // default image
-      const defaultImage = await this.imgRepository.findOne({
-        where: {
-          imgId: DefaultImageId.User,
-        },
-      });
-      userImg = defaultImage.imgUrl;
-
-      userSaved.defaultImgId = DefaultImageId.User;
-      this.userRepository.update(
-        { userId },
-        { defaultImgId: userSaved.defaultImgId },
-      );
-    }
-
-    return new UserDto(
-      userSaved.userNick,
-      userSaved.userName,
-      userSaved.userPhone,
-      userSaved.userBirth,
-      userSaved.authType,
-      userImg,
-      userSaved.userId,
-      userSaved.userEmail,
-      userSaved.authId,
     );
   }
 

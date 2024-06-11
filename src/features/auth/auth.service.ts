@@ -10,6 +10,9 @@ import { ImageType } from 'src/enums/image-type.enum';
 import { RedisClientType } from '@redis/client';
 import { DefaultImageId } from 'src/enums/default-image-id';
 import { UserDto } from '../user/dto/user.dto';
+import { UserInfo } from 'src/interfaces/user-info.interface';
+import { Account } from 'src/entities/account.entity';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +21,8 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Image)
     private readonly imgRepository: Repository<Image>,
+    @InjectRepository(Account)
+    private readonly accRepository: Repository<Account>,
     private jwtService: JwtService,
     private readonly jwtException: GiftogetherExceptions,
     @Inject('REDIS_CLIENT')
@@ -88,33 +93,42 @@ async validateRefresh(userId: string, refreshToken: string): Promise<boolean> {
   
 
 
-  async filterNulls(obj: any) {
-    const filtered = {};
-    Object.keys(obj).forEach((key) => {
-      if (obj[key] !== null) {
-        filtered[key] = obj[key];
-      }
-    });
-    return filtered;
-  }
+  async createUser(userDto: CreateUserDto | UserInfo) {
+    const {userImg, userAcc, ...userInfo} = userDto;
+    const user = new User();
 
-  /**
-   * 
-   * SNS 회원가입, 회원가입 중 추가정보을 저장할 때 사용
-   */
-  async saveAuthUser(userInfo: any, existUser?: User, imgUrl?: string) {
-    const user = existUser || new User();
-    if (imgUrl) {
-      // TODO 이미지 객체 생성
-    }
     // TODO 중복값에 대한 예외 처리 (userPhone, userNick)
-    const filteredUserInfo = await this.filterNulls(userInfo);
+    Object.assign(user, userInfo);
+    const userSaved = await this.userRepository.save(user);
+    const userId = user.userId;
 
-    if(filteredUserInfo){
-
-      Object.assign(user, filteredUserInfo);
-      return await this.userRepository.save(user);
+    // Account
+    if(userAcc) {
+      const account = await this.accRepository.findOneBy({
+        accId: userAcc,
+      });
+      if (account) {
+        userSaved.account = account;
+      }
     }
+    // Image
+    let imgUrl = null;
+    if(userImg){
+      const image = new Image(userImg, ImageType.User, userId);
+      const imgSaved = await this.imgRepository.save(image);
+      
+      imgUrl = imgSaved.imgUrl;
+      user.defaultImgId = null;
+
+    }else{
+      const defaultImage = await this.imgRepository.findOne({
+        where: { imgId: DefaultImageId.User },
+      });
+      user.defaultImgId = DefaultImageId.User;
+      imgUrl = defaultImage.imgUrl;
+    }
+
+    await this.userRepository.update({userId}, user);
 
     return new UserDto(
       userSaved.userNick,
@@ -146,6 +160,13 @@ async validateRefresh(userId: string, refreshToken: string): Promise<boolean> {
       throw this.jwtException.UserAlreadyExists
     }
 
+    const image = user.defaultImgId
+      ? await this.imgRepository.findOne({
+          where: { imgId: user.defaultImgId },
+        })
+      : await this.imgRepository.findOne({
+          where: { imgType: ImageType.User, subId: user.userId },
+        });
 
     return new UserDto(
       user.userNick,
