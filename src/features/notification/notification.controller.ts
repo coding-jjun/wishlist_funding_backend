@@ -24,7 +24,7 @@ export class NotificationController {
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<CommonResponse> {
     return {
-      data: await this.notificationService.findAllByUser(userId),
+      data: await this.notificationService.getAllNoti(userId),
     };
   }
 
@@ -33,7 +33,7 @@ export class NotificationController {
     @Param('notiId', ParseIntPipe) notiId: number,
     @Body() updateNotificationDto: UpdateNotificationDto,
   ): Promise<CommonResponse> {
-    const newNoti = await this.notificationService.updateNotification(
+    const newNoti = await this.notificationService.updateNoti(
       notiId,
       updateNotificationDto,
     );

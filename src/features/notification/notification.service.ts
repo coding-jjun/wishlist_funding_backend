@@ -4,48 +4,87 @@ import { Repository } from 'typeorm';
 import { Notification } from 'src/entities/notification.entity';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
+import { User } from 'src/entities/user.entity';
+import { NotiDto } from './dto/notification.dto';
+import { NotiType } from 'src/enums/notification.enum';
 
 @Injectable()
 export class NotificationService {
   constructor(
     @InjectRepository(Notification)
-    private notificationRepository: Repository<Notification>,
+    private notiRepository: Repository<Notification>,
+
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
-  async findAllByUser(userId: number): Promise<Notification[]> {
-    const notifications = await this.notificationRepository
+  async getAllNoti(
+    userId: number,
+    lastDate?: Date
+  ): Promise<{ noti: NotiDto[]; count: number; lastDate: Date; }> {
+    const notifications = await this.notiRepository
       .createQueryBuilder('notification')
       .where('notification.recvId = :userId', { userId })
+      .andWhere('notifications.notiTime < :lastDate', { lastDate })
+      .take(20)
       .getMany();
 
-    return notifications;
+    if (notifications.length > 0) {
+      await this.notiRepository.createQueryBuilder('notification')
+        .relation(Notification, 'recvId')
+        .of(notifications.map(noti => noti.notiId)) // 필터링된 notiId만 조인
+        .loadOne();
+    }
+
+    return {
+      noti: notifications.map(noti => new NotiDto(noti)),
+      count: notifications.length,
+      lastDate: notifications[notifications.length - 1]?.notiTime,
+    };
   }
 
-  async createNotification(
-    createNotificationDto: CreateNotificationDto,
+  async createNoti(
+    createNotiDto: CreateNotificationDto,
   ): Promise<Notification> {
     const noti = new Notification();
+    const receiver = await this.userRepository.findOneBy({ userId: createNotiDto.recvId })
+    const sender = await this.userRepository.findOneBy({ userId: createNotiDto.sendId })
 
-    noti.sendId = createNotificationDto.sendId;
-    noti.recvId = createNotificationDto.recvId;
-    noti.notiType = createNotificationDto.notiType;
-    noti.reqType = createNotificationDto.reqType;
-    noti.subId = createNotificationDto.subId;
+    noti.sendId = sender;
+    noti.recvId = receiver;
+    noti.notiType = createNotiDto.notiType;
+    noti.reqType = createNotiDto.reqType;
+    noti.subId = createNotiDto.subId;
 
-    return await this.notificationRepository.save(noti);
+    return await this.notiRepository.save(noti);
   }
 
-  async updateNotification(
+  async updateNoti(
     notiId: number,
-    updateNotificationDto: UpdateNotificationDto,
+    updateNotiDto: UpdateNotificationDto,
   ): Promise<Notification> {
-    const noti = await this.notificationRepository.findOne({
-      where: { notiId },
-    });
-    if (noti) {
-      noti.reqType = updateNotificationDto.reqType;
-      await this.notificationRepository.save(noti);
-      return noti;
+    if (notiId) {
+      const noti = await this.notiRepository.findOne({
+        where: { notiId },
+      });
+      if (noti) {
+        noti.reqType = updateNotiDto.reqType;
+        await this.notiRepository.save(noti);
+        return noti;
+      }
+    } else {
+      const noti = await this.notiRepository.findOne({
+        where: { 
+          recvId: { userId: updateNotiDto.userId }, 
+          sendId: { userId: updateNotiDto.friendId },
+          notiType: NotiType.IncomingFollow,
+        },
+      });
+      if (noti) {
+        noti.reqType = updateNotiDto.reqType;
+        await this.notiRepository.save(noti);
+        return noti;
+      }
     }
   }
 }

@@ -1,4 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
 export class FriendDto {
   @IsNotEmpty()
@@ -6,4 +6,7 @@ export class FriendDto {
 
   @IsNotEmpty()
   friendId: number;
+
+  @IsOptional()
+  notiId: number;
 }
