@@ -7,7 +7,7 @@ import {
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Equal, Not, Repository } from 'typeorm';
 import { Address } from 'src/entities/address.entity';
 import { User } from 'src/entities/user.entity';
 
@@ -40,6 +40,31 @@ export class AddressService {
     }
 
     address.addrUser = user;
+
+    if (createAddressDto.recvName) {
+      address.recvName = createAddressDto.recvName;
+    } else {
+      address.recvName = user.userName;
+    }
+
+    if (createAddressDto.recvPhone) {
+      address.recvPhone = createAddressDto.recvPhone;
+    } else {
+      address.recvPhone = user.userPhone;
+    }
+
+    if (createAddressDto.isDef) {
+      const defaultAddr = await this.addrRepository.findOne({
+        where: {
+          addrUser: { userId: user.userId },
+          isDef: true
+        },
+      });
+      if (defaultAddr) {
+        defaultAddr.isDef = false;
+        await this.addrRepository.save(defaultAddr);
+      }
+    }
 
     return await this.addrRepository.save(address);
   }
@@ -77,9 +102,25 @@ export class AddressService {
     addrId: number,
     updateAddressDto: UpdateAddressDto,
   ): Promise<Address> {
-    const addr = await this.addrRepository.findOne({ where: { addrId } });
+    const addr = await this.addrRepository.findOne({
+      where: { addrId },
+      relations: ['addrUser']
+    });
     if (!addr) {
       throw new NotFoundException('배송지를 조회할 수 없습니다.');
+    }
+
+    if (updateAddressDto.isDef && !addr.isDef) {
+      const defaultAddr = await this.addrRepository.findOne({
+        where: {
+          addrUser: { userId: addr.addrUser.userId },
+          isDef: true
+        }
+      });
+      if (defaultAddr) {
+        defaultAddr.isDef = false;
+        await this.addrRepository.save(defaultAddr);
+      }
     }
 
     addr.addrNick = updateAddressDto.addrNick;
@@ -95,16 +136,17 @@ export class AddressService {
   }
 
   async remove(addrId: number): Promise<Address> {
-    const addr = await this.addrRepository.findOne({ where: { addrId } });
+    const addr = await this.addrRepository.findOne({
+      where: { addrId },
+      relations: ['addrUser']
+    });
     if (!addr) {
       throw new NotFoundException('배송지를 조회할 수 없습니다.');
     }
     try {
-      const result = await this.addrRepository.softDelete({ addrId });
-      // 예외가 발생하지 않으면 삭제 작업이 성공적으로 수행된 것으로 간주
+      const result = await this.addrRepository.delete({ addrId });
       return addr;
     } catch (error) {
-      // 삭제 작업 중 오류 발생
     }
   }
 }
