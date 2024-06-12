@@ -27,4 +27,7 @@ export class CreateUserDto {
   @IsUrl()
   userImg?: string;
 
+  @IsNumber()
+  @IsOptional()
+  defaultImgId?: number;
 }

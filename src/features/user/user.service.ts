@@ -14,6 +14,7 @@ import {
 import { UserDto } from './dto/user.dto';
 import { isMongoId } from 'class-validator';
 import assert from 'assert';
+import { CreateUserDto } from '../auth/dto/create-user.dto';
 
 @Injectable()
 export class UserService {
