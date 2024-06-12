@@ -14,7 +14,6 @@ import {
   Request,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AddressService } from '../address/address.service';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
@@ -120,20 +119,6 @@ export class UserController {
       };
     } catch (error) {
       throw error;
-    }
-  }
-
-  @Post('/')
-  async createUser(
-    @Body() createUserDto: CreateUserDto,
-  ): Promise<CommonResponse> {
-    try {
-      return {
-        message: '사용자 생성에 성공하였습니다.',
-        data: await this.userService.createUser(createUserDto),
-      };
-    } catch (error) {
-      throw new HttpException('Failed to create user', HttpStatus.BAD_REQUEST);
     }
   }
 

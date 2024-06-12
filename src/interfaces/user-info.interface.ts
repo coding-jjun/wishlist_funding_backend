@@ -14,4 +14,9 @@ export interface UserInfo {
   userEmail: string;
 
   userBirth?: Date | null;
+
+  userImg?: string | null;
+
+  userAcc?:number  | null;
+
 }
