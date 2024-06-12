@@ -6,15 +6,20 @@ import {
   Req,
   Res,
   UseGuards,
+  Post,
 } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
 import { KakaoAuthGuard } from './guard/kakao-auth-guard';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from './guard/jwt-auth-guard';
-import { AuthUserDto } from './auth-user.dto';
 import { NaverAuthGuard } from './guard/naver-auth-guard';
 import { GoogleAuthGuard } from './guard/google-auth-guard';
+import { JwtRefreshGuard } from './guard/jwt-refresh-guard';
+import { CommonResponse } from 'src/interfaces/common-response.interface';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UserDto } from '../user/dto/user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -28,8 +33,22 @@ export class AuthController {
 
   @Get('kakao/callback')
   @UseGuards(KakaoAuthGuard)
-  async kakaoCallback(@Req() req: Request, @Res() res: Response) {
-    return await this.setupAuthResponse(res, req.user);
+  async kakaoCallback(@Req() req: Request, @Res() res: Response){
+    try {
+      const userDto = req.user as UserDto;
+      const accessToken = await this.authService.createAccessToken(userDto.userId);
+      const refreshToken = await this.authService.createRefreshToken(userDto.userId);
+      res.cookie('access_token', accessToken);
+      res.cookie('refresh_token', refreshToken);
+      
+      const response: CommonResponse = {
+          message: '카카오 가입 완료',
+          data: userDto,
+      };
+      return res.status(200).json(response);
+    } catch (error) {
+        return res.status(500).json({ message: "서버 오류" });
+    }
   }
 
   @Get('naver')
@@ -41,8 +60,23 @@ export class AuthController {
   @Get('naver/callback')
   @UseGuards(NaverAuthGuard)
   async naverCallback(@Req() req: Request, @Res() res:Response){
-    return await this.setupAuthResponse(res, req.user);
+    try {
+      const userDto = req.user as UserDto;
+      const accessToken = await this.authService.createAccessToken(userDto.userId);
+      const refreshToken = await this.authService.createRefreshToken(userDto.userId);
+      res.cookie('access_token', accessToken);
+      res.cookie('refresh_token', refreshToken);
+      
+      const response: CommonResponse = {
+          message: '네이버 가입 완료',
+          data: userDto,
+      };
+      return res.status(200).json(response);
+    } catch (error) {
+        return res.status(500).json({ message: "서버 오류" });
+    }
   }
+  
 
   @Get('google')
   @UseGuards(GoogleAuthGuard)
@@ -53,29 +87,78 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   async googleCallback(@Req() req: Request, @Res() res:Response){
-    return await this.setupAuthResponse(res, req.user);
-  }
-
-  @Patch()
-  @UseGuards(JwtAuthGuard)
-  async signup(
-    @Req() req: any,
-    @Res() res: Response,
-    @Body() authUserDto: AuthUserDto,
-  ) {
-    req.user.user = await this.authService.saveAuthUser(authUserDto, req.user);
-    return await this.setupAuthResponse(res, req.user);
-  }
-
-  async setupAuthResponse(res: Response, userInfo: any) {
-    if (userInfo.type === 'login') {
-      res.cookie('access_token', userInfo.accessToken);
-      res.cookie('refresh_token', userInfo.refreshToken);
-      res.json({ user: userInfo.user });
-    } else if (userInfo.type === 'once') {
-      res.cookie('once', userInfo.onceToken);
-      res.json({ user: userInfo.user });
+    try {
+      const userDto = req.user as UserDto;
+      const accessToken = await this.authService.createAccessToken(userDto.userId);
+      const refreshToken = await this.authService.createRefreshToken(userDto.userId);
+      res.cookie('access_token', accessToken);
+      res.cookie('refresh_token', refreshToken);
+      
+      const response: CommonResponse = {
+          message: '구글 가입 완료',
+          data: userDto,
+      };
+      return res.status(200).json(response);
+    } catch (error) {
+        return res.status(500).json({ message: "서버 오류" });
     }
-    return res;
+    
   }
+
+  @Patch('/signup/extra')
+  @UseGuards(JwtAuthGuard)
+  async extraSignup(
+    @Req() req: any,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<CommonResponse> {
+    return {
+      message: '추가 회원가입 완료',
+      data: await this.authService.updateUser(req.user, updateUserDto)
+    }; 
+  }
+
+  @Post(`/signup`)
+  async signup(
+    @Body() createUserDto: CreateUserDto,
+    @Res() res
+  ): Promise<CommonResponse> {
+    try {
+      const userDto = await this.authService.createUser(createUserDto);
+      const accessToken = await this.authService.createAccessToken(userDto.userId);
+      const refreshToken = await this.authService.createRefreshToken(userDto.userId);
+      res.cookie('access_token', accessToken);
+      res.cookie('refresh_token', refreshToken);
+      
+      const response: CommonResponse = {
+          message: '회원가입 완료',
+          data: userDto,
+      };
+      return res.status(200).json(response);
+    } catch (error) {
+        return res.status(500).json({ message: "서버 오류" });
+    }
+
+
+  @Get('/token')
+  @UseGuards(JwtRefreshGuard)
+  async reIssueAccessToken(): Promise<CommonResponse>{
+    return {
+      message: 'Access Token 재발급 완료',
+      data: true
+    }; 
+  }
+  
+  @Get('/logout')
+  @UseGuards(JwtAuthGuard)
+  async logout(@Req() req: any): Promise<CommonResponse>{
+    const accessToken = req.headers['authorization'].split(' ')[1];
+    const refreshToken = req.cookies['refresh_token'];
+    await this.authService.logout(req.user.userId, accessToken, refreshToken);
+    return {
+      message: '로그아웃 성공',
+      data: true
+    }
+  }
+
+
 }

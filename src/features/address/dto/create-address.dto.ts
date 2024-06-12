@@ -24,6 +24,9 @@ export class CreateAddressDto {
   @IsOptional()
   recvPhone: string;
 
+  @IsOptional()
+  recvReq: string;
+
   @IsNotEmpty()
   isDef: boolean;
 }

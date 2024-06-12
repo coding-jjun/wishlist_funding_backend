@@ -53,6 +53,18 @@ export class GiftogetherExceptions {
     HttpStatus.BAD_REQUEST,
   );
 
+  UserNotUpdated = new GiftogetherException(
+    ErrorMsg.UserNotUpdated,
+    ErrorCode.UserNotUpdated,
+    HttpStatus.BAD_REQUEST,
+  );
+
+  UserAlreadyDeleted = new GiftogetherException(
+    ErrorMsg.UserAlreadyDeleted,
+    ErrorCode.UserAlreadyDeleted,
+    HttpStatus.BAD_REQUEST,
+  );
+
   // Friend
   AlreadySendRequest = new GiftogetherException(
     ErrorMsg.AlreadySendRequest,
@@ -66,4 +78,46 @@ export class GiftogetherExceptions {
   );
 
   // Notification
+
+  // Auth
+  JwtNotExpired = new GiftogetherException(
+    ErrorMsg.JwtNotExpired,
+    ErrorCode.JwtNotExpired,
+    HttpStatus.BAD_REQUEST,
+  );
+  JwtExpired = new GiftogetherException(
+    ErrorMsg.JwtExpired,
+    ErrorCode.JwtExpired,
+    HttpStatus.UNAUTHORIZED,
+  );
+  NotValidToken = new GiftogetherException(
+    ErrorMsg.NotValidToken,
+    ErrorCode.NotValidToken,
+    HttpStatus.UNAUTHORIZED,
+  );
+  TokenMissing = new GiftogetherException(
+    ErrorMsg.TokenMissing,
+    ErrorCode.TokenMissing,
+    HttpStatus.BAD_REQUEST,
+  );
+  RefreshExpire = new GiftogetherException(
+    ErrorMsg.RefreshExpire,
+    ErrorCode.RefreshExpire,
+    HttpStatus.UNAUTHORIZED,
+  );
+  UserAlreadyExists = new GiftogetherException(
+    ErrorMsg.UserAlreadyExists,
+    ErrorCode.UserAlreadyExists,
+    HttpStatus.CONFLICT,
+  );
+  FailedLogout = new GiftogetherException(
+    ErrorMsg.FailedLogout,
+    ErrorCode.FailedLogout,
+    HttpStatus.BAD_REQUEST,
+  );
+  RedisServerError = new GiftogetherException(
+    ErrorMsg.RedisServerError,
+    ErrorCode.RedisServerError,
+    HttpStatus.CONFLICT,
+  );
 }

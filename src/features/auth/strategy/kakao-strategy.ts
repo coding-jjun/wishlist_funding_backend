@@ -5,12 +5,14 @@ import { Profile, Strategy } from 'passport-kakao';
 import { AuthService } from '../auth.service';
 import { AuthType } from 'src/enums/auth-type.enum';
 import { UserInfo } from 'src/interfaces/user-info.interface';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 @Injectable()
 export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
   constructor(
     private readonly configService: ConfigService,
     private readonly authService: AuthService,
+    private readonly g2gException: GiftogetherExceptions,
   ) {
     super({
       clientID: configService.get<string>('KAKAO_CLIENT_ID'),
@@ -27,29 +29,34 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
     const resProfile = profile._json;
     const kakaoAccount = resProfile.kakao_account;
 
-    const userEmail = kakaoAccount.email;
-
     const userInfo: UserInfo = {
       authType: AuthType.Kakao,
       authId: resProfile.id,
-      userNick: kakaoAccount.profile.nickname,
       userName: kakaoAccount.name || null,
-      userEmail: userEmail,
-      userPhone: kakaoAccount.phone_number || null,
-    };
+      userEmail: kakaoAccount.email,
+    }
 
-    const user = await this.authService.validateUser(userEmail);
+    // user == 로그인
+    let user = await this.authService.validateUser(kakaoAccount.email, AuthType.Kakao);
 
-    // 기존 회원 -> 로그인
-    if (user) {
-      const accessToken = await this.authService.createAccessToken(userEmail);
-      const refreshToken = await this.authService.createRefreshToken(userEmail);
+    // ! user == 회원 가입
 
-      done(null, { type: 'login', accessToken, refreshToken, user });
-
-      // 신규 회원 -> 회원가입
-    } else {
-      const onceToken = await this.authService.onceToken(userEmail);
+    if(! user){
+      // 닉네임 유효성 검증
+      const isValidNick = await this.authService.validUserInfo("userNick", kakaoAccount.profile.nickname);
+      if(isValidNick){
+        userInfo.userNick = kakaoAccount.profile.nickname;
+      }
+    
+      // 핸드폰 번호 유효성 검증
+      if(kakaoAccount.phone_number){
+        
+        const isValidPhone = await this.authService.validUserInfo("userPhone", kakaoAccount.phone_number);
+        if(! isValidPhone){
+          throw this.g2gException.UserAlreadyExists;
+        }
+        userInfo.userPhone = kakaoAccount.phone_number;
+      }
 
       if (kakaoAccount.has_birthyear && kakaoAccount.has_birthday) {
         userInfo.userBirth = await this.authService.parseDate(
@@ -58,13 +65,11 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
         );
       }
 
-      let imgUrl = null;
       if (kakaoAccount.profile.is_default_image) {
-        imgUrl = kakaoAccount.profile.thumbnail_image_url;
+        userInfo.userImg = kakaoAccount.profile.thumbnail_image_url;
       }
-
-      const user = await this.authService.saveAuthUser(userInfo, imgUrl);
-      done(null, { type: 'once', onceToken, user });
+      user = await this.authService.createUser(userInfo);
     }
+    done(null, user);
   }
 }

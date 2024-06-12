@@ -10,6 +10,10 @@ import { UserModule } from '../user/user.module';
 import { JwtStrategy } from './strategy/jwt-strategy';
 import { NaverStrategy } from './strategy/naver-strategy';
 import { GoogleStrategy } from './strategy/google-strategy';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { Image } from 'src/entities/image.entity';
+import { Account } from 'src/entities/account.entity';
+
 
 @Module({
   imports: [
@@ -18,11 +22,11 @@ import { GoogleStrategy } from './strategy/google-strategy';
       secret: process.env.JWT_SECRET,
     }),
 
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Image, Account]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, KakaoStrategy, JwtStrategy, NaverStrategy, GoogleStrategy],
+  providers: [AuthService, KakaoStrategy, JwtStrategy, NaverStrategy, GoogleStrategy, GiftogetherExceptions],
   exports: [PassportModule, AuthService]
 })
 export class AuthModule {}

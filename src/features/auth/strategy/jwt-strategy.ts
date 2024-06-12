@@ -1,11 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { AuthService } from '../auth.service';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/entities/user.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(private authService: AuthService) {
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private readonly jwtException: GiftogetherExceptions,
+  ) {
     super({
       // 토큰이 유효한지 확인하기 위한 키
       secretOrKey: process.env.JWT_SECRET,
@@ -14,16 +21,19 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
+  /**
+   * 토큰 유효성 검사
+   * @param tokenInfo : passport 에서 자동으로 secretKey를 이용해 token 을 decode 한다.
+   * @param done 
+   */
   async validate(tokenInfo: any, done:any) {
-    console.log('----------- jwt strategy --------------');
-    
-    // 신규 회원 추가 정보 입력 : 일회용 -> access 토큰 발급
-    if(tokenInfo.type === 'once'){
-      const user = await this.authService.validateUser(tokenInfo.userEmail);
-      const accessToken = await this.authService.createAccessToken(tokenInfo.userEmail);
-      const refreshToken = await this.authService.createRefreshToken(tokenInfo.userEmail);
-
-      done(null, {type: 'login', accessToken, refreshToken, user})
+    // 사용자 인증/인가
+    const userId = tokenInfo.userId;
+    const user =  await this.userRepository.findOneBy({userId});
+    if(!user){
+      throw this.jwtException.UserNotFound;
     }
+    done(null, user)
   }
 }
+

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsUrl } from 'class-validator';
 
 export class CreateUserDto {
   @IsNotEmpty()
@@ -24,6 +24,7 @@ export class CreateUserDto {
   userEmail?: string;
 
   @IsOptional()
-  @IsNumber()
-  userImg?: number;
+  @IsUrl()
+  userImg?: string;
+
 }

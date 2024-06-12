@@ -21,44 +21,42 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google'){
       // scope += 'https://www.googleapis.com/auth/user.phonenumbers.read', 'https://www.googleapis.com/auth/user.birthday.read', 'https://www.googleapis.com/auth/user.addresses.read'
     });
   }
-  async validate(access_token: string, refresh_token: string, profile: Profile, done:any) {
+  async validate(
+    access_token: string,
+    refresh_token: string,
+    profile: Profile,
+    done: any,
+  ) {
 
     const googleAccount = profile._json;
     if(!googleAccount.email_verified){
       // TODO 구글 이메일 에러
       done(null, false);
     }
-    const userEmail = googleAccount.email;
-    console.log("let's make userInfo");
+
     const userInfo : UserInfo = {
       authType: AuthType.Google,
       authId: googleAccount.sub,
-      userNick: googleAccount.name,
-      userEmail: userEmail,
+      userEmail: googleAccount.email,
+      userName: googleAccount.name,
     }
 
-    const user = await this.authService.validateUser(userEmail);
+    // user == 로그인
+    let user = await this.authService.validateUser(googleAccount.email, AuthType.Google);
 
-    // 기존 회원 -> 로그인
-    if(user){
-
-      const accessToken = await this.authService.createAccessToken(userEmail);
-      const refreshToken = await this.authService.createRefreshToken(userEmail);
-
-      done(null, {type: 'login', accessToken, refreshToken, user})
-      
-    // 신규 회원 -> 회원가입
-    }else{
-      const onceToken = await this.authService.onceToken(userEmail);
-
-      let imgUrl = null;
-      if(googleAccount.picture){
-        // imgUrl = googleAccount.picture;
+    // ! user == 회원 가입
+    if(! user){
+      const isValidNick = await this.authService.validUserInfo("userNick", googleAccount.given_name);
+      if(isValidNick){
+        userInfo.userNick = googleAccount.given_name;
       }
 
-      const user = await this.authService.saveAuthUser(userInfo, imgUrl);
-      done(null, {type: 'once', onceToken, user})
+      if(googleAccount.picture){
+        userInfo.userImg = googleAccount.picture;
+      }
+      user = await this.authService.createUser(userInfo);
     }
+    done(null, user);
   }
 }
 

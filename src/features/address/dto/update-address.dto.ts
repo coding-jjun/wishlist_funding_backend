@@ -21,5 +21,8 @@ export class UpdateAddressDto {
   recvPhone: string;
 
   @IsNotEmpty()
+  recvReq: string;
+
+  @IsNotEmpty()
   isDef: boolean;
 }

@@ -34,6 +34,9 @@ export class Address {
   @Column()
   recvPhone: string;
 
+  @Column({ nullable: true })
+  recvReq: string;
+
   @Column({ default: false })
   isDef: boolean;
 }

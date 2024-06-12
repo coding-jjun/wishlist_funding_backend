@@ -16,6 +16,8 @@ import { Account } from './account.entity';
 import { Image } from './image.entity';
 import { Address } from './address.entity';
 import { AuthType } from 'src/enums/auth-type.enum';
+import { ValidateNested } from 'class-validator';
+import { DefaultImageId } from 'src/enums/default-image-id';
 
 @Entity()
 export class User {
@@ -28,7 +30,7 @@ export class User {
   @Column({ default: AuthType.Jwt })
   authType: AuthType;
 
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   userNick: string;
 
   @Column({ nullable: true })
@@ -40,7 +42,7 @@ export class User {
   @Column({ unique: true, nullable: true })
   userPhone: string;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   userEmail: string;
 
   @Column('date', { nullable: true })
@@ -49,10 +51,6 @@ export class User {
   @OneToOne(() => Account, (account) => account.user, { nullable: true })
   @JoinColumn({ name: 'userAcc' })
   account: Account;
-
-  @ManyToOne(() => Image, { nullable: true })
-  @JoinColumn({ name: 'userImg' })
-  image: Image;
 
   @CreateDateColumn()
   regAt: Date;
@@ -72,4 +70,14 @@ export class User {
   @OneToMany(() => Address, (address) => address.addrUser)
   addresses: Address[];
   user: Promise<Date>;
+
+  @Column('int', { nullable: true })
+  @OneToOne(() => Image, (image) => image.imgId)
+  defaultImgId?: number;
+
+  /**
+   * defaultImgId가 NULL일 경우, Image.subId로 조회할 수 있습니다.
+   */
+  @OneToOne(() => Image, (image) => image.subId)
+  image: Image;
 }
