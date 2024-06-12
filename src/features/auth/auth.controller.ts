@@ -33,8 +33,22 @@ export class AuthController {
 
   @Get('kakao/callback')
   @UseGuards(KakaoAuthGuard)
-  async kakaoCallback(@Req() req: Request, @Res() res: Response) {
-    return await this.setupAuthResponse(res, req.user);
+  async kakaoCallback(@Req() req: Request, @Res() res: Response){
+    try {
+      const userDto = req.user as UserDto;
+      const accessToken = await this.authService.createAccessToken(userDto.userId);
+      const refreshToken = await this.authService.createRefreshToken(userDto.userId);
+      res.cookie('access_token', accessToken);
+      res.cookie('refresh_token', refreshToken);
+      
+      const response: CommonResponse = {
+          message: '카카오 가입 완료',
+          data: userDto,
+      };
+      return res.status(200).json(response);
+    } catch (error) {
+        return res.status(500).json({ message: "서버 오류" });
+    }
   }
 
   @Get('naver')
@@ -46,8 +60,23 @@ export class AuthController {
   @Get('naver/callback')
   @UseGuards(NaverAuthGuard)
   async naverCallback(@Req() req: Request, @Res() res:Response){
-    return await this.setupAuthResponse(res, req.user);
+    try {
+      const userDto = req.user as UserDto;
+      const accessToken = await this.authService.createAccessToken(userDto.userId);
+      const refreshToken = await this.authService.createRefreshToken(userDto.userId);
+      res.cookie('access_token', accessToken);
+      res.cookie('refresh_token', refreshToken);
+      
+      const response: CommonResponse = {
+          message: '네이버 가입 완료',
+          data: userDto,
+      };
+      return res.status(200).json(response);
+    } catch (error) {
+        return res.status(500).json({ message: "서버 오류" });
+    }
   }
+  
 
   @Get('google')
   @UseGuards(GoogleAuthGuard)
@@ -58,7 +87,22 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   async googleCallback(@Req() req: Request, @Res() res:Response){
-    return await this.setupAuthResponse(res, req.user);
+    try {
+      const userDto = req.user as UserDto;
+      const accessToken = await this.authService.createAccessToken(userDto.userId);
+      const refreshToken = await this.authService.createRefreshToken(userDto.userId);
+      res.cookie('access_token', accessToken);
+      res.cookie('refresh_token', refreshToken);
+      
+      const response: CommonResponse = {
+          message: '구글 가입 완료',
+          data: userDto,
+      };
+      return res.status(200).json(response);
+    } catch (error) {
+        return res.status(500).json({ message: "서버 오류" });
+    }
+    
   }
 
   @Patch('/signup/extra')
@@ -78,25 +122,23 @@ export class AuthController {
     @Body() createUserDto: CreateUserDto,
     @Res() res
   ): Promise<CommonResponse> {
-    const userDto = await this.authService.createUser(createUserDto);
-    await this.setupAuthResponse(res, userDto.userId);
-    const response: CommonResponse = {
-      message: '회원가입 완료',
-      data: userDto,
-    };
-    return res.status(200).json(response);
+    try {
+      const userDto = await this.authService.createUser(createUserDto);
+      const accessToken = await this.authService.createAccessToken(userDto.userId);
+      const refreshToken = await this.authService.createRefreshToken(userDto.userId);
+      res.cookie('access_token', accessToken);
+      res.cookie('refresh_token', refreshToken);
+      
+      const response: CommonResponse = {
+          message: '회원가입 완료',
+          data: userDto,
+      };
+      return res.status(200).json(response);
+    } catch (error) {
+        return res.status(500).json({ message: "서버 오류" });
+    }
   }
 
-
-  /**
-   * 토큰을 발급받고 cookie 에 설정 후 사용자에게 응답한다.
-   */
-  async setupAuthResponse(res: Response, userId: number): Promise<void> {
-    const accessToken = await this.authService.createAccessToken(userId);
-    const refreshToken = await this.authService.createRefreshToken(userId);
-    res.cookie('access_token', await this.authService.createAccessToken(userId));
-    res.cookie('refresh_token', await this.authService.createRefreshToken(userId));
-  }
 
   @Get('/token')
   @UseGuards(JwtRefreshGuard)

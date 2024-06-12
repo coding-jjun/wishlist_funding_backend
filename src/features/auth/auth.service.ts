@@ -78,20 +78,18 @@ export class AuthService {
 
   }
 
-async validateRefresh(userId: string, refreshToken: string): Promise<boolean> {
-  try {
-    const storedToken = await this.redisClient.get(`user:${userId}`);
-    console.log(userId, storedToken, refreshToken);
-    if (refreshToken !== storedToken) {
-      return false;
-    }
-    return true;
+  async validateRefresh(userId: string, refreshToken: string): Promise<boolean> {
+    try {
+      const storedToken = await this.redisClient.get(`user:${userId}`);
+      if (refreshToken !== storedToken) {
+        return false;
+      }
+      return true;
 
-  } catch (error) {
-    throw this.jwtException.RedisServerError;
+    } catch (error) {
+      throw this.jwtException.RedisServerError;
+    }
   }
-  }
-  
 
 
   async createUser(userDto: CreateUserDto | UserInfo) {
