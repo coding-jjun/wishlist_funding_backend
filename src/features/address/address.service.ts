@@ -7,7 +7,7 @@ import {
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Equal, Not, Repository } from 'typeorm';
 import { Address } from 'src/entities/address.entity';
 import { User } from 'src/entities/user.entity';
 
@@ -50,6 +50,19 @@ export class AddressService {
       address.recvPhone = user.userPhone;
     }
 
+    if (createAddressDto.isDef) {
+      const defaultAddr = await this.addrRepository.findOne({
+        where: {
+          addrUser: { userId: user.userId },
+          isDef: true
+        },
+      });
+      if (defaultAddr) {
+        defaultAddr.isDef = false;
+        await this.addrRepository.save(defaultAddr);
+      }
+    }
+
     return await this.addrRepository.save(address);
   }
 
@@ -85,7 +98,7 @@ export class AddressService {
     addrId: number,
     updateAddressDto: UpdateAddressDto,
   ): Promise<Address> {
-        const addr = await this.addrRepository.findOne({
+    const addr = await this.addrRepository.findOne({
       where: { addrId },
       relations: ['addrUser']
     });
@@ -93,7 +106,19 @@ export class AddressService {
       throw new NotFoundException('배송지를 조회할 수 없습니다.');
     }
 
-    addr.addrUser = addr.addrUser;
+    if (updateAddressDto.isDef && !addr.isDef) {
+      const defaultAddr = await this.addrRepository.findOne({
+        where: {
+          addrUser: { userId: addr.addrUser.userId },
+          isDef: true
+        }
+      });
+      if (defaultAddr) {
+        defaultAddr.isDef = false;
+        await this.addrRepository.save(defaultAddr);
+      }
+    }
+
     addr.addrNick = updateAddressDto.addrNick;
     addr.addrRoad = updateAddressDto.addrRoad;
     addr.addrDetl = updateAddressDto.addrDetl;
@@ -115,10 +140,8 @@ export class AddressService {
     }
     try {
       const result = await this.addrRepository.delete({ addrId });
-      // 예외가 발생하지 않으면 삭제 작업이 성공적으로 수행된 것으로 간주
       return addr;
     } catch (error) {
-      // 삭제 작업 중 오류 발생
     }
   }
 }
