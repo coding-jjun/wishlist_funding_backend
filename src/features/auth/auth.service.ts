@@ -158,8 +158,23 @@ export class AuthService {
       user.account = account;
     }
 
-    const imgUrl = await this.updateUserImg(user.userId, userImg);
-    await this.userRepository.update({userId: user.userId}, user);
+    let imgUrl = null;
+    const userId = user.userId;
+    if(userImg){
+      const image = new Image(userImg, ImageType.User, userId);
+      const imgSaved = await this.imgRepository.save(image);
+      
+      imgUrl = imgSaved.imgUrl;
+      user.defaultImgId = null;
+
+    }else{
+      const defaultImage = await this.imgRepository.findOne({
+        where: { imgId: DefaultImageId.User },
+      });
+      user.defaultImgId = DefaultImageId.User;
+      imgUrl = defaultImage.imgUrl;
+    }
+    await this.userRepository.update({userId: userId}, user);
     return new UserDto(
       user.userNick,
       user.userName,
