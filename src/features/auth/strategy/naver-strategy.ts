@@ -39,6 +39,7 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
     // user == 로그인
     let user = await this.authService.validateUser(naverAccount.email, AuthType.Naver);
 
+
     // ! user == 회원 가입
     if (! user) {
 
@@ -59,12 +60,6 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
         userInfo.userPhone = naverAccount.mobile;
       }
 
-      if (naverAccount.birthyear && naverAccount.birthday) {
-        userInfo.userBirth = await this.authService.parseDate(
-          naverAccount.birthyear,
-          naverAccount.birthday,
-        );
-      }
       if (naverAccount.profile_image) {
         userInfo.userImg = naverAccount.profile_image;
       }

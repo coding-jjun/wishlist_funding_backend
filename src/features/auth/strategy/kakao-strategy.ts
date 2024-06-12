@@ -40,8 +40,8 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
     let user = await this.authService.validateUser(kakaoAccount.email, AuthType.Kakao);
 
     // ! user == 회원 가입
-    if(! user){
 
+    if(! user){
       // 닉네임 유효성 검증
       const isValidNick = await this.authService.validUserInfo("userNick", kakaoAccount.profile.nickname);
       if(isValidNick){
@@ -57,7 +57,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
         }
         userInfo.userPhone = kakaoAccount.phone_number;
       }
-        
+
       if (kakaoAccount.has_birthyear && kakaoAccount.has_birthday) {
         userInfo.userBirth = await this.authService.parseDate(
           kakaoAccount.birthyear,

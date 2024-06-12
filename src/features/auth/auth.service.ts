@@ -15,6 +15,7 @@ import { Account } from 'src/entities/account.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -24,6 +25,7 @@ export class AuthService {
     private readonly imgRepository: Repository<Image>,
     @InjectRepository(Account)
     private readonly accRepository: Repository<Account>,
+
     private jwtService: JwtService,
     private readonly jwtException: GiftogetherExceptions,
     @Inject('REDIS_CLIENT')
@@ -78,6 +80,7 @@ export class AuthService {
 
   }
 
+
   async validateRefresh(userId: string, refreshToken: string): Promise<boolean> {
     try {
       const storedToken = await this.redisClient.get(`user:${userId}`);
@@ -90,6 +93,8 @@ export class AuthService {
       throw this.jwtException.RedisServerError;
     }
   }
+  
+
 
 
   async createUser(userDto: CreateUserDto | UserInfo) {
@@ -126,7 +131,6 @@ export class AuthService {
       user.defaultImgId = DefaultImageId.User;
       imgUrl = defaultImage.imgUrl;
     }
-
     await this.userRepository.update({userId}, user);
 
     return new UserDto(

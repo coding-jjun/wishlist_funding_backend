@@ -137,7 +137,6 @@ export class AuthController {
     } catch (error) {
         return res.status(500).json({ message: "서버 오류" });
     }
-  }
 
 
   @Get('/token')
