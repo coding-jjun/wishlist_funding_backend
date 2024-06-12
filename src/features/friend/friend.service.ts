@@ -71,6 +71,39 @@ export class FriendService {
     };
   }
 
+  async friendStatus(userId: number, friendId: number): Promise<{ message; }> {
+    const friendship = await this.friendRepository
+      .createQueryBuilder('friend')
+      .where(
+        '((friend.userId = :userId AND friend.friendId = :friendId) OR (friend.userId = :friendId AND friend.friendId = :userId))',
+        { userId, friendId },
+      )
+      .getOne();
+
+    if (friendship) {
+      if (friendship.status === FriendStatus.Friend) {
+        return {
+          message: 'friend'
+        }
+      } else {
+        if (friendship.userId === userId && friendship.friendId === friendId) {
+          return {
+            message: 'request'
+          }
+        }
+        if (friendship.friendId === userId && friendship.userId === friendId) {
+          return {
+            message: 'requested'
+          }
+        }
+      }
+    } else {
+      return {
+        message: 'notFriend'
+      }
+    }
+  }
+
   /**
    * 친구 신청
    */

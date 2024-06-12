@@ -73,12 +73,10 @@ export class NotificationService {
         return noti;
       }
     } else {
-      const receiver = await this.userRepository.findOneBy({ userId: updateNotiDto.userId });
-      const sender = await this.userRepository.findOneBy({ userId: updateNotiDto.friendId });
       const noti = await this.notiRepository.findOne({
         where: { 
-          recvId: receiver, 
-          sendId: sender,
+          recvId: { userId: updateNotiDto.userId }, 
+          sendId: { userId: updateNotiDto.friendId },
           notiType: NotiType.IncomingFollow,
         },
       });

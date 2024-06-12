@@ -39,6 +39,21 @@ export class FriendController {
     }
   }
 
+  @Get(':userId/:friendId')
+  async friendStatus(
+    @Param('userId') userId: number,
+    @Param('friendId') friendId: number
+  ): Promise<CommonResponse> {
+    try {
+      return {
+        message: '친구 관계 조회에 성공하였습니다.',
+        data: await this.friendService.friendStatus(userId, friendId)
+      }
+    } catch (error) {
+
+    }
+  }
+
   @Post('/')
   async createFriend(@Body() friendDto: FriendDto): Promise<CommonResponse> {
     try {
@@ -60,6 +75,7 @@ export class FriendController {
           noti.reqType = ReqType.NotResponse;
       }
 
+      console.log('createNoti 전');
       await this.notiService.createNoti(noti);
       
       return {

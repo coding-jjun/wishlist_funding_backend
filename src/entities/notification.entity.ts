@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   OneToOne,
   JoinColumn,
+  ManyToOne,
 } from 'typeorm';
 import { User } from './user.entity';
 
@@ -20,11 +21,11 @@ export class Notification {
   // @Column()
   // sendId: number;
 
-  @OneToOne(() => User, (user) => user.userId)
+  @ManyToOne(() => User, (user) => user.userId)
   @JoinColumn({ name: 'recvId' })
   recvId: User;
-
-  @OneToOne(() => User, (user) => user.userId)
+  
+  @ManyToOne(() => User, (user) => user.userId)
   @JoinColumn({ name: 'sendId' })
   sendId: User;
 
