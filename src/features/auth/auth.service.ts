@@ -12,6 +12,7 @@ import { DefaultImageId } from 'src/enums/default-image-id';
 import { UserDto } from '../user/dto/user.dto';
 import { UserInfo } from 'src/interfaces/user-info.interface';
 import { Account } from 'src/entities/account.entity';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
@@ -142,6 +143,34 @@ async validateRefresh(userId: string, refreshToken: string): Promise<boolean> {
       userSaved.authId,
     )
   }
+  
+
+  async updateUser(user:User, userDto: UpdateUserDto): Promise<UserDto>{
+    const { userImg,userAcc, ...userInfo } = userDto;
+    Object.assign(user, userInfo);
+
+    if (userAcc) {
+      const account = await this.accRepository.findOneBy({
+        accId: userAcc,
+      });
+      user.account = account;
+    }
+
+    const imgUrl = await this.updateUserImg(user.userId, userImg);
+    await this.userRepository.update({userId: user.userId}, user);
+    return new UserDto(
+      user.userNick,
+      user.userName,
+      user.userPhone,
+      user.userBirth,
+      user.authType,
+      imgUrl,
+      user.userId,
+      user.userEmail,
+      user.authId,
+    )
+  }
+  
 
   /**
    * 

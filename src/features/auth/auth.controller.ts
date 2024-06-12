@@ -13,11 +13,11 @@ import { AuthService } from './auth.service';
 import { KakaoAuthGuard } from './guard/kakao-auth-guard';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from './guard/jwt-auth-guard';
-import { AuthUserDto } from './auth-user.dto';
 import { NaverAuthGuard } from './guard/naver-auth-guard';
 import { GoogleAuthGuard } from './guard/google-auth-guard';
 import { JwtRefreshGuard } from './guard/jwt-refresh-guard';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserDto } from '../user/dto/user.dto';
 
@@ -61,16 +61,16 @@ export class AuthController {
     return await this.setupAuthResponse(res, req.user);
   }
 
-  @Patch()
+  @Patch('/signup/extra')
   @UseGuards(JwtAuthGuard)
-  async signup(
+  async extraSignup(
     @Req() req: any,
-    @Res() res: Response,
-    @Body() authUserDto: AuthUserDto,
-  ) {
-    req.user = await this.authService.saveUser(req.user, authUserDto);
-    res.json({user: req.user});
-    return res;
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<CommonResponse> {
+    return {
+      message: '추가 회원가입 완료',
+      data: await this.authService.updateUser(req.user, updateUserDto)
+    }; 
   }
 
   @Post(`/signup`)
