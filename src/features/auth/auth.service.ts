@@ -9,6 +9,12 @@ import { Image } from 'src/entities/image.entity';
 import { ImageType } from 'src/enums/image-type.enum';
 import { RedisClientType } from '@redis/client';
 import { DefaultImageId } from 'src/enums/default-image-id';
+import { UserDto } from '../user/dto/user.dto';
+import { UserInfo } from 'src/interfaces/user-info.interface';
+import { Account } from 'src/entities/account.entity';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+
 
 @Injectable()
 export class AuthService {
@@ -17,6 +23,9 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Image)
     private readonly imgRepository: Repository<Image>,
+    @InjectRepository(Account)
+    private readonly accRepository: Repository<Account>,
+
     private jwtService: JwtService,
     private readonly jwtException: GiftogetherExceptions,
     @Inject('REDIS_CLIENT')
@@ -71,52 +80,99 @@ export class AuthService {
 
   }
 
-async validateRefresh(userId: string, refreshToken: string): Promise<boolean> {
-  try {
-    const storedToken = await this.redisClient.get(`user:${userId}`);
-    console.log(userId, storedToken, refreshToken);
-    if (refreshToken !== storedToken) {
-      return false;
-    }
-    return true;
 
-  } catch (error) {
-    throw this.jwtException.RedisServerError;
-  }
+  async validateRefresh(userId: string, refreshToken: string): Promise<boolean> {
+    try {
+      const storedToken = await this.redisClient.get(`user:${userId}`);
+      if (refreshToken !== storedToken) {
+        return false;
+      }
+      return true;
+
+    } catch (error) {
+      throw this.jwtException.RedisServerError;
+    }
   }
   
 
 
-  async filterNulls(obj: any) {
-    const filtered = {};
-    Object.keys(obj).forEach((key) => {
-      if (obj[key] !== null) {
-        filtered[key] = obj[key];
-      }
-    });
-    return filtered;
-  }
 
-  /**
-   * 
-   * SNS 회원가입, 회원가입 중 추가정보을 저장할 때 사용
-   */
-  async saveAuthUser(userInfo: any, existUser?: User, imgUrl?: string) {
-    const user = existUser || new User();
-    if (imgUrl) {
-      // TODO 이미지 객체 생성
-    }
+  async createUser(userDto: CreateUserDto | UserInfo) {
+    const {userImg, userAcc, ...userInfo} = userDto;
+    const user = new User();
+
     // TODO 중복값에 대한 예외 처리 (userPhone, userNick)
-    const filteredUserInfo = await this.filterNulls(userInfo);
+    Object.assign(user, userInfo);
+    const userSaved = await this.userRepository.save(user);
+    const userId = user.userId;
 
-    if(filteredUserInfo){
-
-      Object.assign(user, filteredUserInfo);
-      return await this.userRepository.save(user);
+    // Account
+    if(userAcc) {
+      const account = await this.accRepository.findOneBy({
+        accId: userAcc,
+      });
+      if (account) {
+        userSaved.account = account;
+      }
     }
-    // TODO 예외처리
-    return user;
+    // Image
+    let imgUrl = null;
+    if(userImg){
+      const image = new Image(userImg, ImageType.User, userId);
+      const imgSaved = await this.imgRepository.save(image);
+      
+      imgUrl = imgSaved.imgUrl;
+      user.defaultImgId = null;
+
+    }else{
+      const defaultImage = await this.imgRepository.findOne({
+        where: { imgId: DefaultImageId.User },
+      });
+      user.defaultImgId = DefaultImageId.User;
+      imgUrl = defaultImage.imgUrl;
+    }
+    await this.userRepository.update({userId}, user);
+
+    return new UserDto(
+      userSaved.userNick,
+      userSaved.userName,
+      userSaved.userPhone,
+      userSaved.userBirth,
+      userSaved.authType,
+      imgUrl,
+      userSaved.userId,
+      userSaved.userEmail,
+      userSaved.authId,
+    )
   }
+  
+
+  async updateUser(user:User, userDto: UpdateUserDto): Promise<UserDto>{
+    const { userImg,userAcc, ...userInfo } = userDto;
+    Object.assign(user, userInfo);
+
+    if (userAcc) {
+      const account = await this.accRepository.findOneBy({
+        accId: userAcc,
+      });
+      user.account = account;
+    }
+
+    const imgUrl = await this.updateUserImg(user.userId, userImg);
+    await this.userRepository.update({userId: user.userId}, user);
+    return new UserDto(
+      user.userNick,
+      user.userName,
+      user.userPhone,
+      user.userBirth,
+      user.authType,
+      imgUrl,
+      user.userId,
+      user.userEmail,
+      user.authId,
+    )
+  }
+  
 
   /**
    * 
@@ -135,15 +191,39 @@ async validateRefresh(userId: string, refreshToken: string): Promise<boolean> {
       throw this.jwtException.UserAlreadyExists
     }
 
-    return user;
+    const image = user.defaultImgId
+      ? await this.imgRepository.findOne({
+          where: { imgId: user.defaultImgId },
+        })
+      : await this.imgRepository.findOne({
+          where: { imgType: ImageType.User, subId: user.userId },
+        });
+
+    return new UserDto(
+      user.userNick,
+      user.userName,
+      user.userPhone,
+      user.userBirth,
+      user.authType,
+      image.imgUrl,
+      user.userId,
+      user.userEmail,
+      user.authId,
+    );
 
   }
 
-  async validUserNick(userNick: string){
+
+  // DB 에서 회원 propertyName(컬럼) 중 이미 사용중인 값인지 확인 (가입전 닉네임, 전화번호...)
+  async validUserInfo(propertyName: string, propertyValue: string){
+    // 동적으로 조건 생성
+    const condition = {};
+    condition[propertyName] = propertyValue;  
     const user = await this.userRepository.findOne({
-      where: {userNick: userNick}
+      where: condition
     });
-    if(user){
+  
+    if (user) {
       return false;
     }
     return true;
