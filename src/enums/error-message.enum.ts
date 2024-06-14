@@ -20,6 +20,7 @@ export enum ErrorMsg {
   UserNotFound = '사용자 정보가 없습니다.',
   UserNotUpdated = '사용자 업데이트에 실패했습니다',
   UserAlreadyDeleted = '사용자가 이미 삭제됐습니다',
+  UserFailedToCreate = '사용자 생성에 실패했습니다',
 
   // Friend
   AlreadySendRequest = '이미 친구 요청을 보냈습니다.',

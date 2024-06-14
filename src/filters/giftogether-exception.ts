@@ -64,6 +64,12 @@ export class GiftogetherExceptions {
     ErrorCode.UserAlreadyDeleted,
     HttpStatus.BAD_REQUEST,
   );
+  
+  UserFailedToCreate = new GiftogetherException(
+    ErrorMsg.UserFailedToCreate,
+    ErrorCode.UserFailedToCreate,
+    HttpStatus.FORBIDDEN,
+  )
 
   // Friend
   AlreadySendRequest = new GiftogetherException(
