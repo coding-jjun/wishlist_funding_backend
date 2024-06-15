@@ -11,7 +11,7 @@ import {
   defaultGratitudeImageIds,
 } from 'src/enums/default-image-id';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
-import assert from 'assert';
+import assert from 'node:assert';
 
 @Injectable()
 export class GratitudeService {
@@ -54,39 +54,51 @@ export class GratitudeService {
   }
 
   async createGratitude(fundUuid: string, gratitudeDto: GratitudeDto) {
-    const funding = await this.fundingRepo.findOne({ where: { fundUuid } });
+    const funding = await this.fundingRepo.findOne({
+      where: { fundUuid },
+    });
+    if (!funding) throw this.g2gException.FundingNotExists;
 
-    let grat = await this.gratitudeRepo.findOne({
+    const grat = await this.gratitudeRepo.findOne({
       where: { gratId: funding.fundId },
     });
+    if (grat) throw this.g2gException.GratitudeAlreadyExists;
 
-    if (grat) {
-      throw this.g2gException.GratitudeAlreadyExists;
-    }
-
-    grat = await this.gratitudeRepo.save(
-      new Gratitude(
-        funding.fundId,
-        gratitudeDto.gratTitle,
-        gratitudeDto.gratCont,
-      ),
-    );
     if (gratitudeDto.gratImg.length > 0) {
-      this.imgRepo.save(
+      // 사용자 정의 이미지 제공시,
+      // 1. 새 grat 생성 및 저장.
+      // 2. gratId를 subId로 갖는 새 image 생성 및 저장.
+      const grat = (
+        await this.gratitudeRepo.insert(
+          new Gratitude(
+            funding.fundId,
+            gratitudeDto.gratTitle,
+            gratitudeDto.gratCont,
+          ),
+        )
+      ).generatedMaps[0] as Gratitude;
+
+      this.imgRepo.insert(
         gratitudeDto.gratImg.map(
           (url) => new Image(url, ImageType.Gratitude, grat.gratId),
         ),
       );
     } else {
-      // defaultImgId 필드에 gratitude 기본 이미지 ID를 넣는다.
-      assert(
-        gratitudeDto.defaultImgId &&
-          defaultGratitudeImageIds.includes(gratitudeDto.defaultImgId),
-      );
+      if (!gratitudeDto.defaultImgId)
+        throw this.g2gException.DefaultImgIdNotExist;
+      if (!defaultGratitudeImageIds.includes(gratitudeDto.defaultImgId))
+        throw this.g2gException.DefaultImgIdNotExist;
+      // 기본 이미지 제공시,
+      // 1. defaultImgId를 갖는 새 grat 생성 및 저장.
 
-      await this.gratitudeRepo.update(grat.gratId, {
-        defaultImgId: gratitudeDto.defaultImgId,
-      });
+      const grat = new Gratitude(
+        funding.fundId,
+        gratitudeDto.gratTitle,
+        gratitudeDto.gratCont,
+      );
+      grat.defaultImgId = gratitudeDto.defaultImgId!;
+
+      await this.gratitudeRepo.insert(grat);
     }
 
     return grat;

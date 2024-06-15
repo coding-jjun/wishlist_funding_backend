@@ -18,6 +18,11 @@ export class GiftogetherException extends HttpException {
 @Injectable()
 export class GiftogetherExceptions {
   // Funding
+  FundingNotExists = new GiftogetherException(
+    ErrorMsg.FundingNotExists,
+    ErrorCode.FundingNotExists,
+    HttpStatus.NOT_FOUND,
+  );
 
   // Donation
 
@@ -64,12 +69,12 @@ export class GiftogetherExceptions {
     ErrorCode.UserAlreadyDeleted,
     HttpStatus.BAD_REQUEST,
   );
-  
+
   UserFailedToCreate = new GiftogetherException(
     ErrorMsg.UserFailedToCreate,
     ErrorCode.UserFailedToCreate,
     HttpStatus.FORBIDDEN,
-  )
+  );
 
   // Friend
   AlreadySendRequest = new GiftogetherException(
@@ -125,5 +130,12 @@ export class GiftogetherExceptions {
     ErrorMsg.RedisServerError,
     ErrorCode.RedisServerError,
     HttpStatus.CONFLICT,
+  );
+
+  // default images
+  DefaultImgIdNotExist = new GiftogetherException(
+    ErrorMsg.DefaultImgIdNotExist,
+    ErrorCode.DefaultImgIdNotExist,
+    HttpStatus.NOT_FOUND,
   );
 }

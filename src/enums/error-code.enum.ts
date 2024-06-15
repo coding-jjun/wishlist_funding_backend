@@ -1,5 +1,6 @@
 export enum ErrorCode {
   // Funding
+  FundingNotExists = '0000',
 
   // Donation
 
@@ -37,4 +38,7 @@ export enum ErrorCode {
   UserAlreadyExists = '0905',
   FailedLogout = '0906',
   RedisServerError = '0907',
+
+  // default image
+  DefaultImgIdNotExist = '1000',
 }
