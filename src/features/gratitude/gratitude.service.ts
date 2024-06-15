@@ -60,7 +60,10 @@ export class GratitudeService {
     );
   }
 
-  async createGratitude(fundUuid: string, gratitudeDto: GratitudeDto) {
+  async createGratitude(
+    fundUuid: string,
+    gratitudeDto: GratitudeDto,
+  ): Promise<GetGratitudeDto> {
     const funding = await this.fundingRepo.findOne({
       where: { fundUuid },
     });
@@ -70,6 +73,8 @@ export class GratitudeService {
       where: { gratId: funding.fundId },
     });
     if (grat) throw this.g2gException.GratitudeAlreadyExists;
+
+    const returnImgUrl = gratitudeDto.gratImg;
 
     if (gratitudeDto.gratImg.length > 0) {
       // 사용자 정의 이미지 제공시,
@@ -103,10 +108,23 @@ export class GratitudeService {
       );
       grat.defaultImgId = gratitudeDto.defaultImgId!;
 
-      await this.gratitudeRepo.insert(grat);
+      this.gratitudeRepo.insert(grat);
+
+      const image = await this.imgRepo.findOne({
+        where: {
+          imgType: ImageType.Gratitude,
+          subId: grat.gratId,
+        },
+      });
+      returnImgUrl.push(image.imgUrl);
     }
 
-    return grat;
+    return new GetGratitudeDto(
+      funding.fundId,
+      gratitudeDto.gratTitle,
+      gratitudeDto.gratCont,
+      returnImgUrl,
+    );
   }
 
   async updateGratitude(
