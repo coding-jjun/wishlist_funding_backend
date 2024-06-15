@@ -29,28 +29,34 @@ export class GratitudeService {
     private readonly g2gException: GiftogetherExceptions,
   ) {}
 
-  async getGratitude(fundUuid: string): Promise<GratitudeDto> {
-    // TODO find all image url
+  async getGratitude(fundUuid: string): Promise<GetGratitudeDto> {
     const funding = await this.fundingRepo.findOne({ where: { fundUuid } });
+    if (!funding) throw this.g2gException.FundingNotExists;
+
     const grat = await this.gratitudeRepo.findOne({
       where: { gratId: funding.fundId },
     });
+    if (!grat) throw this.g2gException.GratitudeNotExist;
+
+    let returnImgUrl = [];
 
     if (grat.defaultImgId) {
       const img = await this.imgRepo.findOne({
         where: { imgId: grat.defaultImgId },
       });
-      return new GratitudeDto(grat.gratTitle, grat.gratCont, [img.imgUrl]);
+      returnImgUrl.push(img.imgUrl);
+    } else {
+      const images = await this.imgRepo.find({
+        where: { imgType: ImageType.Gratitude, subId: grat.gratId },
+      });
+      returnImgUrl.push(images.map((i) => i.imgUrl));
     }
 
-    const images = await this.imgRepo.find({
-      where: { imgType: ImageType.Gratitude, subId: grat.gratId },
-    });
-
-    return new GratitudeDto(
+    return new GetGratitudeDto(
+      funding.fundId,
       grat.gratTitle,
       grat.gratCont,
-      images.map((img) => img.imgUrl),
+      returnImgUrl,
     );
   }
 
