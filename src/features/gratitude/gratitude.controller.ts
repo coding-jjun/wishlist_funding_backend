@@ -40,15 +40,15 @@ export class GratitudeController {
     };
   }
 
-  @Put('/:gratId')
+  @Put('/:fundUuid')
   async updateGratitude(
-    @Param('gratId') gratId: number,
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
     @Body() updateGratitudeDto: GratitudeDto,
   ): Promise<CommonResponse> {
     return {
       message: 'success',
       data: await this.gratitudeService.updateGratitude(
-        gratId,
+        fundUuid,
         updateGratitudeDto,
       ),
     };

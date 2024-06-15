@@ -9,6 +9,7 @@ export enum ErrorCode {
 
   // Gratitude
   GratitudeAlreadyExists = '0300',
+  GratitudeNotExist = '0301',
 
   // RollingPaper
 

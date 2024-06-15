@@ -39,6 +39,11 @@ export class GiftogetherExceptions {
     ErrorCode.GratitudeAlreadyExists,
     HttpStatus.FORBIDDEN,
   );
+  GratitudeNotExist = new GiftogetherException(
+    ErrorMsg.GratitudeNotExist,
+    ErrorCode.GratitudeNotExist,
+    HttpStatus.NOT_FOUND,
+  );
 
   // RollingPaper
 

@@ -9,6 +9,7 @@ export enum ErrorMsg {
 
   // Gratitude
   GratitudeAlreadyExists = '감사인사가 이미 존재합니다.',
+  GratitudeNotExist = '감사인사가 존재하지 않습니다.',
 
   // RollingPaper
 
