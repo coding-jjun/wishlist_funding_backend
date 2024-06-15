@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Gratitude } from 'src/entities/gratitude.entity';
 import { Repository } from 'typeorm';
@@ -68,15 +68,13 @@ export class GratitudeService {
       // 사용자 정의 이미지 제공시,
       // 1. 새 grat 생성 및 저장.
       // 2. gratId를 subId로 갖는 새 image 생성 및 저장.
-      const grat = (
-        await this.gratitudeRepo.insert(
-          new Gratitude(
-            funding.fundId,
-            gratitudeDto.gratTitle,
-            gratitudeDto.gratCont,
-          ),
-        )
-      ).generatedMaps[0] as Gratitude;
+      const grat = await this.gratitudeRepo.save(
+        new Gratitude(
+          funding.fundId,
+          gratitudeDto.gratTitle,
+          gratitudeDto.gratCont,
+        ),
+      );
 
       this.imgRepo.insert(
         gratitudeDto.gratImg.map(
