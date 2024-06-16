@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RollingPaper } from 'src/entities/rolling-paper.entity';
 import { Repository } from 'typeorm';
@@ -32,6 +32,8 @@ export class RollingPaperService {
 
   async getAllRollingPapers(fundUuid: string): Promise<RollingPaperDto[]> {
     const fund = await this.fundingRepo.findOne({ where: { fundUuid } });
+    if (!fund) throw this.g2gException.FundingNotExists;
+
     const rolls = await this.rollingPaperRepo.find({
       where: { fundId: fund.fundId },
       relations: ['donation', 'donation.user'],
@@ -41,17 +43,18 @@ export class RollingPaperService {
       if (roll.defaultImgId) {
         return (
           await this.imgRepo.findOne({
-            where: { imgId: DefaultImageId.RollingPaper },
+            where: { imgId: roll.defaultImgId },
           })
         )?.imgUrl;
       }
 
       // not a default
+      Logger.log(`롤링페이퍼 ID: ${roll.rollId}`);
       return (
         await this.imgRepo.findOne({
           where: { imgType: ImageType.RollingPaper, subId: roll.rollId },
         })
-      ).imgUrl;
+      )?.imgUrl;
     };
 
     const resolvedRolls = await Promise.all(rolls);
