@@ -19,4 +19,5 @@ export interface UserInfo {
 
   userAcc?:number  | null;
 
+  defaultImgId?: number;
 }

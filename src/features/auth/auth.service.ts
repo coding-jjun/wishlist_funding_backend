@@ -8,7 +8,7 @@ import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { Image } from 'src/entities/image.entity';
 import { ImageType } from 'src/enums/image-type.enum';
 import { RedisClientType } from '@redis/client';
-import { DefaultImageId } from 'src/enums/default-image-id';
+import { DefaultImageId, defaultUserImageIds } from 'src/enums/default-image-id';
 import { UserDto } from '../user/dto/user.dto';
 import { UserInfo } from 'src/interfaces/user-info.interface';
 import { Account } from 'src/entities/account.entity';
@@ -32,6 +32,7 @@ export class AuthService {
     @Inject('REDIS_CLIENT')
     private readonly redisClient: RedisClientType,
 
+    private readonly g2gException: GiftogetherExceptions,
   ) {}
 
   async parseDate(yearString: string, birthday: string): Promise<Date> {
@@ -139,52 +140,67 @@ export class AuthService {
 
 
   async createUser(userDto: CreateUserDto | UserInfo) {
-    const {userImg, userAcc, ...userInfo} = userDto;
+    const {userImg, userAcc, defaultImgId, ...userInfo} = userDto;
     const user = new User();
 
     // TODO 중복값에 대한 예외 처리 (userPhone, userNick)
     Object.assign(user, userInfo);
     const userSaved = await this.userRepository.save(user);
     const userId = user.userId;
-
-    // Account
-    if(userAcc) {
-      const account = await this.accRepository.findOneBy({
-        accId: userAcc,
-      });
-      if (account) {
-        userSaved.account = account;
+    
+    try {
+      // Account
+      if (userAcc) {
+        const account = await this.accRepository.findOneBy({
+          accId: userAcc,
+        });
+        if (account) {
+          userSaved.account = account;
+        }
       }
-    }
-    // Image
-    let imgUrl = null;
-    if(userImg){
-      const image = new Image(userImg, ImageType.User, userId);
-      const imgSaved = await this.imgRepository.save(image);
-      
-      imgUrl = imgSaved.imgUrl;
-      user.defaultImgId = null;
+      // Image
+      let imgUrl = null;
+      if (userImg) {
+        // 사용자 정의 이미지 제공시,
+        // 1. userId를 subid로 갖는 새 image 생성 및 저장
+        // 2. user의 defaultImgId 컬럼을 null로 초기화
+        const image = new Image(userImg, ImageType.User, userId);
+        const imgSaved = await this.imgRepository.save(image);
 
-    }else{
-      const defaultImage = await this.imgRepository.findOne({
-        where: { imgId: DefaultImageId.User },
-      });
-      user.defaultImgId = DefaultImageId.User;
-      imgUrl = defaultImage.imgUrl;
-    }
-    await this.userRepository.update({userId}, user);
+        imgUrl = imgSaved.imgUrl;
+        user.defaultImgId = null;
+      } else {
+        // 기본 이미지 제공시,
+        // 1. 기본 이미지 가져오기
+        // 2. user의 defaultImgId를 새 이미지의 id로 설정
+        if (!defaultImgId || !defaultUserImageIds.includes(defaultImgId))
+          throw this.g2gException.DefaultImgIdNotExist;
 
-    return new UserDto(
-      userSaved.userNick,
-      userSaved.userName,
-      userSaved.userPhone,
-      userSaved.userBirth,
-      userSaved.authType,
-      imgUrl,
-      userSaved.userId,
-      userSaved.userEmail,
-      userSaved.authId,
-    )
+        const defaultImage = await this.imgRepository.findOne({
+          where: { imgId: userDto.defaultImgId },
+        });
+        user.defaultImgId = defaultImage.imgId;
+
+        imgUrl = defaultImage.imgUrl;
+      }
+      await this.userRepository.update({ userId }, user);
+
+      return new UserDto(
+        userSaved.userNick,
+        userSaved.userName,
+        userSaved.userPhone,
+        userSaved.userBirth,
+        userSaved.authType,
+        imgUrl,
+        userSaved.userId,
+        userSaved.userEmail,
+        userSaved.authId,
+      );
+    } catch (error) {
+      this.userRepository.remove(user);
+      throw error;
+    }
+
   }
   
 
