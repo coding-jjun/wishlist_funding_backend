@@ -4,8 +4,8 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Profile, Strategy } from 'passport-kakao';
 import { AuthService } from '../auth.service';
 import { AuthType } from 'src/enums/auth-type.enum';
-import { UserInfo } from 'src/interfaces/user-info.interface';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { CreateUserDto } from '../dto/create-user.dto';
 
 @Injectable()
 export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
@@ -29,12 +29,12 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
     const resProfile = profile._json;
     const kakaoAccount = resProfile.kakao_account;
 
-    const userInfo: UserInfo = {
-      authType: AuthType.Kakao,
-      authId: resProfile.id,
-      userName: kakaoAccount.name || null,
-      userEmail: kakaoAccount.email,
-    }
+    const createUserDto = new CreateUserDto();
+
+    createUserDto.authType = AuthType.Kakao;
+    createUserDto.authId = resProfile.id;
+    createUserDto.userEmail = kakaoAccount.name || null;
+    createUserDto.userName = kakaoAccount.name;
 
     // user == 로그인
     let user = await this.authService.validateUser(kakaoAccount.email, AuthType.Kakao);
@@ -45,7 +45,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
       // 닉네임 유효성 검증
       const isValidNick = await this.authService.validUserInfo("userNick", kakaoAccount.profile.nickname);
       if(isValidNick){
-        userInfo.userNick = kakaoAccount.profile.nickname;
+        createUserDto.userNick = kakaoAccount.profile.nickname;
       }
     
       // 핸드폰 번호 유효성 검증
@@ -55,20 +55,20 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
         if(! isValidPhone){
           throw this.g2gException.UserAlreadyExists;
         }
-        userInfo.userPhone = kakaoAccount.phone_number;
+        createUserDto.userPhone = kakaoAccount.phone_number;
       }
 
       if (kakaoAccount.has_birthyear && kakaoAccount.has_birthday) {
-        userInfo.userBirth = await this.authService.parseDate(
+        createUserDto.userBirth = await this.authService.parseDate(
           kakaoAccount.birthyear,
           kakaoAccount.birthday,
         );
       }
 
       if (kakaoAccount.profile.is_default_image) {
-        userInfo.userImg = kakaoAccount.profile.thumbnail_image_url;
+        createUserDto.userImg = kakaoAccount.profile.thumbnail_image_url;
       }
-      user = await this.authService.createUser(userInfo);
+      user = await this.authService.createUser(createUserDto);
     }
     done(null, user);
   }
