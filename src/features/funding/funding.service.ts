@@ -18,6 +18,7 @@ import {
 } from 'src/enums/default-image-id';
 import { query } from 'express';
 import assert from 'assert';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 @Injectable()
 export class FundingService {
@@ -35,6 +36,8 @@ export class FundingService {
     private imageRepository: Repository<Image>,
 
     private giftService: GiftService,
+
+    private readonly g2gException: GiftogetherExceptions,
   ) {}
 
   async findAll(
@@ -264,10 +267,13 @@ export class FundingService {
       this.imageRepository.save(images);
     } else {
       // defaultImgId 필드에 funding 기본 이미지 ID를 넣는다.
-      assert(
-        createFundingDto.defaultImgId &&
-          defaultFundingImageIds.includes(createFundingDto.defaultImgId),
-      );
+      if (
+        !createFundingDto.defaultImgId ||
+        !defaultFundingImageIds.includes(createFundingDto.defaultImgId)
+      ) {
+        this.fundingRepository.remove(funding_save);
+        throw this.g2gException.DefaultImgIdNotExist;
+      }
 
       await this.fundingRepository.update(funding_save.fundId, {
         defaultImgId: createFundingDto.defaultImgId,

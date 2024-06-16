@@ -21,8 +21,9 @@ export class CreateFundingDto {
   @IsNotEmpty()
   fundCont: string;
 
+  @IsOptional()
   @IsUrl({}, { each: true })
-  fundImg: string[];
+  fundImg?: string[];
 
   @IsNumber()
   @IsOptional()
