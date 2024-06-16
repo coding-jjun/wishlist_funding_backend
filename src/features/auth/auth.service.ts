@@ -206,6 +206,9 @@ export class AuthService {
 
   async updateUser(user:User, userDto: UpdateUserDto): Promise<UserDto>{
     const { userImg,userAcc, ...userInfo } = userDto;
+    const userId = user.userId;
+    const defaultImgId = userDto.defaultImgId;
+
     Object.assign(user, userInfo);
 
     if (userAcc) {
@@ -215,23 +218,37 @@ export class AuthService {
       user.account = account;
     }
 
+    // 0. image 테이블에 등록된 사용자 프로필 이미지 삭제
+    this.imgRepository.delete({ imgType: ImageType.User, imgId: userId });
+
     let imgUrl = null;
-    const userId = user.userId;
-    if(userImg){
+    if (userImg) {
+      // 사용자 정의 이미지 제공시,
+      // 1. userId를 subid로 갖는 새 image 생성 및 저장
+      // 2. user의 defaultImgId 컬럼을 null로 초기화
+
       const image = new Image(userImg, ImageType.User, userId);
       const imgSaved = await this.imgRepository.save(image);
-      
+
       imgUrl = imgSaved.imgUrl;
       user.defaultImgId = null;
+    } else {
+      // 기본 이미지 제공시,
+      // 1. 기본 이미지 가져오기
+      // 2. user의 defaultImgId를 새 이미지의 id로 설정
 
-    }else{
+      if (!defaultImgId || !defaultUserImageIds.includes(defaultImgId))
+        throw this.g2gException.DefaultImgIdNotExist;
+
       const defaultImage = await this.imgRepository.findOne({
-        where: { imgId: DefaultImageId.User },
+        where: { imgId: defaultImgId },
       });
-      user.defaultImgId = DefaultImageId.User;
+      user.defaultImgId = defaultImage.imgId;
+
       imgUrl = defaultImage.imgUrl;
     }
-    await this.userRepository.update({userId: userId}, user);
+    await this.userRepository.update({ userId }, user);
+
     return new UserDto(
       user.userNick,
       user.userName,

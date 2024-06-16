@@ -3,7 +3,6 @@ import { IsNotEmpty, IsNumber, IsOptional, IsUrl } from 'class-validator';
  * SNS 가입 회원용 추가 회원가입 + 개인정보 업데이트 DTO
  */
 export class UpdateUserDto {
-
   @IsNotEmpty()
   userNick: string;
 
@@ -24,4 +23,7 @@ export class UpdateUserDto {
   @IsUrl()
   userImg?: string;
 
+  @IsOptional()
+  @IsNumber()
+  defaultImgId?: number;
 }
