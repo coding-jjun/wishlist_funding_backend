@@ -1,19 +1,26 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsUrl } from 'class-validator';
+import { IsNumber, IsOptional, IsUrl } from 'class-validator';
+import { AuthType } from 'src/enums/auth-type.enum';
 
 export class CreateUserDto {
-  @IsNotEmpty()
+  @IsOptional()
+  authId: string;
+
+  @IsOptional()
+  authType: AuthType;
+
+  @IsOptional()
   userNick: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   userPw: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   userName: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   userPhone: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   userBirth: Date;
 
   @IsOptional()

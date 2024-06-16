@@ -10,7 +10,6 @@ import { ImageType } from 'src/enums/image-type.enum';
 import { RedisClientType } from '@redis/client';
 import { DefaultImageId, defaultUserImageIds } from 'src/enums/default-image-id';
 import { UserDto } from '../user/dto/user.dto';
-import { UserInfo } from 'src/interfaces/user-info.interface';
 import { Account } from 'src/entities/account.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -139,7 +138,7 @@ export class AuthService {
 
 
 
-  async createUser(userDto: CreateUserDto | UserInfo) {
+  async createUser(userDto: CreateUserDto) {
     const {userImg, userAcc, defaultImgId, ...userInfo} = userDto;
     const user = new User();
 
