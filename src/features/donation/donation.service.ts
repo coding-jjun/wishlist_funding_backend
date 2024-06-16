@@ -114,6 +114,7 @@ export class DonationService {
         savedDonation.donId,
         createDonationDto.rollMsg,
         createDonationDto.rollImg,
+        createDonationDto.defaultImgId,
       ),
     );
 

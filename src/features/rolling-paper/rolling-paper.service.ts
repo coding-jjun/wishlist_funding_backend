@@ -13,6 +13,7 @@ import { ImageType } from 'src/enums/image-type.enum';
 import { Donation } from 'src/entities/donation.entity';
 import { CreateRollingPaperDto } from './dto/create-rolling-paper.dto';
 import assert from 'assert';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 @Injectable()
 export class RollingPaperService {
@@ -25,6 +26,8 @@ export class RollingPaperService {
 
     @InjectRepository(Image)
     private readonly imgRepo: Repository<Image>,
+
+    private readonly g2gException: GiftogetherExceptions,
   ) {}
 
   async getAllRollingPapers(fundUuid: string): Promise<RollingPaperDto[]> {
@@ -85,13 +88,15 @@ export class RollingPaperService {
         rollingPaper.rollId,
       );
 
-      this.imgRepo.save(image);
+      this.imgRepo.insert(image);
     } else {
       // 기본값 이미지
-      assert(
-        crpDto.defaultImgId &&
-          defaultRollingPaperImageIds.includes(crpDto.defaultImgId),
-      );
+      if (
+        !crpDto.defaultImgId ||
+        !defaultRollingPaperImageIds.includes(crpDto.defaultImgId)
+      )
+        throw this.g2gException.DefaultImgIdNotExist;
+
       this.rollingPaperRepo.update(savedRp.rollId, {
         defaultImgId: crpDto.defaultImgId,
       });
