@@ -20,6 +20,7 @@ import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserDto } from '../user/dto/user.dto';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -104,6 +105,26 @@ export class AuthController {
     }
     
   }
+
+  @Post('login')
+  async login(@Body() loginDto: LoginDto, @Res() res:Response){
+    try {
+      const userDto = await this.authService.login(loginDto);
+      const accessToken = await this.authService.createAccessToken(userDto.userId);
+      const refreshToken = await this.authService.createRefreshToken(userDto.userId);
+      res.cookie('access_token', accessToken);
+      res.cookie('refresh_token', refreshToken);
+      
+      const response: CommonResponse = {
+          message: '로그인 완료',
+          data: userDto,
+      };
+      return res.status(200).json(response);
+    } catch (error) {
+        return res.status(500).json({ message: "서버 오류" });
+    }
+  }
+  
 
   @Patch('/signup/extra')
   @UseGuards(JwtAuthGuard)

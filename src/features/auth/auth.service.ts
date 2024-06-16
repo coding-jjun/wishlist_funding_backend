@@ -14,6 +14,7 @@ import { UserInfo } from 'src/interfaces/user-info.interface';
 import { Account } from 'src/entities/account.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { LoginDto } from './dto/login.dto';
 
 
 @Injectable()
@@ -52,6 +53,7 @@ export class AuthService {
     );
   }
   async createRefreshToken(userId: number): Promise<string> {
+    await this.redisClient.del(`user:${userId}`);
     const time = new Date();
     const token = this.jwtService.sign(
       { userId: userId, time: time },
@@ -92,6 +94,45 @@ export class AuthService {
     } catch (error) {
       throw this.jwtException.RedisServerError;
     }
+  }
+
+  async login(loginDto: LoginDto): Promise<UserDto>{
+    //TODO 패스워드 db 비교
+    const user = await this.userRepository.findOne({
+      where: {userEmail: loginDto.userEmail,
+              userPw : loginDto.userPw}
+    });
+    if(!user){
+      this.jwtException.UserNotFound;
+    }
+    let imgUrl = null;
+    if(user.defaultImgId){
+      const image = await this.imgRepository.findOne({
+        where: {imgId: user.defaultImgId}
+      })
+      imgUrl = image.imgUrl;
+
+      }else{
+      
+        // TODO 사용자 이미지 저장 기록이 여러개 일때,
+        const image = await this.imgRepository.findOne({
+          where: {subId: user.userId,
+                  imgType: ImageType.User}
+        })
+      imgUrl = image.imgUrl;
+    }
+
+    return new UserDto(
+      user.userNick,
+      user.userName,
+      user.userPhone,
+      user.userBirth,
+      user.authType,
+      imgUrl,
+      user.userId,
+      user.userEmail,
+      user.authId
+    )
   }
   
 
