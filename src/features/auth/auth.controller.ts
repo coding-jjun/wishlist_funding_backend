@@ -21,10 +21,15 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserDto } from '../user/dto/user.dto';
 import { LoginDto } from './dto/login.dto';
+import { ValidDto } from './dto/valid.dto';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly g2gException: GiftogetherExceptions,
+  ) {}
 
   @Get('kakao')
   @UseGuards(KakaoAuthGuard)
@@ -181,5 +186,55 @@ export class AuthController {
     }
   }
 
+  @Post('/email')
+  async validUserEmail(@Body() validDto: ValidDto): Promise<CommonResponse>{
+    
+    if(!validDto.userEmail){
+      throw this.g2gException.NotValidEmail;
+    }
+
+    const isValid = await this.authService.validUserInfo("userEmail", validDto.userEmail);
+    if(!isValid){
+      throw this.g2gException.NotValidEmail;
+    }
+    return {
+      message: '유효한 이메일 입니다.',
+      data: true
+    };
+  }
+
+  @Post('/phone')
+  async validUserPhone(@Body() validDto: ValidDto): Promise<CommonResponse>{
+
+    if(!validDto.userPhone){
+      throw this.g2gException.NotValidPhone;
+    }
+
+    const isValid = await this.authService.validUserInfo("userPhone", validDto.userPhone);
+    if(!isValid){
+      throw this.g2gException.NotValidPhone;
+    }
+    return {
+      message: '유효한 번호 입니다.',
+      data: true
+    }; 
+  }
+
+  @Post('/nickname')
+  async validNickName(@Body() validDto: ValidDto): Promise<CommonResponse>{
+
+    if(!validDto.userNick){
+      throw this.g2gException.NotValidNick;
+    }
+
+    const isValid = await this.authService.validUserInfo("userNick", validDto.userNick);
+    if(!isValid){
+      throw this.g2gException.NotValidNick;
+    }
+    return {
+      message: '유효한 닉네임 입니다.',
+      data: true
+    }; 
+  }
 
 }
