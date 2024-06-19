@@ -301,6 +301,8 @@ export class FundingService {
 
     await this.fundingRepository.save(funding);
 
+    // mission1-2 수정사항 발생
+
     // let gifts = await this.giftService.createGift(funding.fundId, updateFundingDto.gifts ?? []);
 
     const { gifts, count } = await this.giftService.findAllGift(funding.fundId);
