@@ -23,6 +23,7 @@ export enum ErrorMsg {
   NotValidEmail = "이미 사용 중인 이메일 입니다.",
   NotValidPhone = "이미 사용 중인 번호 입니다.",
   NotValidNick = "이미 사용 중인 닉네임 입니다.",
+  PasswordIncorrect = "비밀번호가 틀렸습니다. 다시 시도해주세요.",
 
   // Friend
   AlreadySendRequest = '이미 친구 요청을 보냈습니다.',

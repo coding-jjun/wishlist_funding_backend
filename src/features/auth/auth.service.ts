@@ -14,7 +14,7 @@ import { Account } from 'src/entities/account.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
-
+import  * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -95,15 +95,25 @@ export class AuthService {
     }
   }
 
+  async isValidPassword(reqPw: string, storedPw: string): Promise<Boolean>{
+    const isValidPw = await bcrypt.compare(reqPw, storedPw);
+    if(!isValidPw){
+      throw this.jwtException.PasswordIncorrect;  
+    }
+    return true;
+  }
+
   async login(loginDto: LoginDto): Promise<UserDto>{
     //TODO 패스워드 db 비교
     const user = await this.userRepository.findOne({
-      where: {userEmail: loginDto.userEmail,
-              userPw : loginDto.userPw}
+      where: {userEmail: loginDto.userEmail}
     });
     if(!user){
-      this.jwtException.UserNotFound;
+      throw this.jwtException.UserNotFound;
     }
+
+    await this.isValidPassword(user.userPw, loginDto.userPw);
+
     let imgUrl = null;
     if(user.defaultImgId){
       const image = await this.imgRepository.findOne({
@@ -138,13 +148,18 @@ export class AuthService {
 
 
   async createUser(userDto: CreateUserDto) {
-    const {userImg, userAcc, ...userInfo} = userDto;
+    const {userImg, userAcc, userPw, ...userInfo} = userDto;
     const user = new User();
 
-    // TODO 중복값에 대한 예외 처리 (userPhone, userNick)
     Object.assign(user, userInfo);
     const userSaved = await this.userRepository.save(user);
     const userId = user.userId;
+
+    // Password
+    if(userPw){
+      const hashPw = await bcrypt.hash(userPw, 10);
+      user.userPw = hashPw;
+    }
 
     // Account
     if(userAcc) {

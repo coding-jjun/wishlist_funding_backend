@@ -23,6 +23,7 @@ export enum ErrorCode {
   NotValidEmail = "0703",
   NotValidPhone = "0704",
   NotValidNick = "0705",
+  PasswordIncorrect = "0705",
 
   // Friend
   AlreadySendRequest = '0800',
