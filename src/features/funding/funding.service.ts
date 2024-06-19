@@ -299,6 +299,8 @@ export class FundingService {
     }
     funding.endAt = endAt;
 
+    // 수정사항 발생!
+
     await this.fundingRepository.save(funding);
 
     // let gifts = await this.giftService.createGift(funding.fundId, updateFundingDto.gifts ?? []);
