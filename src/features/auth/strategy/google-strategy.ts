@@ -4,7 +4,7 @@ import { PassportStrategy } from "@nestjs/passport";
 import { Profile, Strategy } from "passport-google-oauth20";
 import { AuthService } from "../auth.service";
 import { AuthType } from "src/enums/auth-type.enum";
-import { UserInfo } from "src/interfaces/user-info.interface";
+import { CreateUserDto } from "../dto/create-user.dto";
 
 
 @Injectable()
@@ -34,12 +34,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google'){
       done(null, false);
     }
 
-    const userInfo : UserInfo = {
-      authType: AuthType.Google,
-      authId: googleAccount.sub,
-      userEmail: googleAccount.email,
-      userName: googleAccount.name,
-    }
+    const createUserDto = new CreateUserDto();
+
+    createUserDto.authType = AuthType.Google;
+    createUserDto.authId = googleAccount.sub;
+    createUserDto.userEmail = googleAccount.email;
+    createUserDto.userName = googleAccount.name;
 
     // user == 로그인
     let user = await this.authService.validateUser(googleAccount.email, AuthType.Google);
@@ -48,13 +48,13 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google'){
     if(! user){
       const isValidNick = await this.authService.validUserInfo("userNick", googleAccount.given_name);
       if(isValidNick){
-        userInfo.userNick = googleAccount.given_name;
+        createUserDto.userNick = googleAccount.given_name;
       }
 
       if(googleAccount.picture){
-        userInfo.userImg = googleAccount.picture;
+        createUserDto.userImg = googleAccount.picture;
       }
-      user = await this.authService.createUser(userInfo);
+      user = await this.authService.createUser(createUserDto);
     }
     done(null, user);
   }

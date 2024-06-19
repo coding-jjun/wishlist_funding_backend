@@ -4,8 +4,8 @@ import { Profile, Strategy } from 'passport-naver';
 import { AuthService } from '../auth.service';
 import { AuthType } from 'src/enums/auth-type.enum';
 import { Injectable } from '@nestjs/common';
-import { UserInfo } from 'src/interfaces/user-info.interface';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { CreateUserDto } from '../dto/create-user.dto';
 
 @Injectable()
 export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
@@ -29,12 +29,12 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
   ) {
     const naverAccount = profile._json as any;
 
-    const userInfo: UserInfo = {
-      authType: AuthType.Naver,
-      authId: naverAccount.id,
-      userName: naverAccount.name || null,
-      userEmail: naverAccount.email,
-    }
+    const createUserDto = new CreateUserDto();
+
+    createUserDto.authType = AuthType.Naver;
+    createUserDto.authId = naverAccount.id;
+    createUserDto.userEmail = naverAccount.email;
+    createUserDto.userName = naverAccount.name || null;
 
     // user == 로그인
     let user = await this.authService.validateUser(naverAccount.email, AuthType.Naver);
@@ -44,9 +44,9 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
     if (! user) {
 
       // 닉네임 유효성 검증
-      const isValidNick = await this.authService.validUserInfo("userNick",naverAccount.nickName);
+      const isValidNick = await this.authService.validUserInfo("userNick",naverAccount.nickname);
       if(isValidNick){
-        userInfo.userNick = naverAccount.nickName;
+        createUserDto.userNick = naverAccount.nickname;
       }
 
       // 핸드폰 번호 유효성 검증
@@ -57,13 +57,13 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
         if(! isValidPhone){
           throw this.g2gException.UserAlreadyExists;
         }
-        userInfo.userPhone = naverAccount.mobile;
+        createUserDto.userPhone = naverAccount.mobile;
       }
 
       if (naverAccount.profile_image) {
-        userInfo.userImg = naverAccount.profile_image;
+        createUserDto.userImg = naverAccount.profile_image;
       }
-      user = await this.authService.createUser(userInfo);
+      user = await this.authService.createUser(createUserDto);
     }
     done(null, user);
     

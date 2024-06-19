@@ -65,6 +65,27 @@ export class GiftogetherExceptions {
     HttpStatus.BAD_REQUEST,
   );
 
+  NotValidEmail = new GiftogetherException(
+    ErrorMsg.NotValidEmail,
+    ErrorCode.NotValidEmail,
+    HttpStatus.BAD_REQUEST
+  )
+  NotValidPhone = new GiftogetherException(
+    ErrorMsg.NotValidPhone,
+    ErrorCode.NotValidPhone,
+    HttpStatus.BAD_REQUEST
+  )
+  NotValidNick = new GiftogetherException(
+    ErrorMsg.NotValidNick,
+    ErrorCode.NotValidNick,
+    HttpStatus.BAD_REQUEST
+  )
+  PasswordIncorrect = new GiftogetherException(
+    ErrorMsg.PasswordIncorrect,
+    ErrorCode.PasswordIncorrect,
+    HttpStatus.UNAUTHORIZED 
+  )
+
   // Friend
   AlreadySendRequest = new GiftogetherException(
     ErrorMsg.AlreadySendRequest,
