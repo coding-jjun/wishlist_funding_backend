@@ -299,7 +299,7 @@ export class FundingService {
     }
     funding.endAt = endAt;
 
-    // 수정사항 발생!
+    // 여기에서 충돌이 발생합니다!
 
     await this.fundingRepository.save(funding);
 
