@@ -66,6 +66,11 @@ export class GiftogetherExceptions {
   );
 
   // Notification
+  WrongNotiType = new GiftogetherException(
+    ErrorMsg.WrongNotiType,
+    ErrorCode.WrongNotiType,
+    HttpStatus.BAD_REQUEST
+  )
 
   // Auth
   JwtNotExpired = new GiftogetherException(

@@ -21,7 +21,7 @@ export class NotiDto {
   // sendImg?: string;
   notiType: NotiType;
   reqType: ReqType;
-  subId: number;
+  subId: string;
   notiTime: Date;
 
   constructor(notification: Notification) {

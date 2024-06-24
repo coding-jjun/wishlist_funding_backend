@@ -24,6 +24,7 @@ export enum ErrorMsg {
   AlreadyFriend = '이미 친구 상태입니다.',
 
   // Notification
+  WrongNotiType = '잘못된 알림 타입입니다.',
   
   // Jwt
   JwtNotExpired = '만료되지 않은 토큰입니다.',

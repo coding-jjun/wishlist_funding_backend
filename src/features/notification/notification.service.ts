@@ -7,6 +7,8 @@ import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { User } from 'src/entities/user.entity';
 import { NotiDto } from './dto/notification.dto';
 import { NotiType } from 'src/enums/notification.enum';
+import { Donation } from 'src/entities/donation.entity';
+import { Funding } from 'src/entities/funding.entity';
 
 @Injectable()
 export class NotificationService {
@@ -16,6 +18,12 @@ export class NotificationService {
 
     @InjectRepository(User)
     private userRepository: Repository<User>,
+
+    @InjectRepository(Funding)
+    private fundRepository: Repository<Funding>,
+
+    @InjectRepository(Donation)
+    private donationRepository: Repository<Donation>,
   ) {}
 
   async getAllNoti(
@@ -57,6 +65,54 @@ export class NotificationService {
     noti.subId = createNotiDto.subId;
 
     return await this.notiRepository.save(noti);
+  }
+
+  async createMultiNoti(
+    createNotiDto: CreateNotificationDto,
+  ): Promise<Notification[]> {
+    const notifications: Notification[] = [];
+
+    let funding;
+    let donations;
+    switch (createNotiDto.notiType) {
+      case (NotiType.CheckGratitude):
+        funding = await this.fundRepository.findOne({
+          where: { fundId: Number(createNotiDto.subId) },
+          relations: ['fundUser']
+        });        
+
+        donations = await this.donationRepository.find({
+          where: { funding: { fundId: Number(createNotiDto.subId) } },
+          relations: ['user']
+        });
+        break;
+      case (NotiType.DonatedFundClose):
+        funding = await this.fundRepository.findOne({
+          where: { fundUuid: createNotiDto.subId },
+          relations: ['fundUser']
+        })
+
+        donations = await this.donationRepository.find({
+          where: { funding: { fundUuid: createNotiDto.subId } },
+          relations: ['user']
+        });
+        break;
+    }
+
+    console.log("--------------funding.fundId :" + funding.fundId);
+
+    for (const donation of donations) {
+      const noti = new Notification();
+      noti.recvId = donation.user;
+      noti.sendId = funding.fundUser;
+      noti.notiType = createNotiDto.notiType;
+      noti.subId = createNotiDto.subId
+
+      const savedNoti = await this.notiRepository.save(noti);
+      notifications.push(savedNoti);
+    }
+
+    return notifications;
   }
 
   async updateNoti(

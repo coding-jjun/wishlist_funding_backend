@@ -4,18 +4,22 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Post,
   Put,
 } from '@nestjs/common';
 import { NotificationService } from './notification.service';
-import { Notification } from 'src/entities/notification.entity';
-import { NotiType, ReqType } from 'src/enums/notification.enum';
+import { NotiType } from 'src/enums/notification.enum';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
+import { CreateNotificationDto } from './dto/create-notification.dto';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 @Controller('notification')
 export class NotificationController {
   constructor(
-    private notificationService: NotificationService,
+    private notiService: NotificationService,
+    private readonly g2gException: GiftogetherExceptions,
+
     // private appGateWay: AppGateWay,
   ) {}
 
@@ -24,8 +28,41 @@ export class NotificationController {
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<CommonResponse> {
     return {
-      data: await this.notificationService.getAllNoti(userId),
+      data: await this.notiService.getAllNoti(userId),
     };
+  }
+
+  @Post('')
+  async create(
+    @Body() createNotiDto: CreateNotificationDto,
+  ): Promise<CommonResponse> {
+    try {
+      let result;
+      switch (createNotiDto.notiType) {
+        case NotiType.IncomingFollow:
+        case NotiType.AcceptFollow:
+        case NotiType.FundClose:
+        case NotiType.FundAchieve:
+        case NotiType.NewDonate:
+        case NotiType.DonatedFundClose:
+        case NotiType.WriteGratitude:
+          result = await this.notiService.createNoti(createNotiDto);
+          break;
+        case (NotiType.CheckGratitude):
+          result = this.notiService.createMultiNoti(createNotiDto);
+          break;
+        default:
+          throw this.g2gException.WrongNotiType;
+      }
+        
+      return {
+        message: '알림이 성공적으로 생성되었습니다.',
+        data: result,
+      };
+
+    } catch (error) {
+      throw error;
+    }
   }
 
   @Put('/:notiId')
@@ -33,7 +70,7 @@ export class NotificationController {
     @Param('notiId', ParseIntPipe) notiId: number,
     @Body() updateNotificationDto: UpdateNotificationDto,
   ): Promise<CommonResponse> {
-    const newNoti = await this.notificationService.updateNoti(
+    const newNoti = await this.notiService.updateNoti(
       notiId,
       updateNotificationDto,
     );

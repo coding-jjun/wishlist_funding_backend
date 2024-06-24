@@ -15,5 +15,5 @@ export class CreateNotificationDto {
   reqType?: ReqType;
 
   @IsOptional()
-  subId?: number;
+  subId?: string;
 }

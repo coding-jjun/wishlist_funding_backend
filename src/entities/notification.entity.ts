@@ -36,7 +36,7 @@ export class Notification {
   reqType: ReqType;
 
   @Column({ nullable: true })
-  subId: number;
+  subId: string;
 
   @CreateDateColumn()
   notiTime: Date;
