@@ -7,10 +7,16 @@ export class GratitudeDto {
   @IsNotEmpty()
   gratCont: string;
 
+  /*
+   * fundImg와 defaultImgId 둘 중에 하나만 null이어야 함
+   */
   @IsNotEmpty()
   @IsUrl({}, { each: true })
   gratImg: string[];
 
+  /*
+   * fundImg와 defaultImgId 둘 중에 하나만 null이어야 함
+   */
   @IsNumber()
   @IsOptional()
   defaultImgId?: number;

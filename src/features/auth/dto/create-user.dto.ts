@@ -30,10 +30,16 @@ export class CreateUserDto {
   @IsOptional()
   userEmail?: string;
 
+  /**
+   * fundImg와 defaultImgId 둘 중에 하나만 null이어야 함
+   */
   @IsOptional()
   @IsUrl()
   userImg?: string;
 
+  /**
+   * fundImg와 defaultImgId 둘 중에 하나만 null이어야 함
+   */
   @IsNumber()
   @IsOptional()
   defaultImgId?: number;

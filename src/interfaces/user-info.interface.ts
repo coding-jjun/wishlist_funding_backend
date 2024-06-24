@@ -15,9 +15,15 @@ export interface UserInfo {
 
   userBirth?: Date | null;
 
+  /*
+   * fundImg와 defaultImgId 둘 중에 하나만 null이어야 함
+   */
   userImg?: string | null;
 
   userAcc?:number  | null;
 
+  /*
+   * fundImg와 defaultImgId 둘 중에 하나만 null이어야 함
+   */
   defaultImgId?: number;
 }
