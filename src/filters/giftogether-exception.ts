@@ -20,6 +20,11 @@ export class GiftogetherExceptions {
   // Funding
 
   // Donation
+  FundingClosed = new GiftogetherException(
+    ErrorMsg.FundingClosed,
+    ErrorCode.FundingClosed,
+    HttpStatus.BAD_REQUEST,
+  );
 
   // Gift
   IncorrectGiftUrl = new GiftogetherException(
