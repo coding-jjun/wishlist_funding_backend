@@ -18,6 +18,12 @@ export enum ErrorCode {
 
   // User
   UserNotFound = '0700',
+  UserNotUpdated = '0701',
+  UserAlreadyDeleted = '0702',
+  NotValidEmail = "0703",
+  NotValidPhone = "0704",
+  NotValidNick = "0705",
+  PasswordIncorrect = "0705",
 
   // Friend
   AlreadySendRequest = '0800',
@@ -32,5 +38,7 @@ export enum ErrorCode {
   NotValidToken = '0902',
   TokenMissing = '0903',
   RefreshExpire = '0904',
-  UserAlreadyExists = '0905'
+  UserAlreadyExists = '0905',
+  FailedLogout = '0906',
+  RedisServerError = '0907',
 }

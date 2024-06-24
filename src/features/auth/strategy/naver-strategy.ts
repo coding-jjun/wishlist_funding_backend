@@ -4,13 +4,15 @@ import { Profile, Strategy } from 'passport-naver';
 import { AuthService } from '../auth.service';
 import { AuthType } from 'src/enums/auth-type.enum';
 import { Injectable } from '@nestjs/common';
-import { UserInfo } from 'src/interfaces/user-info.interface';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { CreateUserDto } from '../dto/create-user.dto';
 
 @Injectable()
 export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
   constructor(
     private readonly configService: ConfigService,
     private readonly authService: AuthService,
+    private readonly g2gException: GiftogetherExceptions,
   ) {
     super({
       clientID: configService.get<string>('NAVER_CLIENT_ID'),
@@ -26,50 +28,44 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
     done: any,
   ) {
     const naverAccount = profile._json as any;
-    console.log('-------------------- naver validate -----------------------');
 
-    const userInfo: UserInfo = {
-      authType: AuthType.Naver,
-      authId: naverAccount.id,
-      userName: naverAccount.name || null,
-      userEmail: naverAccount.email,
-      userPhone: naverAccount.mobile || null,
-    }
-    // console.log("username : ", naverAccount.name);
+    const createUserDto = new CreateUserDto();
 
-    const user = await this.authService.validateUser(naverAccount.email, AuthType.Naver);
+    createUserDto.authType = AuthType.Naver;
+    createUserDto.authId = naverAccount.id;
+    createUserDto.userEmail = naverAccount.email;
+    createUserDto.userName = naverAccount.name || null;
 
-    // 기존 회원 -> 로그인
-    if (user) {
-      const accessToken = await this.authService.createAccessToken(user.userId);
-      const refreshToken = await this.authService.createRefreshToken(user.userId);
+    // user == 로그인
+    let user = await this.authService.validateUser(naverAccount.email, AuthType.Naver);
 
-      done(null, { type: 'login', accessToken, refreshToken, user });
 
-      // 신규 회원 -> 회원가입
-    } else {
-      const userNick = naverAccount.nickname;
-      const isValid = await this.authService.validUserNick(userNick);
-      if(isValid){
-        userInfo.userNick = userNick;
+    // ! user == 회원 가입
+    if (! user) {
+
+      // 닉네임 유효성 검증
+      const isValidNick = await this.authService.validUserInfo("userNick",naverAccount.nickname);
+      if(isValidNick){
+        createUserDto.userNick = naverAccount.nickname;
       }
 
-      if (naverAccount.birthyear && naverAccount.birthday) {
-        userInfo.userBirth = await this.authService.parseDate(
-          naverAccount.birthyear,
-          naverAccount.birthday,
-        );
+      // 핸드폰 번호 유효성 검증
+      if(naverAccount.mobile){
+        console.log("naverAccount.mobile : ", naverAccount.mobile)
+        
+        const isValidPhone = await this.authService.validUserInfo("userPhone", naverAccount.mobile);
+        if(! isValidPhone){
+          throw this.g2gException.UserAlreadyExists;
+        }
+        createUserDto.userPhone = naverAccount.mobile;
       }
 
-      let imgUrl = null;
       if (naverAccount.profile_image) {
-        // TODO 이미지 객체 생성
-        // imgUrl = naverAccount.profile_image;
+        createUserDto.userImg = naverAccount.profile_image;
       }
-
-      const user = await this.authService.saveAuthUser(userInfo, imgUrl);
-      const onceToken = await this.authService.createOnceToken(user.userId);
-      done(null, { type: 'once', onceToken, user });
+      user = await this.authService.createUser(createUserDto);
     }
+    done(null, user);
+    
   }
 }

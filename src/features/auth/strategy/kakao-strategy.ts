@@ -4,13 +4,15 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Profile, Strategy } from 'passport-kakao';
 import { AuthService } from '../auth.service';
 import { AuthType } from 'src/enums/auth-type.enum';
-import { UserInfo } from 'src/interfaces/user-info.interface';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { CreateUserDto } from '../dto/create-user.dto';
 
 @Injectable()
 export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
   constructor(
     private readonly configService: ConfigService,
     private readonly authService: AuthService,
+    private readonly g2gException: GiftogetherExceptions,
   ) {
     super({
       clientID: configService.get<string>('KAKAO_CLIENT_ID'),
@@ -27,49 +29,47 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
     const resProfile = profile._json;
     const kakaoAccount = resProfile.kakao_account;
 
-    const userInfo: UserInfo = {
-      authType: AuthType.Kakao,
-      authId: resProfile.id,
-      userName: kakaoAccount.name || null,
-      userEmail: kakaoAccount.email,
-      userPhone: kakaoAccount.phone_number || null,
+    const createUserDto = new CreateUserDto();
 
-    }
-    // userName, userPhone 이 같다면 다른 SNS 로 로그인한 회원
-    // await this.authService.
-    const user = await this.authService.validateUser(kakaoAccount.email, AuthType.Kakao);
+    createUserDto.authType = AuthType.Kakao;
+    createUserDto.authId = resProfile.id;
+    createUserDto.userEmail = kakaoAccount.name || null;
+    createUserDto.userName = kakaoAccount.name;
 
-    // 기존 회원 -> 로그인
-    if(user){
-      const accessToken = await this.authService.createAccessToken(user.userId);
-      const refreshToken = await this.authService.createRefreshToken(user.userId);
+    // user == 로그인
+    let user = await this.authService.validateUser(kakaoAccount.email, AuthType.Kakao);
 
-      done(null, { type: 'login', accessToken, refreshToken, user });
+    // ! user == 회원 가입
 
-      // 신규 회원 -> 회원가입
-    } else {
-      
-      const userNick = kakaoAccount.profile.nickname;
-      const isValid = await this.authService.validUserNick(userNick);
-      if(isValid){
-        userInfo.userNick = userNick;
+    if(! user){
+      // 닉네임 유효성 검증
+      const isValidNick = await this.authService.validUserInfo("userNick", kakaoAccount.profile.nickname);
+      if(isValidNick){
+        createUserDto.userNick = kakaoAccount.profile.nickname;
       }
-      
+    
+      // 핸드폰 번호 유효성 검증
+      if(kakaoAccount.phone_number){
+        
+        const isValidPhone = await this.authService.validUserInfo("userPhone", kakaoAccount.phone_number);
+        if(! isValidPhone){
+          throw this.g2gException.UserAlreadyExists;
+        }
+        createUserDto.userPhone = kakaoAccount.phone_number;
+      }
+
       if (kakaoAccount.has_birthyear && kakaoAccount.has_birthday) {
-        userInfo.userBirth = await this.authService.parseDate(
+        createUserDto.userBirth = await this.authService.parseDate(
           kakaoAccount.birthyear,
           kakaoAccount.birthday,
         );
       }
 
-      let imgUrl = null;
       if (kakaoAccount.profile.is_default_image) {
-        imgUrl = kakaoAccount.profile.thumbnail_image_url;
+        createUserDto.userImg = kakaoAccount.profile.thumbnail_image_url;
       }
-
-      const user = await this.authService.saveAuthUser(userInfo, imgUrl);
-      const onceToken = await this.authService.createOnceToken(user.userId);
-      done(null, { type: 'once', onceToken, user });
+      user = await this.authService.createUser(createUserDto);
     }
+    done(null, user);
   }
 }

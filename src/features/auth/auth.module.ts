@@ -11,7 +11,9 @@ import { JwtStrategy } from './strategy/jwt-strategy';
 import { NaverStrategy } from './strategy/naver-strategy';
 import { GoogleStrategy } from './strategy/google-strategy';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
-import { RefreshToken } from 'src/entities/refresh-token.entity';
+import { Image } from 'src/entities/image.entity';
+import { Account } from 'src/entities/account.entity';
+
 
 @Module({
   imports: [
@@ -20,7 +22,7 @@ import { RefreshToken } from 'src/entities/refresh-token.entity';
       secret: process.env.JWT_SECRET,
     }),
 
-    TypeOrmModule.forFeature([User, RefreshToken]),
+    TypeOrmModule.forFeature([User, Image, Account]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
   controllers: [AuthController],

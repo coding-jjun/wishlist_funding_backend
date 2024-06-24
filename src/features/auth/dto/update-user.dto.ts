@@ -1,11 +1,11 @@
 import { IsNotEmpty, IsNumber, IsOptional, IsUrl } from 'class-validator';
+/**
+ * SNS 가입 회원용 추가 회원가입 + 개인정보 업데이트 DTO
+ */
+export class UpdateUserDto {
 
-export class CreateUserDto {
   @IsNotEmpty()
   userNick: string;
-
-  @IsNotEmpty()
-  userPw: string;
 
   @IsNotEmpty()
   userName: string;
@@ -21,9 +21,7 @@ export class CreateUserDto {
   userAcc?: number;
 
   @IsOptional()
-  userEmail?: string;
-
-  @IsOptional()
   @IsUrl()
   userImg?: string;
+
 }

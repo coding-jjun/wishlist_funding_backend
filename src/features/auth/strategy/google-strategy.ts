@@ -4,7 +4,7 @@ import { PassportStrategy } from "@nestjs/passport";
 import { Profile, Strategy } from "passport-google-oauth20";
 import { AuthService } from "../auth.service";
 import { AuthType } from "src/enums/auth-type.enum";
-import { UserInfo } from "src/interfaces/user-info.interface";
+import { CreateUserDto } from "../dto/create-user.dto";
 
 
 @Injectable()
@@ -21,7 +21,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google'){
       // scope += 'https://www.googleapis.com/auth/user.phonenumbers.read', 'https://www.googleapis.com/auth/user.birthday.read', 'https://www.googleapis.com/auth/user.addresses.read'
     });
   }
-  async validate(access_token: string, refresh_token: string, profile: Profile, done:any) {
+  async validate(
+    access_token: string,
+    refresh_token: string,
+    profile: Profile,
+    done: any,
+  ) {
 
     const googleAccount = profile._json;
     if(!googleAccount.email_verified){
@@ -29,39 +34,29 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google'){
       done(null, false);
     }
 
-    const userInfo : UserInfo = {
-      authType: AuthType.Google,
-      authId: googleAccount.sub,
-      userEmail: googleAccount.email,
-    }
+    const createUserDto = new CreateUserDto();
 
-    const user = await this.authService.validateUser(googleAccount.email, AuthType.Google);
+    createUserDto.authType = AuthType.Google;
+    createUserDto.authId = googleAccount.sub;
+    createUserDto.userEmail = googleAccount.email;
+    createUserDto.userName = googleAccount.name;
 
-    // 기존 회원 -> 로그인
-    if(user){
+    // user == 로그인
+    let user = await this.authService.validateUser(googleAccount.email, AuthType.Google);
 
-      const accessToken = await this.authService.createAccessToken(user.userId);
-      const refreshToken = await this.authService.createRefreshToken(user.userId);
-
-      done(null, {type: 'login', accessToken, refreshToken, user})
-      
-    // 신규 회원 -> 회원가입
-    }else{     
-      const userNick = googleAccount.name;
-      const isValid = await this.authService.validUserNick(userNick);
-      if(isValid){
-        userInfo.userNick = userNick;
+    // ! user == 회원 가입
+    if(! user){
+      const isValidNick = await this.authService.validUserInfo("userNick", googleAccount.given_name);
+      if(isValidNick){
+        createUserDto.userNick = googleAccount.given_name;
       }
-      
-      let imgUrl = null;
+
       if(googleAccount.picture){
-        // imgUrl = googleAccount.picture;
+        createUserDto.userImg = googleAccount.picture;
       }
-      
-      const user = await this.authService.saveAuthUser(userInfo, imgUrl);
-      const onceToken = await this.authService.createOnceToken(user.userId);
-      done(null, {type: 'once', onceToken, user})
+      user = await this.authService.createUser(createUserDto);
     }
+    done(null, user);
   }
 }
 

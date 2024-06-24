@@ -1,23 +1,35 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from 'src/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
-import { UserInfo } from 'src/interfaces/user-info.interface';
 import { AuthType } from 'src/enums/auth-type.enum';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
-import { RefreshToken } from 'src/entities/refresh-token.entity';
-
+import { Image } from 'src/entities/image.entity';
+import { ImageType } from 'src/enums/image-type.enum';
+import { RedisClientType } from '@redis/client';
+import { DefaultImageId } from 'src/enums/default-image-id';
+import { UserDto } from '../user/dto/user.dto';
+import { Account } from 'src/entities/account.entity';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { LoginDto } from './dto/login.dto';
+import  * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(RefreshToken)
-    private readonly refreshRepository: Repository<RefreshToken>,
+    @InjectRepository(Image)
+    private readonly imgRepository: Repository<Image>,
+    @InjectRepository(Account)
+    private readonly accRepository: Repository<Account>,
+
     private jwtService: JwtService,
     private readonly jwtException: GiftogetherExceptions,
+    @Inject('REDIS_CLIENT')
+    private readonly redisClient: RedisClientType,
 
   ) {}
 
@@ -30,44 +42,28 @@ export class AuthService {
     return new Date(year, month, day);
   }
 
-  async createOnceToken(userId: number): Promise<string> {
-    return this.jwtService.sign(
-      { userId, time: new Date(), type: 'once' },
-      {
-        secret: process.env.JWT_SECRET,
-        expiresIn: '20m',
-      }
-    );
-  }
-
   async createAccessToken(userId: number): Promise<string> {
     return this.jwtService.sign(
-      { userId, time: new Date(), type: 'access' },
+      { userId, time: new Date()},
       {
         secret: process.env.JWT_SECRET,
-        expiresIn: '10m',
+        expiresIn: '30m',
       }
     );
   }
-
   async createRefreshToken(userId: number): Promise<string> {
+    await this.redisClient.del(`user:${userId}`);
     const time = new Date();
-    const token =  this.jwtService.sign(
-      { userId, time: time, type: 'refresh' },
+    const token = this.jwtService.sign(
+      { userId: userId, time: time },
       {
         secret: process.env.JWT_REFRESH_SECRET,
         expiresIn: '7d',
       }
     );
-
-    const refreshToken = new RefreshToken();
-    refreshToken.userId = userId;
-    refreshToken.refreshToken = token;
-
-    time.setDate(time.getDate() + 7);
-    refreshToken.expiresAt = time;
-
-    await this.refreshRepository.save(refreshToken);
+    await this.redisClient.set(`user:${userId}`, token, {
+      EX: 60 * 60 * 24 * 7, // 7일 동안 유효
+    });  
     return token;
   }
 
@@ -85,77 +81,168 @@ export class AuthService {
 
   }
 
-    /**
-   * 
-   * refresh token 유효성 검사
-   */
-  async validateRefreshToken(refreshToken: string, refreshInfo: any){
-    const storedRefresh = await this.refreshRepository.findOne({where: {userId: refreshInfo.userId}});
 
-    if(!storedRefresh){
-      throw this.jwtException.NotValidToken;
-    }
+  async validateRefresh(userId: string, refreshToken: string): Promise<boolean> {
+    try {
+      const storedToken = await this.redisClient.get(`user:${userId}`);
+      if (refreshToken !== storedToken) {
+        return false;
+      }
+      return true;
 
-    if(refreshInfo.userId !== storedRefresh.userId){
-      throw this.jwtException.NotValidToken;
+    } catch (error) {
+      throw this.jwtException.RedisServerError;
     }
-    
-    if(refreshToken !== storedRefresh.refreshToken){
-      throw this.jwtException.NotValidToken;
-    }
-    
-    if(new Date() > storedRefresh.expiresAt){
-      throw this.jwtException.RefreshExpire;
-    }
-    
-    if(!storedRefresh.isActive){
-      throw this.jwtException.NotValidToken;
+  }
+
+  async isValidPassword(reqPw: string, storedPw: string): Promise<Boolean>{
+    const isValidPw = await bcrypt.compare(reqPw, storedPw);
+    if(!isValidPw){
+      throw this.jwtException.PasswordIncorrect;  
     }
     return true;
   }
 
-  async filterNulls(obj: any) {
-    const filtered = {};
-    Object.keys(obj).forEach((key) => {
-      if (obj[key] !== null) {
-        filtered[key] = obj[key];
-      }
+  async login(loginDto: LoginDto): Promise<UserDto>{
+    //TODO 패스워드 db 비교
+    const user = await this.userRepository.findOne({
+      where: {userEmail: loginDto.userEmail}
     });
-    return filtered;
-  }
-
-  /**
-   * 
-   * SNS 회원가입, 회원가입 중 추가정보을 저장할 때 사용
-   */
-  async saveAuthUser(userInfo: any, existUser?: User, imgUrl?: string) {
-    const user = existUser || new User();
-    if (imgUrl) {
-      // TODO 이미지 객체 생성
-    }
-    // TODO 중복값에 대한 예외 처리 (userPhone, userNick)
-    const filteredUserInfo = await this.filterNulls(userInfo);
-
-    if(filteredUserInfo){
-
-      Object.assign(user, filteredUserInfo);
-      return await this.userRepository.save(user);
-    }
-    // TODO 예외처리
-    return null;
-  }
-
-  /**
-   * 
-   * Token 에서 추출한 userId 로 User 객체 반환
-   */
-  async getUser(userId: number){
-    const user =  await this.userRepository.findOneBy({userId});
     if(!user){
       throw this.jwtException.UserNotFound;
     }
-    return user;
+
+    await this.isValidPassword(user.userPw, loginDto.userPw);
+
+    let imgUrl = null;
+    if(user.defaultImgId){
+      const image = await this.imgRepository.findOne({
+        where: {imgId: user.defaultImgId}
+      })
+      imgUrl = image.imgUrl;
+
+      }else{
+      
+        // TODO 사용자 이미지 저장 기록이 여러개 일때,
+        const image = await this.imgRepository.findOne({
+          where: {subId: user.userId,
+                  imgType: ImageType.User}
+        })
+      imgUrl = image.imgUrl;
+    }
+
+    return new UserDto(
+      user.userNick,
+      user.userName,
+      user.userPhone,
+      user.userBirth,
+      user.authType,
+      imgUrl,
+      user.userId,
+      user.userEmail,
+      user.authId
+    )
   }
+  
+
+
+
+  async createUser(userDto: CreateUserDto) {
+    const {userImg, userAcc, userPw, ...userInfo} = userDto;
+    const user = new User();
+
+    Object.assign(user, userInfo);
+    const userSaved = await this.userRepository.save(user);
+    const userId = user.userId;
+
+    // Password
+    if(userPw){
+      const hashPw = await bcrypt.hash(userPw, 10);
+      user.userPw = hashPw;
+    }
+
+    // Account
+    if(userAcc) {
+      const account = await this.accRepository.findOneBy({
+        accId: userAcc,
+      });
+      if (account) {
+        userSaved.account = account;
+      }
+    }
+    // Image
+    let imgUrl = null;
+    if(userImg){
+      const image = new Image(userImg, ImageType.User, userId);
+      const imgSaved = await this.imgRepository.save(image);
+      
+      imgUrl = imgSaved.imgUrl;
+      user.defaultImgId = null;
+
+    }else{
+      const defaultImage = await this.imgRepository.findOne({
+        where: { imgId: DefaultImageId.User },
+      });
+      user.defaultImgId = DefaultImageId.User;
+      imgUrl = defaultImage.imgUrl;
+    }
+    await this.userRepository.update({userId}, user);
+
+    return new UserDto(
+      userSaved.userNick,
+      userSaved.userName,
+      userSaved.userPhone,
+      userSaved.userBirth,
+      userSaved.authType,
+      imgUrl,
+      userSaved.userId,
+      userSaved.userEmail,
+      userSaved.authId,
+    )
+  }
+  
+
+  async updateUser(user:User, userDto: UpdateUserDto): Promise<UserDto>{
+    const { userImg,userAcc, ...userInfo } = userDto;
+    Object.assign(user, userInfo);
+
+    if (userAcc) {
+      const account = await this.accRepository.findOneBy({
+        accId: userAcc,
+      });
+      user.account = account;
+    }
+
+    let imgUrl = null;
+    const userId = user.userId;
+    if(userImg){
+      const image = new Image(userImg, ImageType.User, userId);
+      const imgSaved = await this.imgRepository.save(image);
+      
+      imgUrl = imgSaved.imgUrl;
+      user.defaultImgId = null;
+
+    }else{
+      const defaultImage = await this.imgRepository.findOne({
+        where: { imgId: DefaultImageId.User },
+      });
+      user.defaultImgId = DefaultImageId.User;
+      imgUrl = defaultImage.imgUrl;
+    }
+    await this.userRepository.update({userId: userId}, user);
+    return new UserDto(
+      user.userNick,
+      user.userName,
+      user.userPhone,
+      user.userBirth,
+      user.authType,
+      imgUrl,
+      user.userId,
+      user.userEmail,
+      user.authId,
+    )
+  }
+  
 
   /**
    * 
@@ -166,25 +253,89 @@ export class AuthService {
       where: { userEmail: userEmail },
     });
 
-    if(user.authType !== authType){
-      throw this.jwtException.UserAlreadyExists
-    }
-
     if (!user) {
       return null;
     }
-    return user;
+
+    if(user.authType !== authType && userEmail === user.userEmail){
+      throw this.jwtException.UserAlreadyExists
+    }
+
+    const image = user.defaultImgId
+      ? await this.imgRepository.findOne({
+          where: { imgId: user.defaultImgId },
+        })
+      : await this.imgRepository.findOne({
+          where: { imgType: ImageType.User, subId: user.userId },
+        });
+
+    return new UserDto(
+      user.userNick,
+      user.userName,
+      user.userPhone,
+      user.userBirth,
+      user.authType,
+      image.imgUrl,
+      user.userId,
+      user.userEmail,
+      user.authId,
+    );
 
   }
 
-  async validUserNick(userNick: string){
+
+  // DB 에서 회원 propertyName(컬럼) 중 이미 사용중인 값인지 확인 (가입전 닉네임, 전화번호...)
+  async validUserInfo(propertyName: string, propertyValue: string){
+    // 동적으로 조건 생성
+    const condition = {};
+    condition[propertyName] = propertyValue;  
     const user = await this.userRepository.findOne({
-      where: {userNick: userNick}
+      where: condition
     });
-    if(user){
+  
+    if (user) {
       return false;
     }
     return true;
   }
+
+  async verifyAccessToken(accessToken: string){
+    try{
+      return await this.jwtService.verify(accessToken, {
+        secret: process.env.JWT_SECRET,
+      });
+    }catch(error){
+      throw this.jwtException.NotValidToken;
+    }
+
+  }
+
+  async isBlackListToken(userId: string, token: string): Promise<boolean> {
+    try {
+      const result = await this.redisClient.get(`black:${userId}:${token}`);
+      return result !== null;
+    } catch (error) {
+      console.error('Redis server error:', error);
+      throw this.jwtException.RedisServerError;
+    }
+  }
+  async logout(userId: string, accessToken: string, refreshToken: string) {
+    try {
+
+      const accessKey = `black:${userId}:${accessToken}`;
+      await this.redisClient.set(accessKey, ' ');
+      await this.redisClient.expire(accessKey, 60 * 30);
+  
+      const refreshKey = `black:${userId}:${refreshToken}`;
+      await this.redisClient.set(refreshKey, ' ');
+      await this.redisClient.expire(refreshKey, 60 * 60 * 24 * 7);
+  
+      await this.redisClient.del(`user:${userId}`);
+
+    } catch (error) {
+      throw this.jwtException.FailedLogout;
+    }
+  }
+  
 
 }

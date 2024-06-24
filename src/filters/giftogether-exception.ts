@@ -53,6 +53,39 @@ export class GiftogetherExceptions {
     HttpStatus.BAD_REQUEST,
   );
 
+  UserNotUpdated = new GiftogetherException(
+    ErrorMsg.UserNotUpdated,
+    ErrorCode.UserNotUpdated,
+    HttpStatus.BAD_REQUEST,
+  );
+
+  UserAlreadyDeleted = new GiftogetherException(
+    ErrorMsg.UserAlreadyDeleted,
+    ErrorCode.UserAlreadyDeleted,
+    HttpStatus.BAD_REQUEST,
+  );
+
+  NotValidEmail = new GiftogetherException(
+    ErrorMsg.NotValidEmail,
+    ErrorCode.NotValidEmail,
+    HttpStatus.BAD_REQUEST
+  )
+  NotValidPhone = new GiftogetherException(
+    ErrorMsg.NotValidPhone,
+    ErrorCode.NotValidPhone,
+    HttpStatus.BAD_REQUEST
+  )
+  NotValidNick = new GiftogetherException(
+    ErrorMsg.NotValidNick,
+    ErrorCode.NotValidNick,
+    HttpStatus.BAD_REQUEST
+  )
+  PasswordIncorrect = new GiftogetherException(
+    ErrorMsg.PasswordIncorrect,
+    ErrorCode.PasswordIncorrect,
+    HttpStatus.UNAUTHORIZED 
+  )
+
   // Friend
   AlreadySendRequest = new GiftogetherException(
     ErrorMsg.AlreadySendRequest,
@@ -101,6 +134,16 @@ export class GiftogetherExceptions {
   UserAlreadyExists = new GiftogetherException(
     ErrorMsg.UserAlreadyExists,
     ErrorCode.UserAlreadyExists,
+    HttpStatus.CONFLICT,
+  );
+  FailedLogout = new GiftogetherException(
+    ErrorMsg.FailedLogout,
+    ErrorCode.FailedLogout,
+    HttpStatus.BAD_REQUEST,
+  );
+  RedisServerError = new GiftogetherException(
+    ErrorMsg.RedisServerError,
+    ErrorCode.RedisServerError,
     HttpStatus.CONFLICT,
   );
 }

@@ -14,12 +14,12 @@ import {
   Request,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AddressService } from '../address/address.service';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { FundingService } from '../funding/funding.service';
 import { FundTheme } from 'src/enums/fund-theme.enum';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 @Controller('user')
 export class UserController {
@@ -27,6 +27,7 @@ export class UserController {
     private readonly userService: UserService,
     private readonly addrService: AddressService,
     private readonly fundService: FundingService,
+    private readonly g2gExceptions: GiftogetherExceptions,
   ) {}
 
   @Get('/:userId')
@@ -39,10 +40,7 @@ export class UserController {
         data: await this.userService.getUserInfo(userId),
       };
     } catch (error) {
-      throw new HttpException(
-        'Failed to get user info',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw this.g2gExceptions.UserNotFound;
     }
   }
 
@@ -124,20 +122,6 @@ export class UserController {
     }
   }
 
-  @Post('/')
-  async createUser(
-    @Body() createUserDto: CreateUserDto,
-  ): Promise<CommonResponse> {
-    try {
-      return {
-        message: '사용자 생성에 성공하였습니다.',
-        data: await this.userService.createUser(createUserDto),
-      };
-    } catch (error) {
-      throw new HttpException('Failed to create user', HttpStatus.BAD_REQUEST);
-    }
-  }
-
   @Put('/:userId')
   async updateUser(
     @Param('userId', ParseIntPipe) userId: number,
@@ -149,7 +133,7 @@ export class UserController {
         data: await this.userService.updateUser(userId, updateUserDto),
       };
     } catch (error) {
-      throw new HttpException('Failed to update user', HttpStatus.BAD_REQUEST);
+      throw this.g2gExceptions.UserNotUpdated;
     }
   }
 
@@ -157,16 +141,9 @@ export class UserController {
   async deleteUser(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<CommonResponse> {
-    try {
-      return {
-        message: '사용자 정보 삭제에 성공하였습니다.',
-        data: await this.userService.deleteUser(userId),
-      };
-    } catch (error) {
-      throw new HttpException(
-        'Failed to create delete user',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    return {
+      message: '사용자 정보 삭제에 성공하였습니다.',
+      data: await this.userService.deleteUser(userId),
+    };
   }
 }
