@@ -13,7 +13,6 @@ export enum BankType {
   Jeju = 'Jeju', // 제주은행
   Deutschebank = 'Deutschebank', // 도이치은행
   Kdb = 'Kdb', // KDB은행
-  Nfcf = 'Nfcf', // 산림조합
   Kfcc = 'Kfcc', // 새마을금고
   Suhyup = 'Suhyup', // 수협
   Nacufok = 'Nacufok', // 신협
@@ -21,4 +20,8 @@ export enum BankType {
   Tossbank = 'Tossbank', // 토스뱅크
   Scbank = 'Scbank', // SC제일은행
   Kbank = 'Kbank', // 케이뱅
+  Sbi = 'Sbi', // SBI저축은행
+  Kopo = 'Kopo', // 우체국은행
+  Jeonbuk = 'Jeonbuk', // 전북은행
+  Nhinvest = 'Nhinvest', // NH투자증권
 }

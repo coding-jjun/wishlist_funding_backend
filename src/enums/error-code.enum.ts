@@ -3,6 +3,7 @@ export enum ErrorCode {
   FundingNotExists = '0000',
 
   // Donation
+  FundingClosed = '0100',
 
   // Gift
   IncorrectGiftUrl = '0200',
@@ -22,7 +23,11 @@ export enum ErrorCode {
   UserNotFound = '0700',
   UserNotUpdated = '0701',
   UserAlreadyDeleted = '0702',
-  UserFailedToCreate = '0703',
+  NotValidEmail = "0703",
+  NotValidPhone = "0704",
+  NotValidNick = "0705",
+  PasswordIncorrect = "0706",
+  UserFailedToCreate = '0707',
 
   // Friend
   AlreadySendRequest = '0800',

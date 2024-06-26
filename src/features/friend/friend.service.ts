@@ -10,6 +10,7 @@ import {
   GiftogetherExceptions,
 } from 'src/filters/giftogether-exception';
 import { NotiType } from 'src/enums/notification.enum';
+import { ImageType } from 'src/enums/image-type.enum';
 
 @Injectable()
 export class FriendService {
@@ -52,12 +53,14 @@ export class FriendService {
     // 친구 정보 및 이미지 URL 조회
     const [friendsData, total] = await this.userRepository
       .createQueryBuilder('user')
-      .leftJoinAndSelect('user.image', 'image') // 업데이트된 관계 필드 사용
+      .leftJoinAndSelect('image', 'image', 
+        'image.imgId = COALESCE(user.defaultImgId, image.subId) AND (user.defaultImgId IS NOT NULL OR (image.subId = user.userId AND image.imgType = :imgType))', 
+        { imgType: ImageType.User })
       .where('user.userId IN (:...ids)', {
         ids: friendIds.map((fi) => fi.friendId),
       })
-      .select(['user.userId', 'user.userName'])
-      .addSelect('image.imgUrl', 'userImg') // 이미지 URL 직접 추가
+      .select(['user.userId', 'user.userName', 'user.userNick'])
+      .addSelect('image.imgUrl', 'userImg')
       .getManyAndCount();
 
     // 결과 객체 반환
@@ -65,6 +68,7 @@ export class FriendService {
       result: friendsData.map((friend) => ({
         userId: friend.userId,
         userName: friend.userName,
+        userNick: friend.userNick,
         userImg: friend.image ? friend.image.imgUrl : null, // 이미지가 있으면 URL을, 없으면 null
       })),
       total,

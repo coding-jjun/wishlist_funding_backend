@@ -10,6 +10,9 @@ import { User } from 'src/entities/user.entity';
 import { ResponseDonationDTO } from './dto/response-donation.dto';
 import { RollingPaperService } from '../rolling-paper/rolling-paper.service';
 import { CreateRollingPaperDto } from '../rolling-paper/dto/create-rolling-paper.dto';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { getNow } from 'src/app.module';
+import { get } from 'http';
 
 @Injectable()
 export class DonationService {
@@ -27,6 +30,8 @@ export class DonationService {
     private readonly userRepo: Repository<User>,
 
     private readonly rollService: RollingPaperService,
+
+    private readonly g2gException: GiftogetherExceptions,
 
     // private readonly imgService : ImageService
   ) {}
@@ -85,6 +90,13 @@ export class DonationService {
 
   // CREATE
   async createDonation(fundUuid: string, createDonationDto: CreateDonationDto) {
+    const funding = await this.fundingRepo.findOne({ where: { fundUuid } });
+    const now = getNow();
+
+    if (new Date(funding.endAt).getTime() < new Date(now).getTime()) {
+      throw this.g2gException.FundingClosed;
+    }
+     
     const tmpUserId = 1;
     const donAmnt = createDonationDto.donAmnt;
 
@@ -93,7 +105,6 @@ export class DonationService {
       createDonationDto.guest,
     );
 
-    const funding = await this.fundingRepo.findOne({ where: { fundUuid } });
 
     const updateFunding = await this.updateFundingSum(funding, donAmnt);
 

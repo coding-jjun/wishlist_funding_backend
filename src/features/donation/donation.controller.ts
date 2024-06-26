@@ -24,13 +24,17 @@ export class DonationController {
     @Param('fundUuid') fundUuid: string,
     @Body() createDonationDto: CreateDonationDto,
   ): Promise<CommonResponse> {
-    return {
-      message: 'Donation 생성 완료',
-      data: await this.donationService.createDonation(
-        fundUuid,
-        createDonationDto,
-      ),
-    };
+    try {
+      return {
+        message: 'Donation 생성 완료',
+        data: await this.donationService.createDonation(
+          fundUuid,
+          createDonationDto,
+        ),
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
   // 마이페이지에서 후원내역 조회
