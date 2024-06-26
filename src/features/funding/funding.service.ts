@@ -12,8 +12,13 @@ import { FundingDto } from './dto/funding.dto';
 import { UpdateFundingDto } from './dto/update-funding.dto';
 import { Image } from 'src/entities/image.entity';
 import { ImageType } from 'src/enums/image-type.enum';
-import { DefaultImageId } from 'src/enums/default-image-id';
+import {
+  DefaultImageId,
+  defaultFundingImageIds,
+} from 'src/enums/default-image-id';
 import { query } from 'express';
+import assert from 'assert';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 @Injectable()
 export class FundingService {
@@ -31,6 +36,8 @@ export class FundingService {
     private imageRepository: Repository<Image>,
 
     private giftService: GiftService,
+
+    private readonly g2gException: GiftogetherExceptions,
   ) {}
 
   async findAll(
@@ -42,7 +49,12 @@ export class FundingService {
     limit: number,
     lastFundId?: number, // 마지막으로 로드된 항목의 id 값
     lastEndAtDate?: Date, // 마지막으로 로드된 항목의 endAt 값
-  ): Promise<{ fundings: FundingDto[]; count: number; lastFundId: number, lastEndAt: Date }> {
+  ): Promise<{
+    fundings: FundingDto[];
+    count: number;
+    lastFundId: number;
+    lastEndAt: Date;
+  }> {
     const queryBuilder =
       await this.fundingRepository.createQueryBuilder('funding');
 
@@ -161,20 +173,24 @@ export class FundingService {
         }
         break;
     }
-    
+
     queryBuilder.take(limit);
-    
-    queryBuilder
-      .leftJoinAndSelect('funding.fundUser', 'user')
-      // .leftJoinAndSelect('user.image', 'img');
-    
-    const fundings = (await queryBuilder.getMany()).map(funding => new FundingDto(funding));
+
+    queryBuilder.leftJoinAndSelect('funding.fundUser', 'user');
+    // .leftJoinAndSelect('user.image', 'img');
+
+    const fundings = (await queryBuilder.getMany()).map(
+      (funding) => new FundingDto(funding),
+    );
 
     return {
       fundings: fundings,
       count: fundings.length,
       lastFundId: fundings[fundings.length - 1]?.fundId,
-      lastEndAt: sort[0] === "e" ? fundings[fundings.length - 1]?.endAt : fundings[fundings.length - 1]?.regAt
+      lastEndAt:
+        sort[0] === 'e'
+          ? fundings[fundings.length - 1]?.endAt
+          : fundings[fundings.length - 1]?.regAt,
     };
   }
 
@@ -188,7 +204,7 @@ export class FundingService {
     if (fund.defaultImgId) {
       // fund 기본 이미지로 DTO를 생성한다.
       const img = await this.imageRepository.findOne({
-        where: { imgId: DefaultImageId.Funding },
+        where: { imgId: fund.defaultImgId },
       });
 
       return new FundingDto(fund, gifts, [img.imgUrl]);
@@ -242,7 +258,7 @@ export class FundingService {
 
     const funding_save = await this.fundingRepository.save(funding);
 
-    if (createFundingDto.fundImg.length > 0) {
+    if (createFundingDto.fundImg?.length > 0) {
       // subId = fundId, imgType = "Funding" Image 객체를 만든다.
       const images = createFundingDto.fundImg.map(
         (url) => new Image(url, ImageType.Funding, funding_save.fundId),
@@ -251,8 +267,16 @@ export class FundingService {
       this.imageRepository.save(images);
     } else {
       // defaultImgId 필드에 funding 기본 이미지 ID를 넣는다.
+      if (
+        createFundingDto.defaultImgId === null ||
+        !defaultFundingImageIds.includes(createFundingDto.defaultImgId)
+      ) {
+        this.fundingRepository.remove(funding_save);
+        throw this.g2gException.DefaultImgIdNotExist;
+      }
+
       await this.fundingRepository.update(funding_save.fundId, {
-        defaultImgId: DefaultImageId.Funding,
+        defaultImgId: createFundingDto.defaultImgId,
       });
     }
 
@@ -269,7 +293,8 @@ export class FundingService {
     updateFundingDto: UpdateFundingDto,
   ): Promise<FundingDto> {
     Logger.log(updateFundingDto);
-    const { fundTitle, fundCont, fundImg, fundTheme, endAt } = updateFundingDto;
+    const { fundTitle, fundCont, fundImg, fundTheme, endAt, defaultImgId } =
+      updateFundingDto;
     const funding = await this.fundingRepository.findOne({
       relations: {
         fundUser: true,
@@ -277,8 +302,9 @@ export class FundingService {
       where: { fundUuid },
     });
     if (!funding) {
-      throw new HttpException('funding not found!', HttpStatus.NOT_FOUND);
+      throw this.g2gException.FundingNotExists;
     }
+    const fundId = funding.fundId;
 
     funding.fundTitle = fundTitle;
     funding.fundCont = fundCont;
@@ -297,7 +323,39 @@ export class FundingService {
     }
     funding.endAt = endAt;
 
-    await this.fundingRepository.save(funding);
+    // 기존 image 삭제
+    this.imageRepository.delete({
+      imgType: ImageType.Funding,
+      subId: funding.fundId,
+    });
+
+    if (fundImg?.length > 0) {
+      // subId = fundId, imgType = "Funding" Image 객체를 만든다.
+      const images = fundImg.map(
+        (url) => new Image(url, ImageType.Funding, fundId),
+      );
+
+      Logger.log(defaultImgId);
+      this.imageRepository.save(images);
+    } else {
+      // defaultImgId 필드에 funding 기본 이미지 ID를 넣는다.
+      if (
+        defaultImgId === undefined ||
+        !defaultFundingImageIds.includes(defaultImgId)
+      ) {
+        throw this.g2gException.DefaultImgIdNotExist;
+      }
+    }
+    this.fundingRepository.update(
+      { fundId },
+      {
+        fundTitle,
+        fundCont,
+        fundTheme,
+        endAt,
+        defaultImgId: defaultImgId ?? null,
+      },
+    );
 
     // let gifts = await this.giftService.createGift(funding.fundId, updateFundingDto.gifts ?? []);
 
