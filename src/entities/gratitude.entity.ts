@@ -5,6 +5,7 @@ import {
   PrimaryColumn,
   OneToOne,
   JoinColumn,
+  ManyToOne,
 } from 'typeorm';
 import { Image } from './image.entity';
 
@@ -26,7 +27,7 @@ export class Gratitude {
   isDel: boolean;
 
   @Column('int', { nullable: true })
-  @OneToOne(() => Image, (image) => image.imgId)
+  @ManyToOne(() => Image, (image) => image.imgId)
   @JoinColumn({ name: 'defaultImgId' })
   defaultImgId: number;
 
