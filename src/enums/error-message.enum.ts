@@ -2,6 +2,7 @@ export enum ErrorMsg {
   // Funding
 
   // Donation
+  FundingClosed = '이미 마감된 펀딩입니다.',
 
   // Gift
   IncorrectGiftUrl = '선물 URL이 유효하지 않습니다.',

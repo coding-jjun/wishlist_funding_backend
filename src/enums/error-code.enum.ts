@@ -2,6 +2,7 @@ export enum ErrorCode {
   // Funding
 
   // Donation
+  FundingClosed = '0100',
 
   // Gift
   IncorrectGiftUrl = '0200',
