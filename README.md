@@ -5,6 +5,12 @@
 - 여러 단어일 경우, `-`를 기준으로 구분합니다.
 - 동사가 섞인 파일 (ex. `create-user.dto.ts`)일 경우, 동사가 먼저 옵니다.
 
+## How to run this server (test environment)
+
+1. [node.js 설치](https://nodejs.org/en)
+2. 의존성 설치 with `npm i`
+3. redis server 로컬 설치 [하단 참조](^abc)
+
 ## .env 설정
 
 ```
@@ -66,7 +72,7 @@ REDIS_PORT=
 REDIS_PASSWORD=
 ```
 
-## Redis Server 로컬 설치
+## Redis Server 로컬 설치 ^abc
 
 - 로컬에서만 가능해요!
     - Window → 아래 설치
@@ -89,5 +95,5 @@ REDIS_PASSWORD=
     ```
     
 
-- CLIENT_ID , CLIENT_SECRET :  SNS 서버에서 발급
-- JWT_SECRET, JWT_REFRESH_SECRET : 임의로 설정한 키
+- `CLIENT_ID` , `CLIENT_SECRET` :  SNS 서버에서 발급
+- `JWT_SECRET`, `JWT_REFRESH_SECRET` : 임의로 설정한 키
