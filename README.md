@@ -9,7 +9,7 @@
 
 1. [node.js 설치](https://nodejs.org/en)
 2. 의존성 설치 with `npm i`
-3. redis server 로컬 설치 [하단 참조](^abc)
+3. redis server 로컬 설치 [하단 참조](#Install-Redis-Server-Locally)
 
 ## .env 설정
 
@@ -72,7 +72,7 @@ REDIS_PORT=
 REDIS_PASSWORD=
 ```
 
-## Redis Server 로컬 설치 ^abc
+## [Install Redis Server Locally]
 
 - 로컬에서만 가능해요!
     - Window → 아래 설치
