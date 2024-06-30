@@ -5,7 +5,68 @@
 - 여러 단어일 경우, `-`를 기준으로 구분합니다.
 - 동사가 섞인 파일 (ex. `create-user.dto.ts`)일 경우, 동사가 먼저 옵니다.
 
-### Redis Server 로컬 설치
+## .env 설정
+
+```
+# NODE
+TZ=Asia/Seoul
+
+# NestJS
+PORT=
+
+# AWS
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_S3_BUCKET_NAME=
+AWS_S3_REGION=
+
+# Postgres
+DB_HOST=
+DB_PORT=
+# =============[ DEVELOP ]=============
+# DB_DEV_DATABASE=
+DB_DEV_DATABASE=[각자 테스트하는 DB NAME]
+DB_DEV_USERNAME=
+DB_DEV_PASSWORD=
+# =============[ PRODUCT ]=============
+DB_PROD_1_DATABASE=
+DB_PROD_1_USERNAME=
+DB_PROD_1_PASSWORD=
+
+# Auth
+# =============[ KAKAO ]=============
+KAKAO_CLIENT_ID=
+KAKAO_CLIENT_SECRET=
+KAKAO_CALLBACK_URI=
+
+
+# =============[ JWT ]=============
+JWT_SECRET=
+JWT_REFRESH_SECRET=
+
+# =============[ NAVER ]=============
+NAVER_CLIENT_ID=
+NAVER_CLIENT_SECRET=
+NAVER_CALLBACK_URI=
+
+# =============[ GOOGLE ]=============
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_CALLBACK_URI=
+
+# local
+# KAKAO_CALLBACK_URI=
+# NAVER_CALLBACK_URI=
+# GOOGLE_CALLBACK_URI=
+
+# Redis
+REDIS_HOST=
+REDIS_PORT=
+# 본인이 설정하고 싶은 레디스 패스워드
+REDIS_PASSWORD=
+```
+
+## Redis Server 로컬 설치
 
 - 로컬에서만 가능해요!
     - Window → 아래 설치
