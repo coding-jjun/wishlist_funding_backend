@@ -74,7 +74,7 @@ REDIS_PORT=
 REDIS_PASSWORD=
 ```
 
-## [Install Redis Server Locally]
+## Install Redis Server Locally
 
 - 로컬에서만 가능해요!
     - Window → 아래 설치
