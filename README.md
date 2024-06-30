@@ -11,7 +11,8 @@
 2. 의존성 설치 with `npm i`
 3. redis server 로컬 설치 [하단 참조](#Install-Redis-Server-Locally)
 4. `.env` 설정 [하단 참조](#env-설정)
-5. 실행 (watch 모드) with `npm run start:dev`
+5. `global-bundle.pem`키 설정 -> S3를 위해 받아놓아야 함.
+6. 실행 (watch 모드) with `npm run start:dev`
 
 ## .env 설정
 
