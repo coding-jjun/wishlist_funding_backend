@@ -7,9 +7,14 @@ import { Account } from 'src/entities/account.entity';
 import { Image } from 'src/entities/image.entity';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { ImageType } from 'src/enums/image-type.enum';
-import { DefaultImageId } from 'src/enums/default-image-id';
+import {
+  DefaultImageId,
+  defaultUserImageIds,
+} from 'src/enums/default-image-id';
 import { UserDto } from './dto/user.dto';
 import { isMongoId } from 'class-validator';
+import assert from 'assert';
+import { CreateUserDto } from '../auth/dto/create-user.dto';
 
 @Injectable()
 export class UserService {
@@ -47,6 +52,7 @@ export class UserService {
     );
   }
 
+
   async updateUser(
     userId: number,
     updateUserDto: UpdateUserDto,
@@ -67,25 +73,29 @@ export class UserService {
       user.account = account;
     }
 
-    const image = updateUserDto
-      ? new Image(updateUserDto.userImg, ImageType.User, userId)
-      : await this.imgRepository.findOne({
-          where: { imgId: DefaultImageId.User },
-        });
+    let imageUrl = '';
 
     if (updateUserDto.userImg) {
       user.defaultImgId = null;
+      user.image = new Image(updateUserDto.userImg, ImageType.User, userId);
+      imageUrl = user.image.imgUrl;
     } else {
-      user.defaultImgId = image.imgId;
+      user.defaultImgId = updateUserDto.defaultImgId!;
+      imageUrl = (
+        await this.imgRepository.findOne({
+          where: { imgId: user.defaultImgId },
+        })
+      ).imgUrl;
     }
     await this.userRepository.update(userId, user);
+
     return new UserDto(
       user.userNick,
       user.userName,
       user.userPhone,
       user.userBirth,
       user.authType,
-      image.imgUrl,
+      imageUrl,
       user.userId,
       user.userEmail,
       user.authId,

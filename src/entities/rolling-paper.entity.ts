@@ -5,6 +5,7 @@ import {
   JoinColumn,
   PrimaryColumn,
   DeleteDateColumn,
+  ManyToOne,
 } from 'typeorm';
 import { Donation } from './donation.entity';
 import { Image } from './image.entity';
@@ -22,7 +23,7 @@ export class RollingPaper {
   fundId: number;
 
   @Column('int', { nullable: true })
-  @OneToOne(() => Image, (image) => image.imgId)
+  @ManyToOne(() => Image, (image) => image.imgId)
   @JoinColumn({ name: 'defaultImgId' })
   defaultImgId: number;
 

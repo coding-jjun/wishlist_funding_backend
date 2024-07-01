@@ -18,11 +18,11 @@ import { Gratitude } from 'src/entities/gratitude.entity';
 export class GratitudeController {
   constructor(private readonly gratitudeService: GratitudeService) {}
 
-  @Get('/:gratId')
+  @Get('/:fundUuid')
   async getGratitude(
-    @Param('gratId', ParseUUIDPipe) gratId: string,
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
   ): Promise<CommonResponse> {
-    const data = await this.gratitudeService.getGratitude(gratId);
+    const data = await this.gratitudeService.getGratitude(fundUuid);
     return { data };
   }
 
@@ -40,15 +40,15 @@ export class GratitudeController {
     };
   }
 
-  @Put('/:gratId')
+  @Put('/:fundUuid')
   async updateGratitude(
-    @Param('gratId') gratId: number,
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
     @Body() updateGratitudeDto: GratitudeDto,
   ): Promise<CommonResponse> {
     return {
       message: 'success',
       data: await this.gratitudeService.updateGratitude(
-        gratId,
+        fundUuid,
         updateGratitudeDto,
       ),
     };

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsUrl } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsUrl } from 'class-validator';
 
 export class GratitudeDto {
   @IsNotEmpty()
@@ -7,13 +7,24 @@ export class GratitudeDto {
   @IsNotEmpty()
   gratCont: string;
 
+  /*
+   * fundImg와 defaultImgId 둘 중에 하나만 null이어야 함
+   */
   @IsNotEmpty()
   @IsUrl({}, { each: true })
   gratImg: string[];
 
-  constructor(gratTitle: string, gratCont: string, gratImg?: string[]) {
+  /*
+   * fundImg와 defaultImgId 둘 중에 하나만 null이어야 함
+   */
+  @IsNumber()
+  @IsOptional()
+  defaultImgId?: number;
+
+  constructor(gratTitle: string, gratCont: string, gratImg?: string[], defaultImgId?: number) {
     this.gratTitle = gratTitle;
     this.gratCont = gratCont;
     this.gratImg = gratImg || [];
+    this.defaultImgId = defaultImgId;
   }
 }

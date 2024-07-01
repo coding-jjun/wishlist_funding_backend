@@ -1,14 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RollingPaper } from 'src/entities/rolling-paper.entity';
 import { Repository } from 'typeorm';
 import { RollingPaperDto } from './dto/rolling-paper.dto';
 import { Funding } from 'src/entities/funding.entity';
 import { Image } from 'src/entities/image.entity';
-import { DefaultImageId } from 'src/enums/default-image-id';
+import {
+  DefaultImageId,
+  defaultRollingPaperImageIds,
+} from 'src/enums/default-image-id';
 import { ImageType } from 'src/enums/image-type.enum';
 import { Donation } from 'src/entities/donation.entity';
 import { CreateRollingPaperDto } from './dto/create-rolling-paper.dto';
+import assert from 'assert';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 @Injectable()
 export class RollingPaperService {
@@ -21,10 +26,14 @@ export class RollingPaperService {
 
     @InjectRepository(Image)
     private readonly imgRepo: Repository<Image>,
+
+    private readonly g2gException: GiftogetherExceptions,
   ) {}
 
   async getAllRollingPapers(fundUuid: string): Promise<RollingPaperDto[]> {
     const fund = await this.fundingRepo.findOne({ where: { fundUuid } });
+    if (!fund) throw this.g2gException.FundingNotExists;
+
     const rolls = await this.rollingPaperRepo.find({
       where: { fundId: fund.fundId },
       relations: ['donation', 'donation.user'],
@@ -34,17 +43,18 @@ export class RollingPaperService {
       if (roll.defaultImgId) {
         return (
           await this.imgRepo.findOne({
-            where: { imgId: DefaultImageId.RollingPaper },
+            where: { imgId: roll.defaultImgId },
           })
         )?.imgUrl;
       }
 
       // not a default
+      Logger.log(`롤링페이퍼 ID: ${roll.rollId}`);
       return (
         await this.imgRepo.findOne({
           where: { imgType: ImageType.RollingPaper, subId: roll.rollId },
         })
-      ).imgUrl;
+      )?.imgUrl;
     };
 
     const resolvedRolls = await Promise.all(rolls);
@@ -81,11 +91,17 @@ export class RollingPaperService {
         rollingPaper.rollId,
       );
 
-      this.imgRepo.save(image);
+      this.imgRepo.insert(image);
     } else {
       // 기본값 이미지
+      if (
+        !crpDto.defaultImgId ||
+        !defaultRollingPaperImageIds.includes(crpDto.defaultImgId)
+      )
+        throw this.g2gException.DefaultImgIdNotExist;
+
       this.rollingPaperRepo.update(savedRp.rollId, {
-        defaultImgId: DefaultImageId.RollingPaper,
+        defaultImgId: crpDto.defaultImgId,
       });
     }
 

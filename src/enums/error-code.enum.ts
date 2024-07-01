@@ -1,13 +1,16 @@
 export enum ErrorCode {
   // Funding
+  FundingNotExists = '0000',
 
   // Donation
+  FundingClosed = '0100',
 
   // Gift
   IncorrectGiftUrl = '0200',
 
   // Gratitude
   GratitudeAlreadyExists = '0300',
+  GratitudeNotExist = '0301',
 
   // RollingPaper
 
@@ -23,7 +26,8 @@ export enum ErrorCode {
   NotValidEmail = "0703",
   NotValidPhone = "0704",
   NotValidNick = "0705",
-  PasswordIncorrect = "0705",
+  PasswordIncorrect = "0706",
+  UserFailedToCreate = '0707',
 
   // Friend
   AlreadySendRequest = '0800',
@@ -41,4 +45,7 @@ export enum ErrorCode {
   UserAlreadyExists = '0905',
   FailedLogout = '0906',
   RedisServerError = '0907',
+
+  // default image
+  DefaultImgIdNotExist = '1000',
 }
