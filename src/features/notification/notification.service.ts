@@ -30,12 +30,26 @@ export class NotificationService {
     userId: number,
     lastDate?: Date
   ): Promise<{ noti: NotiDto[]; count: number; lastDate: Date; }> {
-    const notifications = await this.notiRepository
+    const queryBuilder = this.notiRepository
       .createQueryBuilder('notification')
       .where('notification.recvId = :userId', { userId })
-      .andWhere('notifications.notiTime < :lastDate', { lastDate })
-      .take(20)
-      .getMany();
+      .orderBy('notification.notiTime', 'DESC');      
+
+    console.log('서비스' + lastDate);
+
+    // lastDate가 제공되었다면, 이를 사용하여 조건 추가
+    if (lastDate) {
+      const adjustedDate = new Date(lastDate);
+      adjustedDate.setHours(adjustedDate.getHours() + 9);
+
+      queryBuilder.andWhere('notification.notiTime < :lastDate', { lastDate: adjustedDate });
+    }
+
+    const notifications = await queryBuilder
+    .take(4)
+    .leftJoinAndSelect('notification.recvId', 'receiver')
+    .leftJoinAndSelect('notification.sendId', 'sender')
+    .getMany();
 
     if (notifications.length > 0) {
       await this.notiRepository.createQueryBuilder('notification')

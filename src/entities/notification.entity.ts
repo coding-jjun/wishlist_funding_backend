@@ -15,12 +15,6 @@ export class Notification {
   @PrimaryGeneratedColumn()
   notiId: number;
 
-  // @Column()
-  // recvId: number;
-
-  // @Column()
-  // sendId: number;
-
   @ManyToOne(() => User, (user) => user.userId)
   @JoinColumn({ name: 'recvId' })
   recvId: User;

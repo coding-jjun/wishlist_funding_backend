@@ -1,11 +1,13 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Get,
   Param,
   ParseIntPipe,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { NotiType } from 'src/enums/notification.enum';
@@ -26,9 +28,13 @@ export class NotificationController {
   @Get('/:userId')
   async findAllByUser(
     @Param('userId', ParseIntPipe) userId: number,
+    @Query('lastDate', new DefaultValuePipe(undefined)) lastDate?: Date,
   ): Promise<CommonResponse> {
+
+    console.log('컨트롤러' + lastDate);
+
     return {
-      data: await this.notiService.getAllNoti(userId),
+      data: await this.notiService.getAllNoti(userId, lastDate),
     };
   }
 
