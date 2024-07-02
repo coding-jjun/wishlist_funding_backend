@@ -71,6 +71,24 @@ export class NotificationController {
     }
   }
 
+  /**
+   * 본 스케줄 핸들러는 AWS 람다함수가 호출할 예정입니다. 아래 세 이벤트는 스케줄러에 의해 서버가 발행하는 이벤트입니다.
+   * 자세한 이벤트 관련한 문서는 [Notification](https://www.notion.so/Notification-461c1a5bb350450a9c1aa696a2a05f8e?pvs=4)을 참조하세요.
+   *
+   * 1. FundClose
+   * 2. DonatedFundClose
+   * 3. WriteGratitude
+   *
+   * TODO - 람다함수만이 이 함수를 호출할 수 있도록 AuthGuard를 설정해야 합니다.
+   */
+  @Post('schedule')
+  async schedule(): Promise<CommonResponse> {
+    return {
+      message: '왔니',
+      data: null,
+    };
+  }
+
   @Put('/:notiId')
   async update(
     @Param('notiId', ParseIntPipe) notiId: number,
