@@ -7,10 +7,11 @@ import { User } from 'src/entities/user.entity';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { NotificationService } from '../notification/notification.service';
 import { Notification } from 'src/entities/notification.entity';
+import { Funding } from 'src/entities/funding.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Friend, User, Notification])],
   controllers: [FriendController],
-  providers: [FriendService, NotificationService, GiftogetherExceptions],
+  providers: [FriendService, GiftogetherExceptions],
 })
 export class FriendModule {}

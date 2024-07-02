@@ -16,8 +16,6 @@ import { Account } from './account.entity';
 import { Image } from './image.entity';
 import { Address } from './address.entity';
 import { AuthType } from 'src/enums/auth-type.enum';
-import { ValidateNested } from 'class-validator';
-import { DefaultImageId } from 'src/enums/default-image-id';
 
 @Entity()
 export class User {
