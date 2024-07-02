@@ -9,6 +9,8 @@ import {
   GiftogetherExceptions
 } from 'src/filters/giftogether-exception';
 import { ImageType } from 'src/enums/image-type.enum';
+import { NotiType } from 'src/enums/notification.enum';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class FriendService {
@@ -18,6 +20,7 @@ export class FriendService {
     @InjectRepository(Friend)
     private readonly friendRepository: Repository<Friend>,
     private readonly g2gException: GiftogetherExceptions,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   /**
@@ -144,11 +147,16 @@ export class FriendService {
           // Accept friend request
           friendship.status = FriendStatus.Friend;
           const result = await this.friendRepository.save(friendship);
-          // const notiType = NotiType.AcceptFollow;
+          const notiType = NotiType.AcceptFollow;
+
+          this.eventEmitter.emit('AcceptFollow', {
+            result: friendDto,
+            notiType: notiType
+          });
+
           return {
             result,
             message: '친구 추가 요청을 수락하였습니다.',
-            // notiType
           };
         } else {
           // Request already sent
@@ -163,11 +171,16 @@ export class FriendService {
         status: FriendStatus.Requested,
       });
       const result = await this.friendRepository.save(newFriendship);
-      // const notiType = NotiType.IncomingFollow
+      const notiType = NotiType.IncomingFollow;
+      
+      this.eventEmitter.emit('IncomingFollow', {
+        result: friendDto,
+        notiType: notiType
+      });
+
       return {
         result,
         message: '친구 추가를 요청하였습니다.',
-        // notiType
       };
     }
   }

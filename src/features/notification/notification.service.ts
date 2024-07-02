@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Req } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification } from 'src/entities/notification.entity';
@@ -6,9 +6,12 @@ import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { User } from 'src/entities/user.entity';
 import { NotiDto } from './dto/notification.dto';
-import { NotiType } from 'src/enums/notification.enum';
+import { NotiType, ReqType } from 'src/enums/notification.enum';
 import { Donation } from 'src/entities/donation.entity';
 import { Funding } from 'src/entities/funding.entity';
+import { OnEvent } from '@nestjs/event-emitter';
+import { FriendDto } from '../friend/dto/friend.dto';
+import { Friend } from 'src/entities/friend.entity';
 
 @Injectable()
 export class NotificationService {
@@ -63,6 +66,100 @@ export class NotificationService {
       count: notifications.length,
       lastDate: notifications[notifications.length - 1]?.notiTime,
     };
+  }
+
+  @OnEvent('AcceptFollow')
+  async handleAcceptFollow(data: { friendDto: FriendDto, notiType: NotiType }) {
+    const noti = new Notification();
+    const receiver = await this.userRepository.findOneBy({ userId: data.friendDto.friendId })
+    const sender = await this.userRepository.findOneBy({ userId: data.friendDto.userId })
+
+    noti.sendId = sender;
+    noti.recvId = receiver;
+    noti.notiType = data.notiType;
+
+    return await this.notiRepository.save(noti);
+  }
+
+  @OnEvent('IncomingFollow')
+  async handleIncomingFollow(data: { friendDto: FriendDto, notiType: NotiType }) {
+    const noti = new Notification();
+    const receiver = await this.userRepository.findOneBy({ userId: data.friendDto.friendId })
+    const sender = await this.userRepository.findOneBy({ userId: data.friendDto.userId })
+
+    noti.sendId = sender;
+    noti.recvId = receiver;
+    noti.notiType = data.notiType;
+    noti.reqType = ReqType.NotResponse;
+
+    return await this.notiRepository.save(noti);
+  }
+
+  // @OnEvent('FundAchieve')
+  // async handleFundAchieve() {
+  //   const noti = new Notification();
+
+  //   return await this.notiRepository.save(noti);
+  // }
+
+  @OnEvent('NewDonate')
+  async handleNewDonate(data: {recvId: number, sendId: number, notiType: NotiType, subId: string}) {
+    const noti = new Notification();
+    const receiver = await this.userRepository.findOneBy({ userId: data.recvId })
+    const sender = await this.userRepository.findOneBy({ userId: data.sendId })
+    
+    noti.sendId = sender;
+    noti.recvId = receiver;
+    noti.notiType = data.notiType;
+    noti.subId = data.subId;
+  
+    return await this.notiRepository.save(noti);
+  }
+
+  @OnEvent('CheckGratitude')
+  async handleCheckGratitude(fundId: number) {
+    const funding = await this.fundRepository.findOne({
+      where: { fundId },
+      relations: ['fundUser', 'donations', 'donations.user']
+    });
+
+  
+    // 해당 펀딩에 기여한 모든 사용자들에게 알림을 생성
+    const notifications = funding.donations.map(donation => {
+      const noti = new Notification();
+      noti.recvId = donation.user; // 받는 사람은 기부자
+      noti.sendId = funding.fundUser; // 보내는 사람은 펀딩 주최자
+      noti.notiType = NotiType.CheckGratitude; // 알림 타입 설정
+      noti.subId = funding.fundUuid;
+  
+      return this.notiRepository.save(noti);
+    });
+  
+    // 모든 알림을 비동기적으로 저장
+    await Promise.all(notifications);
+  }
+
+  @OnEvent('DonatedFundClose')
+  async handleDonatedFundClose(fundId: number) {
+    const funding = await this.fundRepository.findOne({
+      where: { fundId },
+      relations: ['fundUser', 'donations', 'donations.user']
+    });
+
+  
+    // 해당 펀딩에 기여한 모든 사용자들에게 알림을 생성
+    const notifications = funding.donations.map(donation => {
+      const noti = new Notification();
+      noti.recvId = donation.user; // 받는 사람은 기부자
+      noti.sendId = funding.fundUser; // 보내는 사람은 펀딩 주최자
+      noti.notiType = NotiType.CheckGratitude; // 알림 타입 설정
+      noti.subId = funding.fundUuid;
+  
+      return this.notiRepository.save(noti);
+    });
+  
+    // 모든 알림을 비동기적으로 저장
+    await Promise.all(notifications);
   }
 
   async createNoti(

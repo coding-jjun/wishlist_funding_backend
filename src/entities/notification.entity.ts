@@ -21,6 +21,7 @@ export class Notification {
   
   @ManyToOne(() => User, (user) => user.userId)
   @JoinColumn({ name: 'sendId' })
+  @Column({ nullable: true })
   sendId: User;
 
   @Column({ type: 'enum', enum: NotiType })

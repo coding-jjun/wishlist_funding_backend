@@ -13,6 +13,7 @@ import {
 import { FriendService } from './friend.service';
 import { FriendDto } from './dto/friend.dto';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Controller('friend')
 export class FriendController {
@@ -50,7 +51,7 @@ export class FriendController {
   @Post('/')
   async createFriend(@Body() friendDto: FriendDto): Promise<CommonResponse> {
     try {
-      const { result, message } =
+      const { result, message} =
         await this.friendService.createFriend(friendDto);
 
       // const noti = new CreateNotificationDto()
@@ -69,6 +70,15 @@ export class FriendController {
       // }
 
       // await this.notiService.createNoti(noti);
+
+      // switch (notiType) {
+      //   case NotiType.AcceptFollow:
+      //     this.eventEmitter.emit('AcceptFollow', result, notiType);
+      //     break
+      //   case NotiType.IncomingFollow:
+      //     this.eventEmitter.emit('IncomingFollow', result, notiType);
+      //     break
+      // }
       
       return {
         message: message,

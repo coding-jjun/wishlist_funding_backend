@@ -13,6 +13,7 @@ import {
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import assert from 'node:assert';
 import { GetGratitudeDto } from './dto/get-gratitude.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class GratitudeService {
@@ -27,6 +28,8 @@ export class GratitudeService {
     private readonly imgRepo: Repository<Image>,
 
     private readonly g2gException: GiftogetherExceptions,
+
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async getGratitude(fundUuid: string): Promise<GetGratitudeDto> {
@@ -118,6 +121,8 @@ export class GratitudeService {
       });
       returnImgUrl.push(image.imgUrl);
     }
+
+    this.eventEmitter.emit('CheckGratitude', funding.fundId);
 
     return new GetGratitudeDto(
       funding.fundId,

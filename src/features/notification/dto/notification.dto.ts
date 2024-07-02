@@ -4,8 +4,8 @@ import { NotiType, ReqType } from "src/enums/notification.enum";
 export class NotiDto {
   notiId: number;
   recvId: number;
-  sendId: number;
-  sendNick: string;
+  sendId?: number;
+  sendNick?: string;
   // sendImg?: string;
   notiType: NotiType;
   reqType: ReqType;
