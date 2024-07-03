@@ -31,7 +31,8 @@ export class NotificationService {
 
   async getAllNoti(
     userId: number,
-    lastDate?: Date
+    notiType?: NotiType,
+    lastDate?: Date,
   ): Promise<{ noti: NotiDto[]; count: number; lastDate: Date; }> {
     const queryBuilder = this.notiRepository
       .createQueryBuilder('notification')
@@ -95,12 +96,17 @@ export class NotificationService {
     return await this.notiRepository.save(noti);
   }
 
-  // @OnEvent('FundAchieve')
-  // async handleFundAchieve() {
-  //   const noti = new Notification();
+  @OnEvent('FundAchieve')
+  async handleFundAchieve(data: {recvId: number, notiType: NotiType, subId: string}) {
+    const noti = new Notification();
+    const receiver = await this.userRepository.findOneBy({ userId: data.recvId });
 
-  //   return await this.notiRepository.save(noti);
-  // }
+    noti.recvId = receiver;
+    noti.notiType = data.notiType;
+    noti.subId = data.subId;
+
+    return await this.notiRepository.save(noti);
+  }
 
   @OnEvent('NewDonate')
   async handleNewDonate(data: {recvId: number, sendId: number, notiType: NotiType, subId: string}) {

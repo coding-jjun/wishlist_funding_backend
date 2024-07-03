@@ -135,10 +135,8 @@ export class DonationService {
 
     if (updateFunding.fundSum >= updateFunding.fundGoal) {
       this.eventEmitter.emit('FundAchieve', {
-        recvId: updateFunding.fundUser.userId,
-        sendId: 'Server',  // Handling server as a sender
+        recvId: updateFunding.fundUser,  // Handling server as a sender
         notiType: 'FundAchieve',
-        reqType: null,
         subId: fundUuid
       });
     }

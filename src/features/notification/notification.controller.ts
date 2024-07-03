@@ -28,13 +28,14 @@ export class NotificationController {
   @Get('/:userId')
   async findAllByUser(
     @Param('userId', ParseIntPipe) userId: number,
+    @Query('notiType', new DefaultValuePipe(null)) notiType?: NotiType,
     @Query('lastDate', new DefaultValuePipe(undefined)) lastDate?: Date,
   ): Promise<CommonResponse> {
 
     console.log('컨트롤러' + lastDate);
 
     return {
-      data: await this.notiService.getAllNoti(userId, lastDate),
+      data: await this.notiService.getAllNoti(userId, notiType, lastDate),
     };
   }
 
