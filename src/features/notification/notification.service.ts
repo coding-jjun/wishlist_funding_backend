@@ -145,6 +145,22 @@ export class NotificationService {
     await Promise.all(notifications);
   }
   
+  @OnEvent('WriteGratitude')
+  async handleWriteGratitude(fundId: number) {
+    const noti = new Notification();
+    const funding = await this.fundRepository.findOne({
+      where: { fundId },
+      relations: ['fundUser'],
+    });
+
+    noti.recvId = funding.fundUser;
+    noti.notiType = NotiType.WriteGratitude;
+    noti.reqType = ReqType.NotResponse;
+    noti.subId = funding.fundUuid;
+
+    return this.notiRepository.save(noti);
+  }
+
   @OnEvent('CheckGratitude')
   async handleCheckGratitude(fundId: number) {
     const funding = await this.fundRepository.findOne({
