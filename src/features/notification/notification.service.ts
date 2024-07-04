@@ -122,29 +122,6 @@ export class NotificationService {
     return await this.notiRepository.save(noti);
   }
 
-  @OnEvent('CheckGratitude')
-  async handleCheckGratitude(fundId: number) {
-    const funding = await this.fundRepository.findOne({
-      where: { fundId },
-      relations: ['fundUser', 'donations', 'donations.user']
-    });
-
-  
-    // 해당 펀딩에 기여한 모든 사용자들에게 알림을 생성
-    const notifications = funding.donations.map(donation => {
-      const noti = new Notification();
-      noti.recvId = donation.user; // 받는 사람은 기부자
-      noti.sendId = funding.fundUser; // 보내는 사람은 펀딩 주최자
-      noti.notiType = NotiType.CheckGratitude; // 알림 타입 설정
-      noti.subId = funding.fundUuid;
-  
-      return this.notiRepository.save(noti);
-    });
-  
-    // 모든 알림을 비동기적으로 저장
-    await Promise.all(notifications);
-  }
-
   @OnEvent('DonatedFundClose')
   async handleDonatedFundClose(fundId: number) {
     const funding = await this.fundRepository.findOne({
@@ -166,6 +143,45 @@ export class NotificationService {
   
     // 모든 알림을 비동기적으로 저장
     await Promise.all(notifications);
+  }
+  
+  @OnEvent('CheckGratitude')
+  async handleCheckGratitude(fundId: number) {
+    const funding = await this.fundRepository.findOne({
+      where: { fundId },
+      relations: ['fundUser', 'donations', 'donations.user']
+    });
+  
+    // 해당 펀딩에 기여한 모든 사용자들에게 알림을 생성
+    const notifications = funding.donations.map(donation => {
+      const noti = new Notification();
+      noti.recvId = donation.user; // 받는 사람은 기부자
+      noti.sendId = funding.fundUser; // 보내는 사람은 펀딩 주최자
+      noti.notiType = NotiType.CheckGratitude; // 알림 타입 설정
+      noti.subId = funding.fundUuid;
+  
+      return this.notiRepository.save(noti);
+    });
+  
+    // 모든 알림을 비동기적으로 저장
+    await Promise.all(notifications);
+  }
+
+  @OnEvent('NewComment')
+  async handleNewComment(data: { fundId: number, authorId: number }) {
+    const noti = new Notification();
+    const funding = await this.fundRepository.findOne({
+      where: { fundId: data.fundId },
+      relations: ['fundUser'],
+    });
+    const sender = await this.userRepository.findOne({ where: { userId: data.authorId }});
+
+    noti.recvId = funding.fundUser;
+    noti.sendId = sender;
+    noti.notiType = NotiType.NewComment;
+    noti.subId = funding.fundUuid;
+
+    return this.notiRepository.save(noti);
   }
 
   async createNoti(
