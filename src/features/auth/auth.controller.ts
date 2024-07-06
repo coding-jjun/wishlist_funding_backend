@@ -15,7 +15,6 @@ import { Request, Response } from 'express';
 import { JwtAuthGuard } from './guard/jwt-auth-guard';
 import { NaverAuthGuard } from './guard/naver-auth-guard';
 import { GoogleAuthGuard } from './guard/google-auth-guard';
-import { JwtRefreshGuard } from './guard/jwt-refresh-guard';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -23,6 +22,7 @@ import { UserDto } from '../user/dto/user.dto';
 import { LoginDto } from './dto/login.dto';
 import { ValidDto } from './dto/valid.dto';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { TokenDto } from './dto/token.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -39,22 +39,15 @@ export class AuthController {
 
   @Get('kakao/callback')
   @UseGuards(KakaoAuthGuard)
-  async kakaoCallback(@Req() req: Request, @Res() res: Response){
-    try {
-      const userDto = req.user as UserDto;
-      const accessToken = await this.authService.createAccessToken(userDto.userId);
-      const refreshToken = await this.authService.createRefreshToken(userDto.userId);
-      res.cookie('access_token', accessToken);
-      res.cookie('refresh_token', refreshToken);
-      
-      const response: CommonResponse = {
-          message: '카카오 가입 완료',
-          data: userDto,
-      };
-      return res.status(200).json(response);
-    } catch (error) {
-        return res.status(500).json({ message: "서버 오류" });
-    }
+  async kakaoCallback(@Req() req: Request){
+    const user = req.user as { user: UserDto, tokenDto: TokenDto };  
+    return {
+      message: '카카오 가입 완료',
+      data: [
+        { "user": user[0] },
+        { "token": user[1] },
+      ],
+    };
   }
 
   @Get('naver')
@@ -65,22 +58,15 @@ export class AuthController {
 
   @Get('naver/callback')
   @UseGuards(NaverAuthGuard)
-  async naverCallback(@Req() req: Request, @Res() res:Response){
-    try {
-      const userDto = req.user as UserDto;
-      const accessToken = await this.authService.createAccessToken(userDto.userId);
-      const refreshToken = await this.authService.createRefreshToken(userDto.userId);
-      res.cookie('access_token', accessToken);
-      res.cookie('refresh_token', refreshToken);
-      
-      const response: CommonResponse = {
-          message: '네이버 가입 완료',
-          data: userDto,
-      };
-      return res.status(200).json(response);
-    } catch (error) {
-        return res.status(500).json({ message: "서버 오류" });
-    }
+  async naverCallback(@Req() req: Request){
+    const user = req.user as { user: UserDto, tokenDto: TokenDto };  
+    return {
+      message: '네이버 가입 완료',
+      data: [
+        { "user": user[0] },
+        { "token": user[1] },
+      ],
+    };
   }
   
 
@@ -92,38 +78,31 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
-  async googleCallback(@Req() req: Request, @Res() res:Response){
-    try {
-      const userDto = req.user as UserDto;
-      const accessToken = await this.authService.createAccessToken(userDto.userId);
-      const refreshToken = await this.authService.createRefreshToken(userDto.userId);
-      res.cookie('access_token', accessToken);
-      res.cookie('refresh_token', refreshToken);
-      
-      const response: CommonResponse = {
-          message: '구글 가입 완료',
-          data: userDto,
-      };
-      return res.status(200).json(response);
-    } catch (error) {
-        return res.status(500).json({ message: "서버 오류" });
-    }
-    
+  async googleCallback(@Req() req: Request){
+    const user = req.user as { user: UserDto, tokenDto: TokenDto };  
+    return {
+      message: '구글 가입 완료',
+      data: [
+        { "user": user[0] },
+        { "token": user[1] },
+      ],
+    };   
   }
 
   @Post('login')
-  async login(@Body() loginDto: LoginDto, @Res() res:Response){
+  async login(@Body() loginDto: LoginDto){
     const userDto = await this.authService.login(loginDto);
-    const accessToken = await this.authService.createAccessToken(userDto.userId);
-    const refreshToken = await this.authService.createRefreshToken(userDto.userId);
-    res.cookie('access_token', accessToken);
-    res.cookie('refresh_token', refreshToken);
+    const token = new TokenDto()
+    token.accessToken = await this.authService.createAccessToken(userDto.userId);
+    token.refreshToken = await this.authService.createRefreshToken(userDto.userId);
     
-    const response: CommonResponse = {
-        message: '로그인 완료',
-        data: userDto,
-    };
-    return res.status(200).json(response);
+    return {
+      message: '로그인 완료',
+      data: [
+        { "user": userDto },
+        { "token": token },
+      ],
+    };  
   }
   
 
@@ -142,36 +121,32 @@ export class AuthController {
   @Post(`/signup`)
   async signup(
     @Body() createUserDto: CreateUserDto,
-    @Res() res
   ): Promise<CommonResponse> {
     const userDto = await this.authService.createUser(createUserDto);
-    const accessToken = await this.authService.createAccessToken(userDto.userId);
-    const refreshToken = await this.authService.createRefreshToken(userDto.userId);
-    res.cookie('access_token', accessToken);
-    res.cookie('refresh_token', refreshToken);
-    
-    const response: CommonResponse = {
-        message: '회원가입 완료',
-        data: userDto,
-    };
-    return res.status(200).json(response);
+    const token = new TokenDto();
+    token.accessToken = await this.authService.createAccessToken(userDto.userId);
+    token.refreshToken = await this.authService.createRefreshToken(userDto.userId);
+    return {
+      message: '회원가입 완료',
+      data: [
+        { "user": userDto },
+        { "token": token },
+      ],
+    };  
   }
 
   @Get('/token')
-  @UseGuards(JwtRefreshGuard)
-  async reIssueAccessToken(): Promise<CommonResponse>{
+  async reIssueAccessToken(@Body() tokenDto: TokenDto): Promise<CommonResponse>{
+    this.authService.chkValidRefreshToken(tokenDto.userId, tokenDto.refreshToken);
     return {
       message: 'Access Token 재발급 완료',
-      data: true
+      data: await this.authService.createAccessToken(tokenDto.userId)
     }; 
   }
   
-  @Get('/logout')
-  @UseGuards(JwtAuthGuard)
-  async logout(@Req() req: any): Promise<CommonResponse>{
-    const accessToken = req.headers['authorization'].split(' ')[1];
-    const refreshToken = req.cookies['refresh_token'];
-    await this.authService.logout(req.user.userId, accessToken, refreshToken);
+  @Post('/logout')
+  async logout(@Body() tokenDto: TokenDto): Promise<CommonResponse>{
+    await this.authService.logout(tokenDto.userId, tokenDto.refreshToken);
     return {
       message: '로그아웃 성공',
       data: true

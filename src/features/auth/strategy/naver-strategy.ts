@@ -6,6 +6,7 @@ import { AuthType } from 'src/enums/auth-type.enum';
 import { Injectable } from '@nestjs/common';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { CreateUserDto } from '../dto/create-user.dto';
+import { TokenDto } from '../dto/token.dto';
 
 @Injectable()
 export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
@@ -65,7 +66,10 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
       }
       user = await this.authService.createUser(createUserDto);
     }
-    done(null, user);
+    const tokenDto = new TokenDto();
+    tokenDto.accessToken = await this.authService.createAccessToken(user.userId);
+    tokenDto.refreshToken = await this.authService.createRefreshToken(user.userId);
+    done(null, [user, tokenDto]);
     
   }
 }
