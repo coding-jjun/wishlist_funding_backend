@@ -99,8 +99,8 @@ export class AuthService {
     }
   }
 
-  async isValidPassword(reqPw: string, storedPw: string): Promise<Boolean> {
-    const isValidPw = await bcrypt.compare(reqPw, storedPw);
+  async isValidPassword(plainPw: string, hashPw: string): Promise<Boolean> {
+    const isValidPw = await bcrypt.compare(plainPw, hashPw);
     if (!isValidPw) {
       throw this.jwtException.PasswordIncorrect;
     }
@@ -116,7 +116,7 @@ export class AuthService {
       throw this.jwtException.UserNotFound;
     }
 
-    await this.isValidPassword(user.userPw, loginDto.userPw);
+    await this.isValidPassword(loginDto.userPw, user.userPw);
 
     let imgUrl = null;
     if (user.defaultImgId) {
