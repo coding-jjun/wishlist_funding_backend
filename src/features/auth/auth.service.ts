@@ -110,7 +110,7 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<UserDto> {
     //TODO 패스워드 db 비교
     const user = await this.userRepository.findOne({
-      where: { userEmail: loginDto.userEmail },
+      where: { userNick: loginDto.userNick },
     });
     if (!user) {
       throw this.jwtException.UserNotFound;
