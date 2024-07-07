@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -7,14 +7,7 @@ import { Account } from 'src/entities/account.entity';
 import { Image } from 'src/entities/image.entity';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { ImageType } from 'src/enums/image-type.enum';
-import {
-  DefaultImageId,
-  defaultUserImageIds,
-} from 'src/enums/default-image-id';
 import { UserDto } from './dto/user.dto';
-import { isMongoId } from 'class-validator';
-import assert from 'assert';
-import { CreateUserDto } from '../auth/dto/create-user.dto';
 
 @Injectable()
 export class UserService {

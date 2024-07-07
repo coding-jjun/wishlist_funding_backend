@@ -13,7 +13,7 @@ export class UpdateUserDto {
   @IsNotEmpty()
   userPhone: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   userBirth: Date;
 
   @IsNotEmpty()
