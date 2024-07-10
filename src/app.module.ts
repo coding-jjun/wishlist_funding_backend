@@ -107,7 +107,6 @@ import { AccountService } from './features/account/account.service';
       provide: APP_INTERCEPTOR,
       useClass: TransformInterceptor,
     },
-    AccountService,
   ],
 })
 export class AppModule {}
