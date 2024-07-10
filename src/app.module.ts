@@ -101,7 +101,7 @@ import { AccountService } from './features/account/account.service';
     RedisModule,
     AccountModule
   ],
-  controllers: [AppController, AccountController],
+  controllers: [AppController],
   providers: [
     AppService,
     {
