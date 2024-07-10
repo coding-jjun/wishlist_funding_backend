@@ -99,8 +99,8 @@ export class AuthService {
     }
   }
 
-  async isValidPassword(reqPw: string, storedPw: string): Promise<Boolean> {
-    const isValidPw = await bcrypt.compare(reqPw, storedPw);
+  async isValidPassword(plainPw: string, hashPw: string): Promise<Boolean> {
+    const isValidPw = await bcrypt.compare(plainPw, hashPw);
     if (!isValidPw) {
       throw this.jwtException.PasswordIncorrect;
     }
@@ -110,13 +110,13 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<UserDto> {
     //TODO 패스워드 db 비교
     const user = await this.userRepository.findOne({
-      where: { userEmail: loginDto.userEmail },
+      where: { userNick: loginDto.userNick },
     });
     if (!user) {
       throw this.jwtException.UserNotFound;
     }
 
-    await this.isValidPassword(user.userPw, loginDto.userPw);
+    await this.isValidPassword(loginDto.userPw, user.userPw);
 
     let imgUrl = null;
     if (user.defaultImgId) {
