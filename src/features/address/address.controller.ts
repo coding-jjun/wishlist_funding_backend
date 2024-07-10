@@ -3,12 +3,10 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Put,
   ParseIntPipe,
-  ValidationPipe,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
@@ -16,7 +14,6 @@ import { AddressService } from './address.service';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
-import { createDecipheriv } from 'crypto';
 import { AddressDto } from './dto/address.dto';
 
 @Controller('address')

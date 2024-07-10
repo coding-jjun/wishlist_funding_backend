@@ -36,6 +36,8 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TransformInterceptor } from './transform/transform.interceptor';
 import { AuthModule } from './features/auth/auth.module';
 import { RedisModule } from './features/auth/redis.module';
+import { AccountModule } from './features/account/account.module';
+import { AccountService } from './features/account/account.service';
 
 @Module({
   imports: [
@@ -95,7 +97,8 @@ import { RedisModule } from './features/auth/redis.module';
     GiftModule,
     ExceptionModule,
     AuthModule,
-    RedisModule
+    RedisModule,
+    AccountModule
   ],
   controllers: [AppController],
   providers: [
