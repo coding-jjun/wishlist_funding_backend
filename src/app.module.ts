@@ -37,7 +37,6 @@ import { TransformInterceptor } from './transform/transform.interceptor';
 import { AuthModule } from './features/auth/auth.module';
 import { RedisModule } from './features/auth/redis.module';
 import { AccountModule } from './features/account/account.module';
-import { AccountController } from './account/account.controller';
 import { AccountService } from './features/account/account.service';
 
 @Module({
