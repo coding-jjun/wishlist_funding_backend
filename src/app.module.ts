@@ -99,7 +99,7 @@ import { AccountService } from './features/account/account.service';
     ExceptionModule,
     AuthModule,
     RedisModule,
-    EventModule,,
+    EventModule,
     AccountModule
   ],
   controllers: [AppController],
