@@ -10,21 +10,15 @@ import {
   Post,
   Req,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { FriendService } from './friend.service';
 import { FriendDto } from './dto/friend.dto';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
-import { CreateNotificationDto } from '../notification/dto/create-notification.dto';
-import { NotiType, ReqType } from 'src/enums/notification.enum';
-import { NotificationService } from '../notification/notification.service';
-import { freemem } from 'os';
-import { UpdateNotificationDto } from '../notification/dto/update-notification.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Controller('friend')
 export class FriendController {
   constructor(
     private readonly friendService: FriendService,
-    private readonly notiService: NotificationService,
   ) {}
 
   @Get('/:userId')
@@ -57,30 +51,38 @@ export class FriendController {
   @Post('/')
   async createFriend(@Body() friendDto: FriendDto): Promise<CommonResponse> {
     try {
-      const { result, message, notiType } =
+      const { result, message} =
         await this.friendService.createFriend(friendDto);
 
-      const noti = new CreateNotificationDto()
-      noti.recvId = friendDto.friendId;
-      noti.sendId = friendDto.userId;
-      noti.notiType = notiType;
-      switch (notiType) {
-        case NotiType.AcceptFollow:
-          const updateNoti = new UpdateNotificationDto();
-          updateNoti.reqType = ReqType.Accept
-          updateNoti.userId = friendDto.userId
-          updateNoti.friendId = friendDto.friendId
-          await this.notiService.updateNoti(friendDto.notiId, updateNoti);
-        case NotiType.IncomingFollow:
-          noti.reqType = ReqType.NotResponse;
-      }
+      // const noti = new CreateNotificationDto()
+      // noti.recvId = friendDto.friendId;
+      // noti.sendId = friendDto.userId;
+      // noti.notiType = notiType;
+      // switch (notiType) {
+      //   case NotiType.AcceptFollow:
+      //     const updateNoti = new UpdateNotificationDto();
+      //     updateNoti.reqType = ReqType.Accept
+      //     updateNoti.userId = friendDto.userId
+      //     updateNoti.friendId = friendDto.friendId
+      //     await this.notiService.updateNoti(friendDto.notiId, updateNoti);
+      //   case NotiType.IncomingFollow:
+      //     noti.reqType = ReqType.NotResponse;
+      // }
 
-      console.log('createNoti 전');
-      await this.notiService.createNoti(noti);
+      // await this.notiService.createNoti(noti);
+
+      // switch (notiType) {
+      //   case NotiType.AcceptFollow:
+      //     this.eventEmitter.emit('AcceptFollow', result, notiType);
+      //     break
+      //   case NotiType.IncomingFollow:
+      //     this.eventEmitter.emit('IncomingFollow', result, notiType);
+      //     break
+      // }
       
       return {
         message: message,
-        data: result,
+        data: result
       };
     } catch (error) {
       throw error;

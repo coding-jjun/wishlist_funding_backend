@@ -13,6 +13,8 @@ import { CreateRollingPaperDto } from '../rolling-paper/dto/create-rolling-paper
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { getNow } from 'src/app.module';
 import { get } from 'http';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { NotiType } from 'src/enums/notification.enum';
 
 @Injectable()
 export class DonationService {
@@ -34,6 +36,8 @@ export class DonationService {
     private readonly g2gException: GiftogetherExceptions,
 
     // private readonly imgService : ImageService
+
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async getAllDonations(): Promise<Donation[]> {
@@ -128,6 +132,20 @@ export class DonationService {
         createDonationDto.defaultImgId,
       ),
     );
+
+    if (updateFunding.fundSum >= updateFunding.fundGoal) {
+      this.eventEmitter.emit('FundAchieve', {
+        recvId: updateFunding.fundUser,  // Handling server as a sender
+        subId: fundUuid
+      });
+    }
+
+    // Trigger NewDonate event
+    this.eventEmitter.emit('NewDonate', {
+      recvId: updateFunding.fundUser,
+      sendId: user.userId,
+      subId: donation.donId
+    });
 
     return new ResponseDonationDTO(savedDonation, rollingPaper.rollId);
     // TODO 후원 등록 완료 Notification

@@ -7,6 +7,7 @@ export enum NotiType {
   DonatedFundClose = 'DonatedFundClose', // 내가 후원한 펀딩 마감
   WriteGratitude = 'WriteGratitude', // 감사인사 작성 권유
   CheckGratitude = 'CheckGratitude', // 내가 후원한 펀딩 감사인사 확인
+  NewComment = 'NewComment', // 새로운 댓글
 }
 
 export enum ReqType {

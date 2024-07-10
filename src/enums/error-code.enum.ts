@@ -34,6 +34,7 @@ export enum ErrorCode {
   AlreadyFriend = '0801',
 
   // Notification
+  WrongNotiType = '1000',
 
   // Jwt
   JwtNotExpired = '0900',
