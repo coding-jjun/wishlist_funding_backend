@@ -31,22 +31,44 @@ export class NotificationService {
 
   async getAllNoti(
     userId: number,
-    notiType?: NotiType,
-    lastDate?: Date,
-  ): Promise<{ noti: NotiDto[]; count: number; lastDate: Date; }> {
+    notiFilter: 'all' | 'friend' | 'funding' | 'comment',
+    lastId?: number,
+  ): Promise<{ noti: NotiDto[]; count: number; lastId: number; }> {
     const queryBuilder = this.notiRepository
       .createQueryBuilder('notification')
-      .where('notification.recvId = :userId', { userId })
-      .orderBy('notification.notiTime', 'DESC');      
-
-    console.log('서비스' + lastDate);
-
+      .orderBy('notification.notiTime', 'DESC')
+      .where('notification.recvId = :userId', { userId });
+      
+      switch (notiFilter) {
+      case 'all':
+        break;
+      case 'friend':
+        queryBuilder.andWhere('notification.notiType IN (:...friendTypes)', {
+          friendTypes: [NotiType.IncomingFollow, NotiType.AcceptFollow],
+        });
+        break;
+        case 'funding':
+        queryBuilder.andWhere('notification.notiType IN (:...fundingTypes)', {
+          fundingTypes: [
+            NotiType.FundClose, 
+            NotiType.FundAchieve, 
+            NotiType.NewDonate, 
+            NotiType.WriteGratitude,
+            NotiType.CheckGratitude,
+            NotiType.DonatedFundClose
+          ],
+        });
+        break;
+        case 'comment':
+        queryBuilder.andWhere('notification.notiType = :notiType', { 
+          notiType: NotiType.NewComment 
+        });
+        break;
+    }
+    
     // lastDate가 제공되었다면, 이를 사용하여 조건 추가
-    if (lastDate) {
-      const adjustedDate = new Date(lastDate);
-      adjustedDate.setHours(adjustedDate.getHours() + 9);
-
-      queryBuilder.andWhere('notification.notiTime < :lastDate', { lastDate: adjustedDate });
+    if (lastId) {
+      queryBuilder.andWhere('notification.notiId < :lastId', { lastId });
     }
 
     const notifications = await queryBuilder
@@ -65,7 +87,7 @@ export class NotificationService {
     return {
       noti: notifications.map(noti => new NotiDto(noti)),
       count: notifications.length,
-      lastDate: notifications[notifications.length - 1]?.notiTime,
+      lastId: notifications[notifications.length - 1]?.notiId,
     };
   }
 
