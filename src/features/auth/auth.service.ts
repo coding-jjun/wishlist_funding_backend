@@ -71,8 +71,36 @@ export class AuthService {
     return token;
   }
 
-  async isValidPassword(reqPw: string, storedPw: string): Promise<Boolean> {
-    const isValidPw = await bcrypt.compare(reqPw, storedPw);
+  /**
+   * refresh token 디코딩 및 유효성 검사
+   */
+  async verifyRefreshToken(refreshToken: string) {
+    try {
+      return await this.jwtService.verify(refreshToken, {
+        secret: process.env.JWT_REFRESH_SECRET,
+      });
+    } catch (error) {
+      throw this.jwtException.NotValidToken;
+    }
+  }
+
+  async validateRefresh(
+    userId: string,
+    refreshToken: string,
+  ): Promise<boolean> {
+    try {
+      const storedToken = await this.redisClient.get(`user:${userId}`);
+      if (refreshToken !== storedToken) {
+        return false;
+      }
+      return true;
+    } catch (error) {
+      throw this.jwtException.RedisServerError;
+    }
+  }
+
+  async isValidPassword(plainPw: string, hashPw: string): Promise<Boolean> {
+    const isValidPw = await bcrypt.compare(plainPw, hashPw);
     if (!isValidPw) {
       throw this.jwtException.PasswordIncorrect;
     }
@@ -82,13 +110,13 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<UserDto> {
     //TODO 패스워드 db 비교
     const user = await this.userRepository.findOne({
-      where: { userEmail: loginDto.userEmail },
+      where: { userNick: loginDto.userNick },
     });
     if (!user) {
       throw this.jwtException.UserNotFound;
     }
 
-    await this.isValidPassword(user.userPw, loginDto.userPw);
+    await this.isValidPassword(loginDto.userPw, user.userPw);
 
     let imgUrl = null;
     if (user.defaultImgId) {
