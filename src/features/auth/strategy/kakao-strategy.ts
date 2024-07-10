@@ -6,6 +6,7 @@ import { AuthService } from '../auth.service';
 import { AuthType } from 'src/enums/auth-type.enum';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { CreateUserDto } from '../dto/create-user.dto';
+import { TokenDto } from '../dto/token.dto';
 
 @Injectable()
 export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
@@ -70,6 +71,9 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
       }
       user = await this.authService.createUser(createUserDto);
     }
-    done(null, user);
+    const tokenDto = new TokenDto();
+    tokenDto.accessToken = await this.authService.createAccessToken(user.userId);
+    tokenDto.refreshToken = await this.authService.createRefreshToken(user.userId);
+    done(null, [user, tokenDto]);
   }
 }
