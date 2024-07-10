@@ -168,10 +168,17 @@ export class GiftogetherExceptions {
     HttpStatus.CONFLICT,
   );
 
-  // default images
+  // Default images
   DefaultImgIdNotExist = new GiftogetherException(
     ErrorMsg.DefaultImgIdNotExist,
     ErrorCode.DefaultImgIdNotExist,
     HttpStatus.NOT_FOUND,
   );
+
+  // Account
+  AccountNotFound = new GiftogetherException(
+    ErrorMsg.AccountNotFound,
+    ErrorCode.AccountNotFound,
+    HttpStatus.NOT_FOUND,
+  )
 }

@@ -46,6 +46,9 @@ export enum ErrorCode {
   FailedLogout = '0906',
   RedisServerError = '0907',
 
-  // default image
+  // Default image
   DefaultImgIdNotExist = '1000',
+
+  // Account
+  AccountNotFound = '1100',
 }

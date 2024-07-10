@@ -71,19 +71,6 @@ export class AuthService {
     return token;
   }
 
-  /**
-   * refresh token 디코딩 및 유효성 검사
-   */
-  async verifyRefreshToken(refreshToken: string) {
-    try {
-      return await this.jwtService.verify(refreshToken, {
-        secret: process.env.JWT_REFRESH_SECRET,
-      });
-    } catch (error) {
-      throw this.jwtException.NotValidToken;
-    }
-  }
-
   async validateRefresh(
     userId: string,
     refreshToken: string,
@@ -99,8 +86,8 @@ export class AuthService {
     }
   }
 
-  async isValidPassword(reqPw: string, storedPw: string): Promise<Boolean> {
-    const isValidPw = await bcrypt.compare(reqPw, storedPw);
+  async isValidPassword(plainPw: string, hashPw: string): Promise<Boolean> {
+    const isValidPw = await bcrypt.compare(plainPw, hashPw);
     if (!isValidPw) {
       throw this.jwtException.PasswordIncorrect;
     }
@@ -110,13 +97,13 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<UserDto> {
     //TODO 패스워드 db 비교
     const user = await this.userRepository.findOne({
-      where: { userEmail: loginDto.userEmail },
+      where: { userNick: loginDto.userNick },
     });
     if (!user) {
       throw this.jwtException.UserNotFound;
     }
 
-    await this.isValidPassword(user.userPw, loginDto.userPw);
+    await this.isValidPassword(loginDto.userPw, user.userPw);
 
     let imgUrl = null;
     if (user.defaultImgId) {
@@ -207,12 +194,13 @@ export class AuthService {
         userSaved.authId,
       );
     } catch (error) {
-      this.userRepository.remove(user);
+      await this.userRepository.remove(user);
       throw error;
     }
   }
 
   async updateUser(user: User, userDto: UpdateUserDto): Promise<UserDto> {
+    // TODO 사용자 정보를 repo에서 조회 후 updateUser 하도록 refactoring 예정
     const { userImg, userAcc, ...userInfo } = userDto;
     const userId = user.userId;
     const defaultImgId = userDto.defaultImgId;
@@ -333,7 +321,66 @@ export class AuthService {
     }
   }
 
-  async isBlackListToken(userId: string, token: string): Promise<boolean> {
+  
+  async logout(userId: number, refreshToken: string) {
+
+    await this.chkValidRefreshToken(userId, refreshToken);
+    try {
+    
+      // refresh token blacklist 등록
+      const refreshKey = `black:${userId}:${refreshToken}`;
+      await this.redisClient.set(refreshKey, ' ');
+      await this.redisClient.expire(refreshKey, 60 * 60 * 24 * 7); // 7일 후 blacklist 에서 삭제
+
+      // 기존 refresh token 삭제
+      await this.redisClient.del(`user:${userId}`);
+
+    } catch (error) {
+      throw this.jwtException.FailedLogout;
+    }
+  }
+
+
+  // refresh token 유효성 검사 절차
+  async chkValidRefreshToken(userId:number, refreshToken: string){
+    if( !refreshToken){
+      throw this.jwtException.TokenMissing;
+    }
+    const tokenInfo = await this.verifyRefreshToken(refreshToken);
+    const storedId = tokenInfo.userId;
+
+    if(userId != storedId){
+      throw this.jwtException.NotValidToken;
+    }
+    
+    const isInBlackList = await this.isBlackListToken(userId, refreshToken);
+    if(isInBlackList){
+      throw this.jwtException.NotValidToken;
+    }
+    
+    const isValid = await this.compareToStoredRefresh(userId, refreshToken);
+    if(!isValid){
+      // 중복 로그인시, 기존 로그인한 회원은 해당 에러에 걸린다.
+      throw this.jwtException.NotValidToken;
+    }
+    return true;
+  }
+
+  
+  /**
+   * refresh token 디코딩 및 유효성 검사
+   */
+  async verifyRefreshToken(refreshToken: string) {
+    try {
+      return await this.jwtService.verify(refreshToken, {
+        secret: process.env.JWT_REFRESH_SECRET,
+      });
+    } catch (error) {
+      throw this.jwtException.NotValidToken;
+    }
+  }
+  
+  async isBlackListToken(userId: number, token: string): Promise<boolean> {
     try {
       const result = await this.redisClient.get(`black:${userId}:${token}`);
       return result !== null;
@@ -342,19 +389,17 @@ export class AuthService {
       throw this.jwtException.RedisServerError;
     }
   }
-  async logout(userId: string, accessToken: string, refreshToken: string) {
+
+  // redis 저장된 토큰과 비교
+  async compareToStoredRefresh(
+    userId: number,
+    refreshToken: string,
+  ): Promise<boolean> {
     try {
-      const accessKey = `black:${userId}:${accessToken}`;
-      await this.redisClient.set(accessKey, ' ');
-      await this.redisClient.expire(accessKey, 60 * 30);
-
-      const refreshKey = `black:${userId}:${refreshToken}`;
-      await this.redisClient.set(refreshKey, ' ');
-      await this.redisClient.expire(refreshKey, 60 * 60 * 24 * 7);
-
-      await this.redisClient.del(`user:${userId}`);
+      const storedToken = await this.redisClient.get(`user:${userId}`);
+      return refreshToken === storedToken;
     } catch (error) {
-      throw this.jwtException.FailedLogout;
+      throw this.jwtException.RedisServerError;
     }
   }
 }
