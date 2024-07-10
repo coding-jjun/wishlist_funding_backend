@@ -71,19 +71,6 @@ export class AuthService {
     return token;
   }
 
-  /**
-   * refresh token 디코딩 및 유효성 검사
-   */
-  async verifyRefreshToken(refreshToken: string) {
-    try {
-      return await this.jwtService.verify(refreshToken, {
-        secret: process.env.JWT_REFRESH_SECRET,
-      });
-    } catch (error) {
-      throw this.jwtException.NotValidToken;
-    }
-  }
-
   async validateRefresh(
     userId: string,
     refreshToken: string,
