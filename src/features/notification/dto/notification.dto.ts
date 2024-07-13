@@ -15,8 +15,8 @@ export class NotiDto {
   constructor(notification: Notification) {
     this.notiId = notification.notiId;
     this.recvId = notification.recvId.userId;
-    this.sendId = notification.sendId.userId;
-    this.sendNick = notification.sendId.userNick;
+    this.sendId = notification.sendId?.userId;
+    this.sendNick = notification.sendId?.userNick;
     // this.sendImg? = notification.sendId.image;
     this.notiType = notification.notiType;
     this.reqType = notification.reqType;

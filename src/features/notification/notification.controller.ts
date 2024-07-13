@@ -31,7 +31,6 @@ export class NotificationController {
     @Query('notiFilter', new DefaultValuePipe('all')) notiFilter: 'all' | 'friend' | 'funding' | 'comment',
     @Query('lastId', new DefaultValuePipe(undefined)) lastId?: number,
   ): Promise<CommonResponse> {
-
     return {
       data: await this.notiService.getAllNoti(userId, notiFilter, lastId),
     };

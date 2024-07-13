@@ -39,31 +39,31 @@ export class NotificationService {
       .orderBy('notification.notiTime', 'DESC')
       .where('notification.recvId = :userId', { userId });
       
-      switch (notiFilter) {
-      case 'all':
-        break;
-      case 'friend':
-        queryBuilder.andWhere('notification.notiType IN (:...friendTypes)', {
-          friendTypes: [NotiType.IncomingFollow, NotiType.AcceptFollow],
-        });
-        break;
-        case 'funding':
-        queryBuilder.andWhere('notification.notiType IN (:...fundingTypes)', {
-          fundingTypes: [
-            NotiType.FundClose, 
-            NotiType.FundAchieve, 
-            NotiType.NewDonate, 
-            NotiType.WriteGratitude,
-            NotiType.CheckGratitude,
-            NotiType.DonatedFundClose
-          ],
-        });
-        break;
-        case 'comment':
-        queryBuilder.andWhere('notification.notiType = :notiType', { 
-          notiType: NotiType.NewComment 
-        });
-        break;
+    switch (notiFilter) {
+    case 'all':
+      break;
+    case 'friend':
+      queryBuilder.andWhere('notification.notiType IN (:...friendTypes)', {
+        friendTypes: [NotiType.IncomingFollow, NotiType.AcceptFollow],
+      });
+      break;
+      case 'funding':
+      queryBuilder.andWhere('notification.notiType IN (:...fundingTypes)', {
+        fundingTypes: [
+          NotiType.FundClose, 
+          NotiType.FundAchieve, 
+          NotiType.NewDonate, 
+          NotiType.WriteGratitude,
+          NotiType.CheckGratitude,
+          NotiType.DonatedFundClose
+        ],
+      });
+      break;
+      case 'comment':
+      queryBuilder.andWhere('notification.notiType = :notiType', { 
+        notiType: NotiType.NewComment 
+      });
+      break;
     }
     
     // lastDate가 제공되었다면, 이를 사용하여 조건 추가
