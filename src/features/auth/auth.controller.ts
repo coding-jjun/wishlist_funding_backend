@@ -58,15 +58,17 @@ export class AuthController {
 
   @Get('naver/callback')
   @UseGuards(NaverAuthGuard)
-  async naverCallback(@Req() req: Request){
-    const user = req.user as { user: UserDto, tokenDto: TokenDto };  
-    return {
-      message: '네이버 가입 완료',
-      data: [
-        { "user": user[0] },
-        { "token": user[1] },
-      ],
-    };
+  async naverCallback(@Req() req: Request, @Res() res:Response){
+    const data = req.user as { user: UserDto, tokenDto: TokenDto, type: string };
+    res.cookie("access_token", data.tokenDto.accessToken);
+    res.cookie("refresh_token", data.tokenDto.refreshToken);
+    res.cookie("user", data.user);
+
+    if( data.type === 'login'){
+      return res.status(200).redirect('/');
+    }else{
+      return res.status(200).redirect('/signup/oauth');
+    }
   }
   
 
