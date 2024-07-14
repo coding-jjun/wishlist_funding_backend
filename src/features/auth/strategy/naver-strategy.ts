@@ -40,7 +40,7 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
     // user == 로그인
     let user = await this.authService.validateUser(naverAccount.email, AuthType.Naver);
 
-
+    let type = null;
     // ! user == 회원 가입
     if (! user) {
 
@@ -65,11 +65,16 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
         createUserDto.userImg = naverAccount.profile_image;
       }
       user = await this.authService.createUser(createUserDto);
+
+      type = "signup"
+
+    }else{
+      type = "login"
     }
     const tokenDto = new TokenDto();
     tokenDto.accessToken = await this.authService.createAccessToken(user.userId);
     tokenDto.refreshToken = await this.authService.createRefreshToken(user.userId);
-    done(null, [user, tokenDto]);
+    done(null, {user, tokenDto, type});
     
   }
 }
