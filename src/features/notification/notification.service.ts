@@ -39,31 +39,31 @@ export class NotificationService {
       .orderBy('notification.notiTime', 'DESC')
       .where('notification.recvId = :userId', { userId });
       
-      switch (notiFilter) {
-      case 'all':
-        break;
-      case 'friend':
-        queryBuilder.andWhere('notification.notiType IN (:...friendTypes)', {
-          friendTypes: [NotiType.IncomingFollow, NotiType.AcceptFollow],
-        });
-        break;
-        case 'funding':
-        queryBuilder.andWhere('notification.notiType IN (:...fundingTypes)', {
-          fundingTypes: [
-            NotiType.FundClose, 
-            NotiType.FundAchieve, 
-            NotiType.NewDonate, 
-            NotiType.WriteGratitude,
-            NotiType.CheckGratitude,
-            NotiType.DonatedFundClose
-          ],
-        });
-        break;
-        case 'comment':
-        queryBuilder.andWhere('notification.notiType = :notiType', { 
-          notiType: NotiType.NewComment 
-        });
-        break;
+    switch (notiFilter) {
+    case 'all':
+      break;
+    case 'friend':
+      queryBuilder.andWhere('notification.notiType IN (:...friendTypes)', {
+        friendTypes: [NotiType.IncomingFollow, NotiType.AcceptFollow],
+      });
+      break;
+      case 'funding':
+      queryBuilder.andWhere('notification.notiType IN (:...fundingTypes)', {
+        fundingTypes: [
+          NotiType.FundClose, 
+          NotiType.FundAchieve, 
+          NotiType.NewDonate, 
+          NotiType.WriteGratitude,
+          NotiType.CheckGratitude,
+          NotiType.DonatedFundClose
+        ],
+      });
+      break;
+      case 'comment':
+      queryBuilder.andWhere('notification.notiType = :notiType', { 
+        notiType: NotiType.NewComment 
+      });
+      break;
     }
     
     // lastDate가 제공되었다면, 이를 사용하여 조건 추가
@@ -77,17 +77,30 @@ export class NotificationService {
     .leftJoinAndSelect('notification.sendId', 'sender')
     .getMany();
 
-    if (notifications.length > 0) {
-      await this.notiRepository.createQueryBuilder('notification')
-        .relation(Notification, 'recvId')
-        .of(notifications.map(noti => noti.notiId)) // 필터링된 notiId만 조인
-        .loadOne();
-    }
+    const notiDtos = notifications.map(noti => new NotiDto(noti));
 
+    const fundingTypes = [NotiType.FundClose, NotiType.FundAchieve, NotiType.NewDonate, NotiType.WriteGratitude, NotiType.CheckGratitude, NotiType.DonatedFundClose];
+    const fundUuids = notifications.filter(noti => fundingTypes.includes(noti.notiType)).map(noti => noti.subId);
+    
+    if (fundUuids.length > 0) {
+      const fundings = await this.fundRepository
+        .createQueryBuilder('funding')
+        .where('funding.fundUuid IN (:...fundUuids)', { fundUuids })
+        .getMany();
+    
+      const fundingMap = new Map(fundings.map(fund => [fund.fundUuid, fund.fundTitle]));
+    
+      notiDtos.forEach(notiDto => {
+        if (fundingTypes.includes(notiDto.notiType)) {
+          notiDto.fundTitle = fundingMap.get(notiDto.subId);
+        }
+      });
+    }
+    
     return {
-      noti: notifications.map(noti => new NotiDto(noti)),
-      count: notifications.length,
-      lastId: notifications[notifications.length - 1]?.notiId,
+      noti: notiDtos,
+      count: notiDtos.length,
+      lastId: notiDtos.length > 0 ? notiDtos[notiDtos.length - 1].notiId : 0,
     };
   }
 
