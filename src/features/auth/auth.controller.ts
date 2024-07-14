@@ -65,9 +65,9 @@ export class AuthController {
     res.cookie("user", data.user);
 
     if( data.type === 'login'){
-      return res.status(200).redirect('/');
+      return res.redirect('localhost:3000');
     }else{
-      return res.status(200).redirect('/signup/oauth');
+      return res.redirect('localhost:3000/signup/oauth');
     }
   }
   
