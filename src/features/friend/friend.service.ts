@@ -147,12 +147,8 @@ export class FriendService {
           // Accept friend request
           friendship.status = FriendStatus.Friend;
           const result = await this.friendRepository.save(friendship);
-          const notiType = NotiType.AcceptFollow;
 
-          this.eventEmitter.emit('AcceptFollow', {
-            result: friendDto,
-            notiType: notiType
-          });
+          this.eventEmitter.emit('AcceptFollow', friendDto);
 
           return {
             result,
@@ -171,12 +167,8 @@ export class FriendService {
         status: FriendStatus.Requested,
       });
       const result = await this.friendRepository.save(newFriendship);
-      const notiType = NotiType.IncomingFollow;
       
-      this.eventEmitter.emit('IncomingFollow', {
-        result: friendDto,
-        notiType: notiType
-      });
+      this.eventEmitter.emit('IncomingFollow', friendDto);
 
       return {
         result,
