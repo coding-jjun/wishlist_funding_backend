@@ -190,14 +190,14 @@ export class NotificationService {
   }
 
   @OnEvent('NewDonate')
-  async handleNewDonate(data: {recvId: number, sendId: number, notiType: NotiType, subId: string}) {
+  async handleNewDonate(data: {recvId: number, sendId: number, subId: string}) {
     const noti = new Notification();
     const receiver = await this.userRepository.findOneBy({ userId: data.recvId })
     const sender = await this.userRepository.findOneBy({ userId: data.sendId })
     
     noti.sendId = sender;
     noti.recvId = receiver;
-    noti.notiType = data.notiType;
+    noti.notiType = NotiType.NewDonate;
     noti.subId = data.subId;
   
     return await this.notiRepository.save(noti);

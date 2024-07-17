@@ -144,7 +144,7 @@ export class DonationService {
     this.eventEmitter.emit('NewDonate', {
       recvId: updateFunding.fundUser,
       sendId: user.userId,
-      subId: donation.donId
+      subId: fundUuid
     });
 
     return new ResponseDonationDTO(savedDonation, rollingPaper.rollId);
