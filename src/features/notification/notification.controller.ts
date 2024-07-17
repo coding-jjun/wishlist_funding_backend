@@ -44,7 +44,7 @@ export class NotificationController {
       let result;
       switch (createNotiDto.notiType) {
         case NotiType.IncomingFollow:
-        case NotiType.AcceptFollow:
+        case NotiType.NewFriend:
         case NotiType.FundClose:
         case NotiType.FundAchieve:
         case NotiType.NewDonate:
