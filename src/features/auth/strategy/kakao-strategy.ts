@@ -39,9 +39,10 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
 
     // user == 로그인
     let user = await this.authService.validateUser(kakaoAccount.email, AuthType.Kakao);
+    
+    let type = null;
 
     // ! user == 회원 가입
-
     if(! user){
       // 닉네임 유효성 검증
       const isValidNick = await this.authService.validUserInfo("userNick", kakaoAccount.profile.nickname);
@@ -70,10 +71,13 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
         createUserDto.userImg = kakaoAccount.profile.thumbnail_image_url;
       }
       user = await this.authService.createUser(createUserDto);
+      type = "signup"
+    }else{
+      type = "login"
     }
     const tokenDto = new TokenDto();
     tokenDto.accessToken = await this.authService.createAccessToken(user.userId);
     tokenDto.refreshToken = await this.authService.createRefreshToken(user.userId);
-    done(null, [user, tokenDto]);
+    done(null, {user, tokenDto, type});
   }
 }
