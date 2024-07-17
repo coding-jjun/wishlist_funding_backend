@@ -8,6 +8,7 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
+  ParseUUIDPipe,
   Post,
   Put,
   Query,
@@ -20,6 +21,7 @@ import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { FundingService } from '../funding/funding.service';
 import { FundTheme } from 'src/enums/fund-theme.enum';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { UUID } from 'crypto';
 
 @Controller('user')
 export class UserController {
@@ -63,8 +65,7 @@ export class UserController {
     @Query('sort', new DefaultValuePipe('endAtDesc'))
     sort: 'endAtAsc' | 'endAtDesc' | 'regAtAsc' | 'regAtDesc',
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
-    @Query('lastFundId', new DefaultValuePipe(0), ParseIntPipe)
-    lastFundId?: number,
+    @Query('lastFundUuid', new DefaultValuePipe(undefined)) lastFundUuid?: string,
     @Query('lastEndAt', new DefaultValuePipe(undefined)) lastEndAt?: string,
   ): Promise<CommonResponse> {
     try {
@@ -77,7 +78,7 @@ export class UserController {
         status,
         sort,
         limit,
-        lastFundId,
+        lastFundUuid,
         lastEndAtDate,
       );
 

@@ -1,23 +1,16 @@
 import {
   Body,
   Controller,
-  DefaultValuePipe,
   Delete,
   Get,
-  HttpException,
-  HttpStatus,
-  Logger,
   Param,
-  ParseIntPipe,
   ParseUUIDPipe,
   Post,
   Put,
-  Query,
 } from '@nestjs/common';
 import { FundingService } from './funding.service';
 import { CreateFundingDto } from './dto/create-funding.dto';
 import { UpdateFundingDto } from './dto/update-funding.dto';
-import { FundTheme } from 'src/enums/fund-theme.enum';
 import { GiftArray } from '../gift/dto/request-gift.dto';
 import { GiftService } from '../gift/gift.service';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
