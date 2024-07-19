@@ -9,7 +9,6 @@ import {
   GiftogetherExceptions
 } from 'src/filters/giftogether-exception';
 import { ImageType } from 'src/enums/image-type.enum';
-import { NotiType } from 'src/enums/notification.enum';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()

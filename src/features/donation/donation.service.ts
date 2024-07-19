@@ -12,9 +12,7 @@ import { RollingPaperService } from '../rolling-paper/rolling-paper.service';
 import { CreateRollingPaperDto } from '../rolling-paper/dto/create-rolling-paper.dto';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { getNow } from 'src/app.module';
-import { get } from 'http';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { NotiType } from 'src/enums/notification.enum';
 
 @Injectable()
 export class DonationService {

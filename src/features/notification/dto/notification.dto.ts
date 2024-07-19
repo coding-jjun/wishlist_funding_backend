@@ -1,5 +1,5 @@
 import { Notification } from "src/entities/notification.entity";
-import { NotiType, ReqType } from "src/enums/notification.enum";
+import { NotiType } from "src/enums/noti-type.enum";
 
 export class NotiDto {
   notiId: number;
@@ -8,7 +8,6 @@ export class NotiDto {
   sendNick?: string;
   sendImg?: string;
   notiType: NotiType;
-  reqType: ReqType;
   subId: string;
   notiTime: Date;
   fundTitle?: string;
@@ -20,7 +19,6 @@ export class NotiDto {
     this.sendNick = notification.sendId?.userNick;
     this.sendImg = notification.sendId?.image?.imgUrl;
     this.notiType = notification.notiType;
-    this.reqType = notification.reqType;
     this.subId = notification.subId;
     this.notiTime = notification.notiTime;
     this.fundTitle = undefined;
