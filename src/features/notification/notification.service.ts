@@ -1,4 +1,4 @@
-import { Injectable, Req } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification } from 'src/entities/notification.entity';
@@ -6,7 +6,7 @@ import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { User } from 'src/entities/user.entity';
 import { NotiDto } from './dto/notification.dto';
-import { NotiType, ReqType } from 'src/enums/notification.enum';
+import { NotiType } from 'src/enums/noti-type.enum';
 import { Donation } from 'src/entities/donation.entity';
 import { Funding } from 'src/entities/funding.entity';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -149,7 +149,6 @@ export class NotificationService {
     noti.sendId = sender;
     noti.recvId = receiver;
     noti.notiType = NotiType.IncomingFollow;
-    noti.reqType = ReqType.NotResponse;
 
     return await this.notiRepository.save(noti);
   }
@@ -259,7 +258,6 @@ export class NotificationService {
 
     noti.recvId = funding.fundUser;
     noti.notiType = NotiType.WriteGratitude;
-    noti.reqType = ReqType.NotResponse;
     noti.subId = funding.fundUuid;
 
     return this.notiRepository.save(noti);
@@ -314,7 +312,6 @@ export class NotificationService {
     noti.sendId = sender;
     noti.recvId = receiver;
     noti.notiType = createNotiDto.notiType;
-    noti.reqType = createNotiDto.reqType;
     noti.subId = createNotiDto.subId;
 
     return await this.notiRepository.save(noti);
@@ -377,7 +374,6 @@ export class NotificationService {
         where: { notiId },
       });
       if (noti) {
-        noti.reqType = updateNotiDto.reqType;
         await this.notiRepository.save(noti);
         return noti;
       }
@@ -390,7 +386,6 @@ export class NotificationService {
         },
       });
       if (noti) {
-        noti.reqType = updateNotiDto.reqType;
         await this.notiRepository.save(noti);
         return noti;
       }

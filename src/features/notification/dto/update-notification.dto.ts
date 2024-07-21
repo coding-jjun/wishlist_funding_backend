@@ -1,10 +1,6 @@
-import { IsNotEmpty, IsOptional } from 'class-validator';
-import { ReqType } from 'src/enums/notification.enum';
+import { IsOptional } from 'class-validator';
 
 export class UpdateNotificationDto {
-  @IsNotEmpty()
-  reqType: ReqType;
-
   @IsOptional()
   userId: number;
 

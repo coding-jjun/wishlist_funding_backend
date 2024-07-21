@@ -9,8 +9,9 @@ import {
   GiftogetherExceptions
 } from 'src/filters/giftogether-exception';
 import { ImageType } from 'src/enums/image-type.enum';
-import { NotiType } from 'src/enums/notification.enum';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { NotiType } from 'src/enums/noti-type.enum';
+import { Notification } from 'src/entities/notification.entity';
 
 @Injectable()
 export class FriendService {
@@ -19,6 +20,8 @@ export class FriendService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Friend)
     private readonly friendRepository: Repository<Friend>,
+    @InjectRepository(Notification)
+    private readonly notiRepository: Repository<Notification>,
     private readonly g2gException: GiftogetherExceptions,
     private eventEmitter: EventEmitter2,
   ) {}
@@ -178,7 +181,7 @@ export class FriendService {
   }
 
   /**
-   * 친구 삭제
+   * 친구 삭제, 거절, 취소
    */
   async deleteFriend(
     friendDto: FriendDto,
@@ -206,27 +209,64 @@ export class FriendService {
       )
       .getOne();
 
+    let message = '';
     if (friendship) {
+      if (friendship.status === FriendStatus.Friend) {
+        const noti1 = await this.notiRepository.createQueryBuilder('noti')
+        .where('noti.recvId = :recvId', { recvId: friendDto.friendId })
+        .andWhere('noti.sendId = :sendId', { sendId: friendDto.userId })
+        .andWhere('noti.notiType = :notiType', { notiType: NotiType.NewFriend })
+        .getOne();
+
+        const noti2 = await this.notiRepository.createQueryBuilder('noti')
+        .where('noti.recvId = :recvId', { recvId: friendDto.userId })
+        .andWhere('noti.sendId = :sendId', { sendId: friendDto.friendId })
+        .andWhere('noti.notiType = :notiType', { notiType: NotiType.NewFriend })
+        .getOne();
+
+        await this.notiRepository.delete(noti1.notiId);
+        await this.notiRepository.delete(noti2.notiId);
+
+        message = '친구 삭제가 완료되었습니다.';
+      } else {
+        const notiType = NotiType.IncomingFollow
+        // 보낸 친구 요청 취소
+        if (friendship.userId === userId) {
+          const noti = await this.notiRepository.createQueryBuilder('noti')
+          .where('noti.recvId = :recvId', { recvId: friendDto.friendId })
+          .andWhere('noti.sendId = :sendId', { sendId: friendDto.userId })
+          .andWhere('noti.notiType = :notiType', { notiType })
+          .getOne();
+
+          await this.notiRepository.delete(noti.notiId);
+          message = '친구 요청이 취소되었습니다.';
+        } else {  // 받은 친구 요청 거절
+          if (friendDto.notiId) {
+            await this.notiRepository.delete(friendDto.notiId);
+          } else {
+            const noti = await this.notiRepository
+              .createQueryBuilder('noti')
+              .where('noti.recvId = :recvId', { recvId: friendDto.userId })
+              .andWhere('noti.sendId = :sendId', { sendId: friendDto.friendId })
+              .andWhere('noti.notiType = :notiType', { notiType })
+              .getOne();
+            
+            await this.notiRepository.delete(noti.notiId);
+          }
+          message = '친구 요청을 거절하였습니다.';
+        }
+      }
       await this.friendRepository.delete({
         userId: friendship.userId,
         friendId: friendship.friendId,
       });
-      let message = '';
-      if (friendship.status === FriendStatus.Friend) {
-        message = '친구 삭제가 완료되었습니다.';
-      } else {
-        message =
-          friendship.userId === userId
-            ? '친구 요청이 취소되었습니다.'
-            : '친구 요청을 거절하였습니다';
-      }
-
-      return {
-        result: friendship,
-        message: message,
-      };
     } else {
       throw new HttpException('친구 관계가 아닙니다.', HttpStatus.BAD_REQUEST);
     }
+
+    return {
+      result: friendship,
+      message: message,
+    };
   }
 }

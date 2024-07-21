@@ -10,7 +10,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { NotificationService } from './notification.service';
-import { NotiType } from 'src/enums/notification.enum';
+import { NotiType } from 'src/enums/noti-type.enum';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { CreateNotificationDto } from './dto/create-notification.dto';
