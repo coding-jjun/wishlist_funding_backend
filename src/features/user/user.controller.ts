@@ -8,10 +8,8 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
-  Post,
   Put,
   Query,
-  Request,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -65,8 +63,7 @@ export class UserController {
     @Query('sort', new DefaultValuePipe('endAtDesc'))
     sort: 'endAtAsc' | 'endAtDesc' | 'regAtAsc' | 'regAtDesc',
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
-    @Query('lastFundId', new DefaultValuePipe(0), ParseIntPipe)
-    lastFundId?: number,
+    @Query('lastFundUuid', new DefaultValuePipe(undefined)) lastFundUuid?: string,
     @Query('lastEndAt', new DefaultValuePipe(undefined)) lastEndAt?: string,
   ): Promise<CommonResponse> {
     try {
@@ -79,7 +76,7 @@ export class UserController {
         status,
         sort,
         limit,
-        lastFundId,
+        lastFundUuid,
         lastEndAtDate,
       );
 

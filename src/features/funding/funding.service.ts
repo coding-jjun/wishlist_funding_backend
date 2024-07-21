@@ -19,6 +19,7 @@ import {
 import { query } from 'express';
 import assert from 'assert';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { UUID } from 'crypto';
 
 @Injectable()
 export class FundingService {
@@ -47,14 +48,24 @@ export class FundingService {
     status: 'ongoing' | 'ended',
     sort: 'endAtAsc' | 'endAtDesc' | 'regAtAsc' | 'regAtDesc',
     limit: number,
-    lastFundId?: number, // 마지막으로 로드된 항목의 id 값
+    lastFundUuid?: string, // 마지막으로 로드된 항목의 id 값
     lastEndAtDate?: Date, // 마지막으로 로드된 항목의 endAt 값
   ): Promise<{
     fundings: FundingDto[];
     count: number;
-    lastFundId: number;
+    lastFundUuid: string;
     lastEndAt: Date;
   }> {
+    let lastFundId;
+    if (lastFundUuid) {
+      const lastFund = await this.fundingRepository.findOne({
+        where: { fundUuid: lastFundUuid }
+      });
+      if (lastFund) {
+        lastFundId = lastFund.fundId;
+      }
+    }
+
     const queryBuilder =
       await this.fundingRepository.createQueryBuilder('funding');
 
@@ -186,7 +197,7 @@ export class FundingService {
     return {
       fundings: fundings,
       count: fundings.length,
-      lastFundId: fundings[fundings.length - 1]?.fundId,
+      lastFundUuid: fundings[fundings.length - 1]?.fundUuid,
       lastEndAt:
         sort[0] === 'e'
           ? fundings[fundings.length - 1]?.endAt
