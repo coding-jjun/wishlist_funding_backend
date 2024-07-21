@@ -39,15 +39,20 @@ export class AuthController {
 
   @Get('kakao/callback')
   @UseGuards(KakaoAuthGuard)
-  async kakaoCallback(@Req() req: Request){
-    const user = req.user as { user: UserDto, tokenDto: TokenDto };  
-    return {
-      message: '카카오 가입 완료',
-      data: [
-        { "user": user[0] },
-        { "token": user[1] },
-      ],
-    };
+  async kakaoCallback(@Req() req: Request, @Res() res: Response){
+    const data = req.user as { user: UserDto, tokenDto: TokenDto, type: string };
+
+    res.cookie('access_token', data.tokenDto.accessToken, { httpOnly: false });
+    res.cookie('refresh_token', data.tokenDto.refreshToken, { httpOnly: false });
+    res.cookie('user', JSON.stringify(data.user), { httpOnly: false });
+
+    if( data.type === 'login'){
+      return res.redirect(process.env.LOGIN_URL);
+      
+    }else{
+      return res.redirect(process.env.SIGNUP_URL);
+    }
+
   }
 
   @Get('naver')
@@ -60,18 +65,19 @@ export class AuthController {
   @UseGuards(NaverAuthGuard)
   async naverCallback(@Req() req: Request, @Res() res:Response){
     const data = req.user as { user: UserDto, tokenDto: TokenDto, type: string };
-    res.cookie("access_token", data.tokenDto.accessToken);
-    res.cookie("refresh_token", data.tokenDto.refreshToken);
-    res.cookie("user", data.user);
+    res.cookie('access_token', data.tokenDto.accessToken, { httpOnly: false });
+    res.cookie('refresh_token', data.tokenDto.refreshToken, { httpOnly: false });
+    res.cookie('user', JSON.stringify(data.user), { httpOnly: false });
 
     if( data.type === 'login'){
-      return res.redirect('localhost:3000');
+      return res.redirect(process.env.LOGIN_URL);
+      
     }else{
-      return res.redirect('localhost:3000/signup/oauth');
+      return res.redirect(process.env.SIGNUP_URL);
     }
+
   }
   
-
   @Get('google')
   @UseGuards(GoogleAuthGuard)
   async googleLogin(){
@@ -80,31 +86,34 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
-  async googleCallback(@Req() req: Request){
-    const user = req.user as { user: UserDto, tokenDto: TokenDto };  
-    return {
-      message: '구글 가입 완료',
-      data: [
-        { "user": user[0] },
-        { "token": user[1] },
-      ],
-    };   
+  async googleCallback(@Req() req: Request, @Res() res:Response){
+    const data = req.user as { user: UserDto, tokenDto: TokenDto, type: string };
+
+    res.cookie('access_token', data.tokenDto.accessToken, { httpOnly: false });
+    res.cookie('refresh_token', data.tokenDto.refreshToken, { httpOnly: false });
+    res.cookie('user', JSON.stringify(data.user), { httpOnly: false });
+
+    if( data.type === 'login'){
+      return res.redirect(process.env.LOGIN_URL);
+      
+    }else{
+      return res.redirect(process.env.SIGNUP_URL);
+    }
   }
 
   @Post('login')
-  async login(@Body() loginDto: LoginDto){
-    const userDto = await this.authService.login(loginDto);
+  async login(@Body() loginDto: LoginDto, @Res() res: Response){
+    const user = await this.authService.login(loginDto);
     const token = new TokenDto()
-    token.accessToken = await this.authService.createAccessToken(userDto.userId);
-    token.refreshToken = await this.authService.createRefreshToken(userDto.userId);
+    token.accessToken = await this.authService.createAccessToken(user.userId);
+    token.refreshToken = await this.authService.createRefreshToken(user.userId);
+
+    res.cookie("access_token", token.accessToken);
+    res.cookie("refresh_token", token.refreshToken);
+    res.cookie("user", user);
+
+    return res.redirect(process.env.LOGIN_URL);
     
-    return {
-      message: '로그인 완료',
-      data: [
-        { "user": userDto },
-        { "token": token },
-      ],
-    };  
   }
   
 
@@ -123,18 +132,11 @@ export class AuthController {
   @Post(`/signup`)
   async signup(
     @Body() createUserDto: CreateUserDto,
-  ): Promise<CommonResponse> {
-    const userDto = await this.authService.createUser(createUserDto);
-    const token = new TokenDto();
-    token.accessToken = await this.authService.createAccessToken(userDto.userId);
-    token.refreshToken = await this.authService.createRefreshToken(userDto.userId);
-    return {
-      message: '회원가입 완료',
-      data: [
-        { "user": userDto },
-        { "token": token },
-      ],
-    };  
+    @Res() res: Response
+  ) {
+    res.cookie("user", await this.authService.createUser(createUserDto));
+
+    return res.redirect(process.env.LOGIN_URL);
   }
 
   @Get('/token')
