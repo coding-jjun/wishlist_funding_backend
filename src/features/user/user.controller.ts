@@ -20,6 +20,7 @@ import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { FundingService } from '../funding/funding.service';
 import { FundTheme } from 'src/enums/fund-theme.enum';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { DonationService } from '../donation/donation.service';
 
 @Controller('user')
 export class UserController {
@@ -27,6 +28,7 @@ export class UserController {
     private readonly userService: UserService,
     private readonly addrService: AddressService,
     private readonly fundService: FundingService,
+    private readonly donaService: DonationService,
     private readonly g2gExceptions: GiftogetherExceptions,
   ) {}
 
@@ -107,6 +109,20 @@ export class UserController {
   // ) {
   //     return await this.userService.getUserAccount(userId);
   // }
+
+  @Get('/:userId/donation')
+  async getUserDonation(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<CommonResponse> {
+    try {
+      return {
+        message: 'Success',
+        data: await this.donaService.findAll(userId)
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
 
   @Get('/:userId/address')
   async getUserAddress(

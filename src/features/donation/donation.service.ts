@@ -149,8 +149,15 @@ export class DonationService {
     // TODO 후원 등록 완료 Notification
   }
   
-  async findAll(userId: number): Promise<DonationDto> {
-    return;
+  async findAll(userId: number): Promise<DonationDto[]> {
+    const donations = await this.donationRepo.createQueryBuilder('donation')
+    .where('donation.user = :userId', { userId })
+    .orderBy('donation.donId', 'DESC')
+    .leftJoinAndSelect('donation.funding', 'funding')
+    .leftJoinAndSelect('donation.user', 'user')
+    .getMany();
+
+    return donations.map(donation => new DonationDto(donation));
   }
 
   // DELETE
