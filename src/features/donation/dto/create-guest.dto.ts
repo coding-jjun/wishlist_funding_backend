@@ -1,4 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
+import { BankType } from 'src/enums/bank-type.enum';
 
 export class CreateGuestDto {
   @IsNotEmpty()
@@ -8,7 +9,7 @@ export class CreateGuestDto {
   userPhone: string;
 
   @IsNotEmpty()
-  accBank: string;
+  accBank: BankType;
 
   @IsNotEmpty()
   accNum: string;

@@ -2,7 +2,7 @@ import { Donation } from 'src/entities/donation.entity';
 import { User } from 'src/entities/user.entity';
 import { DonationStatus } from 'src/enums/donation-status.enum';
 
-export class ResponseDonationDTO {
+export class DonationDto {
   donator: User;
 
   rollId: number;
@@ -20,7 +20,7 @@ export class ResponseDonationDTO {
     this.rollId = rollId;
     this.donId = donation.donId;
     this.orderId = donation.orderId;
-    this.donationStatus = donation.donationStatus;
+    this.donationStatus = donation.donStat;
     this.regAt = donation.regAt;
   }
 }
