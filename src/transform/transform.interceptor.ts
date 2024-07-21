@@ -13,8 +13,8 @@ export class TransformInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map((response) => {
         // 응답 객체에서 메시지와 데이터 추출
-        if (response && response.message) {
-          const message = response.message;
+        if (response) {
+          const message = response.message ? response.message : 'Success';
           const data = response.data;
   
           return {
