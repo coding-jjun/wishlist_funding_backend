@@ -29,7 +29,7 @@ export class Donation {
     enum: DonationStatus,
     default: DonationStatus.Donated,
   })
-  donationStatus: DonationStatus;
+  donStat: DonationStatus;
 
   @Column()
   orderId: string;
