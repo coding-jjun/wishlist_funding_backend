@@ -212,6 +212,21 @@ export class FriendService {
     let message = '';
     if (friendship) {
       if (friendship.status === FriendStatus.Friend) {
+        const noti1 = await this.notiRepository.createQueryBuilder('noti')
+        .where('noti.recvId = :recvId', { recvId: friendDto.friendId })
+        .andWhere('noti.sendId = :sendId', { sendId: friendDto.userId })
+        .andWhere('noti.notiType = :notiType', { notiType: NotiType.NewFriend })
+        .getOne();
+
+        const noti2 = await this.notiRepository.createQueryBuilder('noti')
+        .where('noti.recvId = :recvId', { recvId: friendDto.userId })
+        .andWhere('noti.sendId = :sendId', { sendId: friendDto.friendId })
+        .andWhere('noti.notiType = :notiType', { notiType: NotiType.NewFriend })
+        .getOne();
+
+        await this.notiRepository.delete(noti1.notiId);
+        await this.notiRepository.delete(noti2.notiId);
+
         message = '친구 삭제가 완료되었습니다.';
       } else {
         const notiType = NotiType.IncomingFollow
