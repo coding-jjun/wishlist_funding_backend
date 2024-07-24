@@ -1,4 +1,4 @@
-import { Injectable, Req } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification } from 'src/entities/notification.entity';
@@ -6,12 +6,11 @@ import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { User } from 'src/entities/user.entity';
 import { NotiDto } from './dto/notification.dto';
-import { NotiType, ReqType } from 'src/enums/notification.enum';
+import { NotiType } from 'src/enums/noti-type.enum';
 import { Donation } from 'src/entities/donation.entity';
 import { Funding } from 'src/entities/funding.entity';
 import { OnEvent } from '@nestjs/event-emitter';
 import { FriendDto } from '../friend/dto/friend.dto';
-import { Friend } from 'src/entities/friend.entity';
 
 @Injectable()
 export class NotificationService {
@@ -44,7 +43,7 @@ export class NotificationService {
       break;
     case 'friend':
       queryBuilder.andWhere('notification.notiType IN (:...friendTypes)', {
-        friendTypes: [NotiType.IncomingFollow, NotiType.AcceptFollow],
+        friendTypes: [NotiType.IncomingFollow, NotiType.NewFriend],
       });
       break;
       case 'funding':
@@ -105,28 +104,51 @@ export class NotificationService {
   }
 
   @OnEvent('AcceptFollow')
-  async handleAcceptFollow(data: { friendDto: FriendDto, notiType: NotiType }) {
-    const noti = new Notification();
-    const receiver = await this.userRepository.findOneBy({ userId: data.friendDto.friendId })
-    const sender = await this.userRepository.findOneBy({ userId: data.friendDto.userId })
+  async handleAcceptFollow(friendDto: FriendDto) {
+    const noti1 = new Notification();
+    const noti2 = new Notification();
+    const receiver = await this.userRepository.findOneBy({ userId: friendDto.friendId })
+    const sender = await this.userRepository.findOneBy({ userId: friendDto.userId })
 
-    noti.sendId = sender;
-    noti.recvId = receiver;
-    noti.notiType = data.notiType;
+    noti1.sendId = sender;
+    noti1.recvId = receiver;
+    noti2.sendId = receiver;
+    noti2.recvId = sender;
+    noti1.notiType = NotiType.NewFriend;
+    noti2.notiType = NotiType.NewFriend;
 
-    return await this.notiRepository.save(noti);
+    if (!friendDto.notiId) {
+      const deleteNoti = await this.notiRepository.createQueryBuilder("notification")
+      .leftJoinAndSelect("notification.recvId", "receiver")
+      .where("notification.recvId = :recvId", { recvId: friendDto.userId })
+      .andWhere("notification.sendId = :sendId", { sendId: friendDto.friendId }) // 여기서 senderId는 숫자 타입이어야 합니다.
+      .andWhere("notification.notiType = :notiType", { notiType: NotiType.IncomingFollow })
+      .getOne();
+
+      console.log('deleteNoti.notiId: '+ deleteNoti.notiId);
+
+      if (deleteNoti) {
+        await this.notiRepository.delete(deleteNoti.notiId);
+      };
+    } else {
+      await this.notiRepository.delete(friendDto.notiId);
+    }
+
+    await this.notiRepository.save(noti1);
+    await this.notiRepository.save(noti2);
+    
+    return;
   }
 
   @OnEvent('IncomingFollow')
-  async handleIncomingFollow(data: { friendDto: FriendDto, notiType: NotiType }) {
+  async handleIncomingFollow(friendDto: FriendDto) {
     const noti = new Notification();
-    const receiver = await this.userRepository.findOneBy({ userId: data.friendDto.friendId })
-    const sender = await this.userRepository.findOneBy({ userId: data.friendDto.userId })
+    const receiver = await this.userRepository.findOneBy({ userId: friendDto.friendId })
+    const sender = await this.userRepository.findOneBy({ userId: friendDto.userId })
 
     noti.sendId = sender;
     noti.recvId = receiver;
-    noti.notiType = data.notiType;
-    noti.reqType = ReqType.NotResponse;
+    noti.notiType = NotiType.IncomingFollow;
 
     return await this.notiRepository.save(noti);
   }
@@ -190,14 +212,14 @@ export class NotificationService {
   }
 
   @OnEvent('NewDonate')
-  async handleNewDonate(data: {recvId: number, sendId: number, notiType: NotiType, subId: string}) {
+  async handleNewDonate(data: {recvId: number, sendId: number, subId: string}) {
     const noti = new Notification();
     const receiver = await this.userRepository.findOneBy({ userId: data.recvId })
     const sender = await this.userRepository.findOneBy({ userId: data.sendId })
     
     noti.sendId = sender;
     noti.recvId = receiver;
-    noti.notiType = data.notiType;
+    noti.notiType = NotiType.NewDonate;
     noti.subId = data.subId;
   
     return await this.notiRepository.save(noti);
@@ -236,7 +258,6 @@ export class NotificationService {
 
     noti.recvId = funding.fundUser;
     noti.notiType = NotiType.WriteGratitude;
-    noti.reqType = ReqType.NotResponse;
     noti.subId = funding.fundUuid;
 
     return this.notiRepository.save(noti);
@@ -291,7 +312,6 @@ export class NotificationService {
     noti.sendId = sender;
     noti.recvId = receiver;
     noti.notiType = createNotiDto.notiType;
-    noti.reqType = createNotiDto.reqType;
     noti.subId = createNotiDto.subId;
 
     return await this.notiRepository.save(noti);
@@ -354,7 +374,6 @@ export class NotificationService {
         where: { notiId },
       });
       if (noti) {
-        noti.reqType = updateNotiDto.reqType;
         await this.notiRepository.save(noti);
         return noti;
       }
@@ -367,7 +386,6 @@ export class NotificationService {
         },
       });
       if (noti) {
-        noti.reqType = updateNotiDto.reqType;
         await this.notiRepository.save(noti);
         return noti;
       }

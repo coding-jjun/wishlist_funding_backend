@@ -13,11 +13,15 @@ import { Friend } from 'src/entities/friend.entity';
 import { GiftService } from '../gift/gift.service';
 import { Gift } from 'src/entities/gift.entity';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { Donation } from 'src/entities/donation.entity';
+import { DonationService } from '../donation/donation.service';
+import { RollingPaper } from 'src/entities/rolling-paper.entity';
+import { RollingPaperService } from '../rolling-paper/rolling-paper.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Account, Image, Address, Funding, Friend, Gift])],
+  imports: [TypeOrmModule.forFeature([User, Account, Image, Address, Funding, Friend, Gift, Donation, RollingPaper])],
   controllers: [UserController],
-  providers: [UserService, AddressService, FundingService, GiftService, GiftogetherExceptions],
+  providers: [UserService, AddressService, FundingService, GiftService, DonationService, RollingPaperService, GiftogetherExceptions],
   exports: [UserService],
 })
 export class UserModule {}

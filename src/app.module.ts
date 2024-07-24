@@ -39,9 +39,11 @@ import { RedisModule } from './features/auth/redis.module';
 import { EventModule } from './features/event/event.module';
 import { AccountModule } from './features/account/account.module';
 import { AccountService } from './features/account/account.service';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
@@ -100,7 +102,7 @@ import { AccountService } from './features/account/account.service';
     AuthModule,
     RedisModule,
     EventModule,
-    AccountModule
+    AccountModule,
   ],
   controllers: [AppController],
   providers: [

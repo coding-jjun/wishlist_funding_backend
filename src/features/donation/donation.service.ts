@@ -7,14 +7,12 @@ import { CreateDonationDto } from './dto/create-donation.dto';
 import { CreateGuestDto } from './dto/create-guest.dto';
 import { Funding } from 'src/entities/funding.entity';
 import { User } from 'src/entities/user.entity';
-import { ResponseDonationDTO } from './dto/response-donation.dto';
+import { DonationDto } from './dto/donation.dto';
 import { RollingPaperService } from '../rolling-paper/rolling-paper.service';
 import { CreateRollingPaperDto } from '../rolling-paper/dto/create-rolling-paper.dto';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { getNow } from 'src/app.module';
-import { get } from 'http';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { NotiType } from 'src/enums/notification.enum';
 
 @Injectable()
 export class DonationService {
@@ -144,11 +142,22 @@ export class DonationService {
     this.eventEmitter.emit('NewDonate', {
       recvId: updateFunding.fundUser,
       sendId: user.userId,
-      subId: donation.donId
+      subId: fundUuid
     });
 
-    return new ResponseDonationDTO(savedDonation, rollingPaper.rollId);
+    return new DonationDto(savedDonation, rollingPaper.rollId);
     // TODO 후원 등록 완료 Notification
+  }
+  
+  async findAll(userId: number): Promise<DonationDto[]> {
+    const donations = await this.donationRepo.createQueryBuilder('donation')
+    .where('donation.user = :userId', { userId })
+    .orderBy('donation.donId', 'DESC')
+    .leftJoinAndSelect('donation.funding', 'funding')
+    .leftJoinAndSelect('donation.user', 'user')
+    .getMany();
+
+    return donations.map(donation => new DonationDto(donation));
   }
 
   // DELETE

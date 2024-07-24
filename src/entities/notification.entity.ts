@@ -1,10 +1,9 @@
-import { NotiType, ReqType } from 'src/enums/notification.enum';
+import { NotiType } from 'src/enums/noti-type.enum';
 import {
   Column,
   Entity,
   PrimaryGeneratedColumn,
   CreateDateColumn,
-  OneToOne,
   JoinColumn,
   ManyToOne,
 } from 'typeorm';
@@ -26,9 +25,6 @@ export class Notification {
 
   @Column({ type: 'enum', enum: NotiType })
   notiType: NotiType;
-
-  @Column({ type: 'enum', enum: ReqType, nullable: true })
-  reqType: ReqType;
 
   @Column({ nullable: true })
   subId: string;

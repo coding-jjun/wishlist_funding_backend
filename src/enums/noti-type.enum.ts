@@ -1,6 +1,6 @@
 export enum NotiType {
   IncomingFollow = 'IncomingFollow', // 들어오는 친구 요청
-  AcceptFollow = 'AcceptFollow', // 내 요청에 대한 친구의 수락
+  NewFriend = 'NewFriend', // 새로운 친구
   FundClose = 'FundClose', // 내 펀딩 마감
   FundAchieve = 'FundAchieve', // 내 펀딩 달성
   NewDonate = 'NewDonate', // 내 펀딩에 들어온 새로운 후원
