@@ -39,24 +39,11 @@ export class FundingTasksService {
       },
     });
 
-    // 펀딩들을 순회하며 Notification 생성 여부를 파악 후 FundClose를 emit한다.
-    closedFundings.filter(
-      async (f) =>
-        !(await this.notiRepo.exists({
-          where: { notiType: NotiType.FundClose, subId: f.fundUuid },
-        })),
-    );
 
     for (const f of closedFundings) {
       this.logger.debug(`"${f.fundTitle}" 마감되어 마감 이벤트 발생하겠습니다.`);
       // 내 펀딩 마감 이벤트 발생
       this.eventEmitter.emit('FundClose', f.fundId);
-
-      // 내가 후원한 펀딩 마감 이벤트 발생
-      this.eventEmitter.emit('FundAchieve', {
-        recvId: f.fundUser.userId,
-        subId: f.fundUuid,
-      });
     }
   }
 }
