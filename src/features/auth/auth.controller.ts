@@ -31,6 +31,13 @@ export class AuthController {
     private readonly g2gException: GiftogetherExceptions,
   ) {}
 
+  private cookieOptions = {
+    httpOnly: false,
+    path: '/',
+    secure: false,
+    sameSite: 'lax' as 'lax'
+  };
+
   @Get('kakao')
   @UseGuards(KakaoAuthGuard)
   async kakaoLogin() {
@@ -42,9 +49,9 @@ export class AuthController {
   async kakaoCallback(@Req() req: Request, @Res() res: Response){
     const data = req.user as { user: UserDto, tokenDto: TokenDto, type: string };
 
-    res.cookie('access_token', data.tokenDto.accessToken, { httpOnly: false });
-    res.cookie('refresh_token', data.tokenDto.refreshToken, { httpOnly: false });
-    res.cookie('user', JSON.stringify(data.user), { httpOnly: false });
+    res.cookie('access_token', data.tokenDto.accessToken, this.cookieOptions);
+    res.cookie('refresh_token', data.tokenDto.refreshToken, this.cookieOptions);
+    res.cookie('user', JSON.stringify(data.user), this.cookieOptions);
 
     if( data.type === 'login'){
       return res.redirect(process.env.LOGIN_URL);
@@ -65,9 +72,9 @@ export class AuthController {
   @UseGuards(NaverAuthGuard)
   async naverCallback(@Req() req: Request, @Res() res:Response){
     const data = req.user as { user: UserDto, tokenDto: TokenDto, type: string };
-    res.cookie('access_token', data.tokenDto.accessToken, { httpOnly: false });
-    res.cookie('refresh_token', data.tokenDto.refreshToken, { httpOnly: false });
-    res.cookie('user', JSON.stringify(data.user), { httpOnly: false });
+    res.cookie('access_token', data.tokenDto.accessToken, this.cookieOptions);
+    res.cookie('refresh_token', data.tokenDto.refreshToken, this.cookieOptions);
+    res.cookie('user', JSON.stringify(data.user), this.cookieOptions);
 
     if( data.type === 'login'){
       return res.redirect(process.env.LOGIN_URL);
@@ -89,9 +96,9 @@ export class AuthController {
   async googleCallback(@Req() req: Request, @Res() res:Response){
     const data = req.user as { user: UserDto, tokenDto: TokenDto, type: string };
 
-    res.cookie('access_token', data.tokenDto.accessToken, { httpOnly: false });
-    res.cookie('refresh_token', data.tokenDto.refreshToken, { httpOnly: false });
-    res.cookie('user', JSON.stringify(data.user), { httpOnly: false });
+    res.cookie('access_token', data.tokenDto.accessToken, this.cookieOptions);
+    res.cookie('refresh_token', data.tokenDto.refreshToken, this.cookieOptions);
+    res.cookie('user', JSON.stringify(data.user), this.cookieOptions);
 
     if( data.type === 'login'){
       return res.redirect(process.env.LOGIN_URL);
@@ -108,9 +115,9 @@ export class AuthController {
     token.accessToken = await this.authService.createAccessToken(user.userId);
     token.refreshToken = await this.authService.createRefreshToken(user.userId);
 
-    res.cookie("access_token", token.accessToken);
-    res.cookie("refresh_token", token.refreshToken);
-    res.cookie("user", user);
+    res.cookie("access_token", token.accessToken, this.cookieOptions);
+    res.cookie("refresh_token", token.refreshToken, this.cookieOptions);
+    res.cookie("user", user, this.cookieOptions);
 
     return res.redirect(process.env.LOGIN_URL);
     
@@ -134,7 +141,7 @@ export class AuthController {
     @Body() createUserDto: CreateUserDto,
     @Res() res: Response
   ) {
-    res.cookie("user", await this.authService.createUser(createUserDto));
+    res.cookie("user", await this.authService.createUser(createUserDto), this.cookieOptions);
 
     return res.redirect(process.env.LOGIN_URL);
   }
