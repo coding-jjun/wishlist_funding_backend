@@ -5,25 +5,29 @@ import { DonationStatus } from 'src/enums/donation-status.enum';
 export class DonationDto {
   donId: number;
   rollId: number;
-  fundId: number;
+  fundUuid: string;
   fundTitle?: string;
-  fundEnd: boolean;
   donUserId: number;
-  donUserNick: string;
+  fundUserId: number;
+  fundUserNick: string;
+  fundUserImg: string;
   orderId: string;
   donStat: DonationStatus;
+  donAmnt: number;
   regAt: Date;
 
   constructor(donation: Donation, rollId?: number) {
     this.donId = donation.donId;
     this.rollId = rollId ? rollId : donation.donId;
-    this.fundId = donation.funding.fundId;
+    this.fundUuid = donation.funding.fundUuid;
     this.fundTitle = donation.funding.fundTitle;
-    this.fundEnd = (donation.funding.endAt <= new Date(getNow())) ? true : false;
     this.donUserId = donation.user.userId;
-    this.donUserNick = donation.user.userNick;
+    this.fundUserId = donation.funding.fundUser.userId;
+    this.fundUserNick = donation.funding.fundUser.userNick;
+    this.fundUserImg = donation.funding.fundUser.image ? donation.funding.fundUser.image.imgUrl : '';
     this.orderId = donation.orderId;
     this.donStat = donation.donStat;
+    this.donAmnt = donation.donAmnt;
     this.regAt = donation.regAt;
   }
 }
