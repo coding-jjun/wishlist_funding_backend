@@ -15,6 +15,7 @@ import { getNow } from 'src/app.module';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Image } from 'src/entities/image.entity';
 import { ImageType } from 'src/enums/image-type.enum';
+import { DonationListDto } from './dto/donation-list.dto';
 
 @Injectable()
 export class DonationService {
@@ -112,7 +113,6 @@ export class DonationService {
       createDonationDto.guest,
     );
 
-
     const updateFunding = await this.updateFundingSum(funding, donAmnt);
 
     const donation = new Donation();
@@ -171,7 +171,7 @@ export class DonationService {
     }
   
     const donations = await query.orderBy('donation.donId', 'DESC').getMany();
-    return donations.map(donation => new DonationDto(donation));
+    return donations.map(donation => new DonationListDto(donation));
   }
 
   // DELETE
