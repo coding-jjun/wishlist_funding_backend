@@ -71,14 +71,14 @@ export class NotificationService {
     }
 
     const notifications = await queryBuilder
-    .take(4)
+    .take(10)
     .leftJoinAndSelect('notification.recvId', 'receiver')
     .leftJoinAndSelect('notification.sendId', 'sender')
     .getMany();
 
     const notiDtos = notifications.map(noti => new NotiDto(noti));
 
-    const fundingTypes = [NotiType.FundClose, NotiType.FundAchieve, NotiType.NewDonate, NotiType.WriteGratitude, NotiType.CheckGratitude, NotiType.DonatedFundClose];
+    const fundingTypes = [NotiType.FundClose, NotiType.FundAchieve, NotiType.NewDonate, NotiType.WriteGratitude, NotiType.CheckGratitude, NotiType.DonatedFundClose, NotiType.NewComment];
     const fundUuids = notifications.filter(noti => fundingTypes.includes(noti.notiType)).map(noti => noti.subId);
     
     if (fundUuids.length > 0) {

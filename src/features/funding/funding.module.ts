@@ -10,13 +10,15 @@ import { GiftService } from '../gift/gift.service';
 import { Gift } from 'src/entities/gift.entity';
 import { Image } from 'src/entities/image.entity';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { FundingTasksService } from './funding.tasks.service';
+import { Notification } from 'src/entities/notification.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Funding, User, Comment, Friend, Gift, Image]),
+    TypeOrmModule.forFeature([Funding, User, Comment, Friend, Gift, Image, Notification]),
   ],
   controllers: [FundingController],
-  providers: [FundingService, GiftService, GiftogetherExceptions],
+  providers: [FundingService, GiftService, GiftogetherExceptions, FundingTasksService],
   exports: [FundingService],
 })
 export class FundingModule {}
