@@ -4,7 +4,6 @@ import { DonationStatus } from 'src/enums/donation-status.enum';
 
 export class DonationListDto {
   donId: number;
-  rollId: number;
   fundUuid: string;
   fundTitle: string;
   donUserId: number;
@@ -18,7 +17,6 @@ export class DonationListDto {
 
   constructor(donation: Donation) {
     this.donId = donation.donId;
-    this.rollId = donation.donId;
     this.fundUuid = donation.funding.fundUuid;
     this.fundTitle = donation.funding.fundTitle;
     this.donUserId = donation.user.userId;
