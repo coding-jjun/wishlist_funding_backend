@@ -1,15 +1,14 @@
 import {
-  HttpException,
-  HttpStatus,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Equal, Not, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Address } from 'src/entities/address.entity';
 import { User } from 'src/entities/user.entity';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 @Injectable()
 export class AddressService {
@@ -18,6 +17,7 @@ export class AddressService {
     private readonly addrRepository: Repository<Address>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly g2gException: GiftogetherExceptions,
   ) {}
 
   async create(createAddressDto: CreateAddressDto): Promise<Address> {
@@ -90,9 +90,13 @@ export class AddressService {
   }
 
   async findOne(addrId: number): Promise<Address> {
-    const addr = await this.addrRepository.findOneBy({ addrId });
+    const addr = await this.addrRepository.findOne({
+      where: { addrId },
+      relations: ['addrUser']
+    });
+
     if (!addr) {
-      throw new NotFoundException('배송지를 조회할 수 없습니다.');
+      throw this.g2gException.AddressNotFound;
     }
 
     return addr;

@@ -50,5 +50,8 @@ export enum ErrorMsg {
   DefaultImgIdNotExist = '기본 이미지가 정의되어있지 않습니다.',
 
   // Account
-  AccountNotFound = '계좌 정보가 없습니다.'
+  AccountNotFound = '계좌 정보가 없습니다.',
+
+  // Address
+  AddressNotFound = '배송지 정보가 없습니다.',
 }

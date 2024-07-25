@@ -32,10 +32,7 @@ export enum ErrorCode {
   // Friend
   AlreadySendRequest = '0800',
   AlreadyFriend = '0801',
-
-  // Notification
-  WrongNotiType = '1000',
-
+  
   // Jwt
   JwtNotExpired = '0900',
   JwtExpired = '0901',
@@ -45,10 +42,16 @@ export enum ErrorCode {
   UserAlreadyExists = '0905',
   FailedLogout = '0906',
   RedisServerError = '0907',
-
+  
   // Default image
   DefaultImgIdNotExist = '1000',
-
+  
   // Account
   AccountNotFound = '1100',
+
+  // Notification
+  WrongNotiType = '1200',
+
+  // Address
+  AddressNotFound = '1300'
 }

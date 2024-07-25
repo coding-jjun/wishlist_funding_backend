@@ -34,19 +34,17 @@ export class AddressController {
   @Get(':addrId')
   async findOne(
     @Param('addrId', ParseIntPipe) addrId: number,
-  ): Promise<CommonResponse> {
-    const address = await this.addressService.findOne(addrId);
-
+  ): Promise<CommonResponse> {    
     try {
+      const address = await this.addressService.findOne(addrId);
+      //TODO - res.user와 address.user가 일치하는지 검증해야함
+
       return {
         message: '배송지 조회에 성공하였습니다.',
         data: new AddressDto(address),
       };
     } catch (error) {
-      throw new HttpException(
-        '배송지 조회에 실패하였습니다',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw error;
     }
   }
 

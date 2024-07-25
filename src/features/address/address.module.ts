@@ -4,11 +4,12 @@ import { AddressController } from './address.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Address } from 'src/entities/address.entity';
 import { User } from 'src/entities/user.entity';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Address, User])],
   controllers: [AddressController],
-  providers: [AddressService],
+  providers: [AddressService, GiftogetherExceptions],
   exports: [AddressService],
 })
 export class AddressModule {}
