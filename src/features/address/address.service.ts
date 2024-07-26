@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 import { Address } from 'src/entities/address.entity';
 import { User } from 'src/entities/user.entity';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { AddressDto } from './dto/address.dto';
 
 @Injectable()
 export class AddressService {
@@ -69,24 +70,15 @@ export class AddressService {
     return await this.addrRepository.save(address);
   }
 
-  async findAll(userId: number): Promise<Address[]> {
+  async findAll(userId: number): Promise<AddressDto[]> {
     const addresses = await this.addrRepository
       .createQueryBuilder('addr')
-      .select([
-        'addr.addrId',
-        'addr.addrNick',
-        'addr.addrRoad',
-        'addr.addrDetl',
-        'addr.addrZip',
-        'addr.recvName',
-        'addr.recvPhone',
-        'addr.recvReq',
-        'addr.isDef',
-      ])
       .where('addr.userId = :userId', { userId })
       .getMany();
-
-    return addresses;
+  
+    const result = addresses.map(address => new AddressDto(address, userId));
+  
+    return result;
   }
 
   async findOne(addrId: number): Promise<Address> {

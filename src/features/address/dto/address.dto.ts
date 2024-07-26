@@ -12,9 +12,9 @@ export class AddressDto {
   recvReq: string;
   isDef: boolean;
 
-  constructor(address: Address) {
+  constructor(address: Address, userId?: number) {
     this.addrId = address.addrId;
-    this.userId = address.addrUser.userId;
+    this.userId = userId ? userId : address.addrUser.userId;
     this.addrNick = address.addrNick;
     this.addrRoad = address.addrRoad;
     this.addrDetl = address.addrDetl;
