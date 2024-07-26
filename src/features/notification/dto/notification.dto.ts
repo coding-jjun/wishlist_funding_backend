@@ -17,7 +17,7 @@ export class NotiDto {
     this.recvId = notification.recvId.userId;
     this.sendId = notification.sendId?.userId;
     this.sendNick = notification.sendId?.userNick;
-    this.sendImg = notification.sendId?.image?.imgUrl;
+    this.sendImg = notification.sendId?.image ? notification.sendId.image.imgUrl : '';
     this.notiType = notification.notiType;
     this.subId = notification.subId;
     this.notiTime = notification.notiTime;
