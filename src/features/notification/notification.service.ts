@@ -11,6 +11,8 @@ import { Donation } from 'src/entities/donation.entity';
 import { Funding } from 'src/entities/funding.entity';
 import { OnEvent } from '@nestjs/event-emitter';
 import { FriendDto } from '../friend/dto/friend.dto';
+import { ImageType } from 'src/enums/image-type.enum';
+import { Image } from 'src/entities/image.entity';
 
 @Injectable()
 export class NotificationService {
@@ -74,6 +76,7 @@ export class NotificationService {
     .take(10)
     .leftJoinAndSelect('notification.recvId', 'receiver')
     .leftJoinAndSelect('notification.sendId', 'sender')
+    .leftJoinAndMapOne('sender.image', Image, 'image', 'sender.defaultImgId = image.imgId OR (sender.defaultImgId IS NULL AND image.subId = sender.userId AND image.imgType = :userType)', { userType: ImageType.User })
     .getMany();
 
     const notiDtos = notifications.map(noti => new NotiDto(noti));
@@ -153,21 +156,6 @@ export class NotificationService {
     return await this.notiRepository.save(noti);
   }
 
-  // @OnEvent('FundClose')
-  // async handleFundClose(fundId: number) {
-  //   const noti = new Notification();
-  //   const funding = await this.fundRepository.findOne({
-  //     where: { fundId },
-  //     relations: ['fundUser']
-  //   });
-
-  //   noti.recvId = funding.fundUser;
-  //   noti.notiType = NotiType.FundClose;
-  //   noti.subId = funding.fundUuid;
-
-  //   return await this.notiRepository.save(noti);
-  // }
-
   @OnEvent('FundClose')
   async handleFundClose(fundId: number) {
     const funding = await this.fundRepository.findOne({
@@ -224,29 +212,6 @@ export class NotificationService {
   
     return await this.notiRepository.save(noti);
   }
-
-  // @OnEvent('DonatedFundClose')
-  // async handleDonatedFundClose(fundId: number) {
-  //   const funding = await this.fundRepository.findOne({
-  //     where: { fundId },
-  //     relations: ['fundUser', 'donations', 'donations.user']
-  //   });
-
-  
-  //   // 해당 펀딩에 기여한 모든 사용자들에게 알림을 생성
-  //   const notifications = funding.donations.map(donation => {
-  //     const noti = new Notification();
-  //     noti.recvId = donation.user; // 받는 사람은 기부자
-  //     noti.sendId = funding.fundUser; // 보내는 사람은 펀딩 주최자
-  //     noti.notiType = NotiType.CheckGratitude; // 알림 타입 설정
-  //     noti.subId = funding.fundUuid;
-  
-  //     return this.notiRepository.save(noti);
-  //   });
-  
-  //   // 모든 알림을 비동기적으로 저장
-  //   await Promise.all(notifications);
-  // }
   
   @OnEvent('WriteGratitude')
   async handleWriteGratitude(fundId: number) {
