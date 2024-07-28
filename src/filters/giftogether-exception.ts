@@ -181,4 +181,11 @@ export class GiftogetherExceptions {
     ErrorCode.AccountNotFound,
     HttpStatus.NOT_FOUND,
   )
+
+  // Address
+  AddressNotFound = new GiftogetherException(
+    ErrorMsg.AddressNotFound,
+    ErrorCode.AddressNotFound,
+    HttpStatus.NOT_FOUND
+  )
 }
