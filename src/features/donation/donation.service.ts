@@ -13,6 +13,9 @@ import { CreateRollingPaperDto } from '../rolling-paper/dto/create-rolling-paper
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { getNow } from 'src/app.module';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Image } from 'src/entities/image.entity';
+import { ImageType } from 'src/enums/image-type.enum';
+import { DonationListDto } from './dto/donation-list.dto';
 
 @Injectable()
 export class DonationService {
@@ -28,6 +31,9 @@ export class DonationService {
 
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+
+    @InjectRepository(Image)
+    private readonly imageRepo: Repository<Image>,
 
     private readonly rollService: RollingPaperService,
 
@@ -107,7 +113,6 @@ export class DonationService {
       createDonationDto.guest,
     );
 
-
     const updateFunding = await this.updateFundingSum(funding, donAmnt);
 
     const donation = new Donation();
@@ -149,15 +154,24 @@ export class DonationService {
     // TODO 후원 등록 완료 Notification
   }
   
-  async findAll(userId: number): Promise<DonationDto[]> {
-    const donations = await this.donationRepo.createQueryBuilder('donation')
-    .where('donation.user = :userId', { userId })
-    .orderBy('donation.donId', 'DESC')
-    .leftJoinAndSelect('donation.funding', 'funding')
-    .leftJoinAndSelect('donation.user', 'user')
-    .getMany();
-
-    return donations.map(donation => new DonationDto(donation));
+  async findAll(userId: number, status: string): Promise<DonationDto[]> {
+    const currentDate = new Date();
+    let query = this.donationRepo.createQueryBuilder('donation')
+      .leftJoinAndSelect('donation.funding', 'funding')
+      .leftJoinAndSelect('donation.user', 'user')
+      .leftJoinAndSelect('funding.fundUser', 'fundUser')
+      .leftJoinAndMapOne('fundUser.image', Image, 'image', 'fundUser.defaultImgId = image.imgId OR (fundUser.defaultImgId IS NULL AND image.subId = fundUser.userId AND image.imgType = :userType)', { userType: ImageType.User })
+      .where('donation.userId = :userId', { userId })
+      .setParameter('currentDate', currentDate);
+  
+    if (status === 'ongoing') {
+      query.andWhere('funding.endAt >= :currentDate');
+    } else if (status === 'ended') {
+      query.andWhere('funding.endAt < :currentDate');
+    }
+  
+    const donations = await query.orderBy('donation.donId', 'DESC').getMany();
+    return donations.map(donation => new DonationListDto(donation));
   }
 
   // DELETE

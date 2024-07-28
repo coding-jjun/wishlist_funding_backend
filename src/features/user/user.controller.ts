@@ -110,11 +110,12 @@ export class UserController {
   @Get('/:userId/donation')
   async getUserDonation(
     @Param('userId', ParseIntPipe) userId: number,
+    @Query('status', new DefaultValuePipe('ongoing')) status: 'ongoing' | 'ended',
   ): Promise<CommonResponse> {
     try {
       return {
         message: 'Success',
-        data: await this.donaService.findAll(userId)
+        data: await this.donaService.findAll(userId, status)
       }
     } catch (error) {
       throw error;
