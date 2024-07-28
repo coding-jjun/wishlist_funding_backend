@@ -32,10 +32,11 @@ export class AuthController {
   ) {}
 
   private cookieOptions = {
-    httpOnly: false,
+    httpOnly: true,
     path: '/',
     secure: false,
-    sameSite: 'lax' as 'lax'
+    sameSite: 'none' as 'none', // 크로스 도메인 요청을 허용하기 위해 none으로 설정
+    domain: '.giftogether.co.kr' // 애플리케이션 도메인으로 설정
   };
 
   @Get('kakao')
