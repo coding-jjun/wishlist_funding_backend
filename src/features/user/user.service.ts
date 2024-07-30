@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Account } from '@entities/account.entity';
 import { Image } from '@entities/image.entity';
-import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherExceptions } from '@filters/giftogether-exception';
 import { ImageType } from '@enums/image-type.enum';
 import { UserDto } from './dto/user.dto';
 

@@ -8,7 +8,7 @@ import { RollingPaper } from '@entities/rolling-paper.entity';
 import { Funding } from '@entities/funding.entity';
 import { User } from '@entities/user.entity';
 import { Image } from '@entities/image.entity';
-import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherExceptions } from '@filters/giftogether-exception';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Donation, RollingPaper, Funding, User, Image])],

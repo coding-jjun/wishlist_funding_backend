@@ -7,7 +7,7 @@ import { Module } from '@nestjs/common';
 import { FundingService } from '../funding/funding.service';
 import { User } from '@entities/user.entity';
 import { Friend } from '@entities/friend.entity';
-import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherExceptions } from '@filters/giftogether-exception';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Gift, Funding])],

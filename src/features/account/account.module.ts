@@ -4,7 +4,7 @@ import { Account } from '@entities/account.entity';
 import { AccountController } from './account.controller';
 import { AccountService } from './account.service';
 import { User } from '@entities/user.entity';
-import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherExceptions } from '@filters/giftogether-exception';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Account, User])],

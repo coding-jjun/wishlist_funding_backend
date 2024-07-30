@@ -20,7 +20,8 @@
     "paths": {
       "@features/*": ["src/features/*"],
       "@entities/*": ["src/entities/*"],
-      "@enums/*": ["src/enums/*"]
+      "@enums/*": ["src/enums/*"],
+      "@filters/*": ["src/filters/*"],
     }
   },
   "exclude": ["node_modules", "dist"]

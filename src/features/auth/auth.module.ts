@@ -10,7 +10,7 @@ import { UserModule } from '../user/user.module';
 import { JwtStrategy } from './strategy/jwt-strategy';
 import { NaverStrategy } from './strategy/naver-strategy';
 import { GoogleStrategy } from './strategy/google-strategy';
-import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherExceptions } from '@filters/giftogether-exception';
 import { Image } from '@entities/image.entity';
 import { Account } from '@entities/account.entity';
 

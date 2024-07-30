@@ -10,7 +10,7 @@ import {
   DefaultImageId,
   defaultGratitudeImageIds,
 } from '@enums/default-image-id';
-import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherExceptions } from '@filters/giftogether-exception';
 import assert from 'node:assert';
 import { GetGratitudeDto } from './dto/get-gratitude.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';

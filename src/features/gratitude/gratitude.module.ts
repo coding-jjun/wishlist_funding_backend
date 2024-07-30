@@ -4,7 +4,7 @@ import { Gratitude } from '@entities/gratitude.entity';
 import { GratitudeController } from './gratitude.controller';
 import { GratitudeService } from './gratitude.service';
 import { Funding } from '@entities/funding.entity';
-import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherExceptions } from '@filters/giftogether-exception';
 import { Image } from '@entities/image.entity';
 
 @Module({

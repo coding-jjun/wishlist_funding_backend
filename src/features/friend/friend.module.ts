@@ -4,7 +4,7 @@ import { FriendController } from './friend.controller';
 import { FriendService } from './friend.service';
 import { Friend } from '@entities/friend.entity';
 import { User } from '@entities/user.entity';
-import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherExceptions } from '@filters/giftogether-exception';
 import { NotificationService } from '../notification/notification.service';
 import { Notification } from '@entities/notification.entity';
 import { Funding } from '@entities/funding.entity';

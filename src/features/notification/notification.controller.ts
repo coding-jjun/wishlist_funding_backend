@@ -14,7 +14,7 @@ import { NotiType } from '@enums/noti-type.enum';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { CreateNotificationDto } from './dto/create-notification.dto';
-import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherExceptions } from '@filters/giftogether-exception';
 
 @Controller('notification')
 export class NotificationController {

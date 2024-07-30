@@ -6,7 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '@entities/user.entity';
 import { Funding } from '@entities/funding.entity';
 import { Donation } from '@entities/donation.entity';
-import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherExceptions } from '@filters/giftogether-exception';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Notification, User, Funding, Donation])],

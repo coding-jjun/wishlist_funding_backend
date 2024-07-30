@@ -1,7 +1,7 @@
 import { ExecutionContext, Inject, Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { RedisClientType } from '@redis/client';
-import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherExceptions } from '@filters/giftogether-exception';
 import { AuthService } from '../auth.service';
 
 @Injectable()

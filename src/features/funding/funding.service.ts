@@ -18,7 +18,7 @@ import {
 } from '@enums/default-image-id';
 import { query } from 'express';
 import assert from 'assert';
-import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherExceptions } from '@filters/giftogether-exception';
 import { UUID } from 'crypto';
 
 @Injectable()

@@ -9,11 +9,11 @@ import {
   DefaultImageId,
   defaultRollingPaperImageIds,
 } from '@enums/default-image-id';
-import { ImageType } from 'src/enums/image-type.enum';
+import { ImageType } from '@enums/image-type.enum';
 import { Donation } from '@entities/donation.entity';
 import { CreateRollingPaperDto } from './dto/create-rolling-paper.dto';
 import assert from 'assert';
-import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherExceptions } from '@filters/giftogether-exception';
 
 @Injectable()
 export class RollingPaperService {

@@ -17,7 +17,7 @@ import { AddressService } from '../address/address.service';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { FundingService } from '../funding/funding.service';
 import { FundTheme } from '@enums/fund-theme.enum';
-import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherExceptions } from '@filters/giftogether-exception';
 import { DonationService } from '../donation/donation.service';
 
 @Controller('user')

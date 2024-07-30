@@ -9,7 +9,7 @@ import { Friend } from '@entities/friend.entity';
 import { GiftService } from '../gift/gift.service';
 import { Gift } from '@entities/gift.entity';
 import { Image } from '@entities/image.entity';
-import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherExceptions } from '@filters/giftogether-exception';
 import { FundingTasksService } from './funding.tasks.service';
 import { Notification } from '@entities/notification.entity';
 

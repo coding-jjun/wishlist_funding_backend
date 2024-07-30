@@ -10,7 +10,7 @@ import { User } from '@entities/user.entity';
 import { DonationDto } from './dto/donation.dto';
 import { RollingPaperService } from '../rolling-paper/rolling-paper.service';
 import { CreateRollingPaperDto } from '../rolling-paper/dto/create-rolling-paper.dto';
-import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherExceptions } from '@filters/giftogether-exception';
 import { getNow } from 'src/app.module';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Image } from '@entities/image.entity';

@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from '@entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { AuthType } from '@enums/auth-type.enum';
-import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherExceptions } from '@filters/giftogether-exception';
 import { Image } from '@entities/image.entity';
 import { ImageType } from '@enums/image-type.enum';
 import { RedisClientType } from '@redis/client';

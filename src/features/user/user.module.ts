@@ -12,7 +12,7 @@ import { Funding } from '@entities/funding.entity';
 import { Friend } from '@entities/friend.entity';
 import { GiftService } from '../gift/gift.service';
 import { Gift } from '@entities/gift.entity';
-import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherExceptions } from '@filters/giftogether-exception';
 import { Donation } from '@entities/donation.entity';
 import { DonationService } from '../donation/donation.service';
 import { RollingPaper } from '@entities/rolling-paper.entity';

@@ -7,7 +7,7 @@ import { FriendDto } from './dto/friend.dto';
 import { FriendStatus } from '@enums/friend-status.enum';
 import {
   GiftogetherExceptions
-} from 'src/filters/giftogether-exception';
+} from '@filters/giftogether-exception';
 import { ImageType } from '@enums/image-type.enum';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NotiType } from '@enums/noti-type.enum';

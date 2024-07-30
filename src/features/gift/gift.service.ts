@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 import { RequestGiftDto } from './dto/request-gift.dto';
 import { ResponseGiftDto } from './dto/response-gift.dto';
 import { isURL } from 'class-validator';
-import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherExceptions } from '@filters/giftogether-exception';
 
 @Injectable()
 export class GiftService {

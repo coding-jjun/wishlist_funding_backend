@@ -21,7 +21,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UserDto } from '../user/dto/user.dto';
 import { LoginDto } from './dto/login.dto';
 import { ValidDto } from './dto/valid.dto';
-import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherExceptions } from '@filters/giftogether-exception';
 import { TokenDto } from './dto/token.dto';
 
 @Controller('auth')

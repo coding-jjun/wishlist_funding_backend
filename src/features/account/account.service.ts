@@ -4,7 +4,7 @@ import { Account } from '@entities/account.entity';
 import { Repository } from 'typeorm';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { User } from '@entities/user.entity';
-import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherExceptions } from '@filters/giftogether-exception';
 import { UpdateAccountDto } from './dto/update-account.dto';
 
 @Injectable()

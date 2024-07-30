@@ -4,7 +4,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Profile, Strategy } from 'passport-kakao';
 import { AuthService } from '../auth.service';
 import { AuthType } from '@enums/auth-type.enum';
-import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherExceptions } from '@filters/giftogether-exception';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { TokenDto } from '../dto/token.dto';
 
