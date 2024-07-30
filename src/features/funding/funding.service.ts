@@ -1,21 +1,21 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Funding } from 'src/entities/funding.entity';
+import { Funding } from '@entities/funding.entity';
 import { Repository, Like, MoreThan, Brackets } from 'typeorm';
 import { CreateFundingDto } from './dto/create-funding.dto';
-import { User } from 'src/entities/user.entity';
-import { FundTheme } from 'src/enums/fund-theme.enum';
-import { FriendStatus } from 'src/enums/friend-status.enum';
-import { Friend } from 'src/entities/friend.entity';
+import { User } from '@entities/user.entity';
+import { FundTheme } from '@enums/fund-theme.enum';
+import { FriendStatus } from '@enums/friend-status.enum';
+import { Friend } from '@entities/friend.entity';
 import { GiftService } from '../gift/gift.service';
 import { FundingDto } from './dto/funding.dto';
 import { UpdateFundingDto } from './dto/update-funding.dto';
-import { Image } from 'src/entities/image.entity';
-import { ImageType } from 'src/enums/image-type.enum';
+import { Image } from '@entities/image.entity';
+import { ImageType } from '@enums/image-type.enum';
 import {
   DefaultImageId,
   defaultFundingImageIds,
-} from 'src/enums/default-image-id';
+} from '@enums/default-image-id';
 import { query } from 'express';
 import assert from 'assert';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';

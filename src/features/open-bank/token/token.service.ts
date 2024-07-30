@@ -3,7 +3,7 @@ import { TokenRequestDataDto } from '../dto/token-request-data.dto';
 import { OpenBankApiClient } from '../open-bank-api-client';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { OpenBankToken } from 'src/entities/open-bank-token.entity';
+import { OpenBankToken } from '@entities/open-bank-token.entity';
 import { ExceptionsHandler } from '@nestjs/core/exceptions/exceptions-handler';
 
 @Injectable()

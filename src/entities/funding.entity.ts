@@ -13,7 +13,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { Comment } from './comment.entity';
-import { FundTheme } from 'src/enums/fund-theme.enum';
+import { FundTheme } from '@enums/fund-theme.enum';
 import { Gift } from './gift.entity';
 import { Donation } from './donation.entity';
 import { Image } from './image.entity';

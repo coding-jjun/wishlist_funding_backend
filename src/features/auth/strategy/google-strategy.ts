@@ -3,7 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import { Profile, Strategy } from "passport-google-oauth20";
 import { AuthService } from "../auth.service";
-import { AuthType } from "src/enums/auth-type.enum";
+import { AuthType } from "@enums/auth-type.enum";
 import { CreateUserDto } from "../dto/create-user.dto";
 import { TokenDto } from "../dto/token.dto";
 

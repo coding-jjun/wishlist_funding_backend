@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Gratitude } from 'src/entities/gratitude.entity';
+import { Gratitude } from '@entities/gratitude.entity';
 import { GratitudeController } from './gratitude.controller';
 import { GratitudeService } from './gratitude.service';
-import { Funding } from 'src/entities/funding.entity';
+import { Funding } from '@entities/funding.entity';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
-import { Image } from 'src/entities/image.entity';
+import { Image } from '@entities/image.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Gratitude, Funding, Image])],

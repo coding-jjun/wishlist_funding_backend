@@ -1,17 +1,17 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Friend } from 'src/entities/friend.entity';
-import { User } from 'src/entities/user.entity';
+import { Friend } from '@entities/friend.entity';
+import { User } from '@entities/user.entity';
 import { Brackets, Repository } from 'typeorm';
 import { FriendDto } from './dto/friend.dto';
-import { FriendStatus } from 'src/enums/friend-status.enum';
+import { FriendStatus } from '@enums/friend-status.enum';
 import {
   GiftogetherExceptions
 } from 'src/filters/giftogether-exception';
-import { ImageType } from 'src/enums/image-type.enum';
+import { ImageType } from '@enums/image-type.enum';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { NotiType } from 'src/enums/noti-type.enum';
-import { Notification } from 'src/entities/notification.entity';
+import { NotiType } from '@enums/noti-type.enum';
+import { Notification } from '@entities/notification.entity';
 
 @Injectable()
 export class FriendService {

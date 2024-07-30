@@ -1,20 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Donation } from 'src/entities/donation.entity';
-import { RollingPaper } from 'src/entities/rolling-paper.entity';
+import { Donation } from '@entities/donation.entity';
+import { RollingPaper } from '@entities/rolling-paper.entity';
 import { CreateDonationDto } from './dto/create-donation.dto';
 import { CreateGuestDto } from './dto/create-guest.dto';
-import { Funding } from 'src/entities/funding.entity';
-import { User } from 'src/entities/user.entity';
+import { Funding } from '@entities/funding.entity';
+import { User } from '@entities/user.entity';
 import { DonationDto } from './dto/donation.dto';
 import { RollingPaperService } from '../rolling-paper/rolling-paper.service';
 import { CreateRollingPaperDto } from '../rolling-paper/dto/create-rolling-paper.dto';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { getNow } from 'src/app.module';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Image } from 'src/entities/image.entity';
-import { ImageType } from 'src/enums/image-type.enum';
+import { Image } from '@entities/image.entity';
+import { ImageType } from '@enums/image-type.enum';
 import { DonationListDto } from './dto/donation-list.dto';
 
 @Injectable()
@@ -154,7 +154,7 @@ export class DonationService {
     // TODO 후원 등록 완료 Notification
   }
   
-  async findAll(userId: number, status: string): Promise<DonationDto[]> {
+  async findAll(userId: number, status: string): Promise<DonationListDto[]> {
     const currentDate = new Date();
     let query = this.donationRepo.createQueryBuilder('donation')
       .leftJoinAndSelect('donation.funding', 'funding')

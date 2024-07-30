@@ -10,7 +10,7 @@ import { Response } from 'express';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { GiftogetherException } from './giftogether-exception';
 import { Repository } from 'typeorm';
-import { GiftogetherError } from 'src/entities/error.entity';
+import { GiftogetherError } from '@entities/error.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { getNow } from 'src/app.module';
 

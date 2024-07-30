@@ -10,9 +10,9 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
-import { Funding } from 'src/entities/funding.entity';
-import { FundTheme } from 'src/enums/fund-theme.enum';
-import { RequestGiftDto } from 'src/features/gift/dto/request-gift.dto';
+import { Funding } from '@entities/funding.entity';
+import { FundTheme } from '@enums/fund-theme.enum';
+import { RequestGiftDto } from '@features/gift/dto/request-gift.dto';
 
 export class CreateFundingDto {
   @IsNotEmpty()

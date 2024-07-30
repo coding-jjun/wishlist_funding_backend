@@ -1,5 +1,5 @@
 import { IsNumber, IsOptional, IsUrl } from 'class-validator';
-import { AuthType } from 'src/enums/auth-type.enum';
+import { AuthType } from '@enums/auth-type.enum';
 
 export class CreateUserDto {
   @IsOptional()

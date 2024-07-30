@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Funding } from 'src/entities/funding.entity';
-import { Gift } from 'src/entities/gift.entity';
+import { Funding } from '@entities/funding.entity';
+import { Gift } from '@entities/gift.entity';
 import { Repository } from 'typeorm';
 import { RequestGiftDto } from './dto/request-gift.dto';
 import { ResponseGiftDto } from './dto/response-gift.dto';

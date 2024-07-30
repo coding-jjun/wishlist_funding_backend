@@ -12,7 +12,7 @@ import {
 import { GratitudeDto } from './dto/gratitude.dto';
 import { GratitudeService } from './gratitude.service';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
-import { Gratitude } from 'src/entities/gratitude.entity';
+import { Gratitude } from '@entities/gratitude.entity';
 
 @Controller('gratitude')
 export class GratitudeController {

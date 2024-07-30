@@ -1,5 +1,5 @@
-import { Notification } from "src/entities/notification.entity";
-import { NotiType } from "src/enums/noti-type.enum";
+import { Notification } from "@entities/notification.entity";
+import { NotiType } from "@enums/noti-type.enum";
 
 export class NotiDto {
   notiId: number;

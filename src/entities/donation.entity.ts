@@ -1,6 +1,6 @@
-import { DonationStatus } from 'src/enums/donation-status.enum';
-import { Funding } from 'src/entities/funding.entity';
-import { User } from 'src/entities/user.entity';
+import { DonationStatus } from '@enums/donation-status.enum';
+import { Funding } from '@entities/funding.entity';
+import { User } from '@entities/user.entity';
 import {
   Column,
   Entity,

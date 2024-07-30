@@ -6,8 +6,8 @@ import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Address } from 'src/entities/address.entity';
-import { User } from 'src/entities/user.entity';
+import { Address } from '@entities/address.entity';
+import { User } from '@entities/user.entity';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { AddressDto } from './dto/address.dto';
 

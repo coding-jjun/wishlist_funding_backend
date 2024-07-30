@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsOptional } from 'class-validator';
-import { NotiType } from 'src/enums/noti-type.enum';
+import { NotiType } from '@enums/noti-type.enum';
 
 export class CreateNotificationDto {
   @IsNotEmpty()

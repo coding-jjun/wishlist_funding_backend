@@ -1,5 +1,5 @@
-import { Funding } from 'src/entities/funding.entity';
-import { ResponseGiftDto } from 'src/features/gift/dto/response-gift.dto';
+import { Funding } from '@entities/funding.entity';
+import { ResponseGiftDto } from '@features/gift/dto/response-gift.dto';
 
 export class FundingDto {
   fundId: number;

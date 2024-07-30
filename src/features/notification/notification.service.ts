@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Notification } from 'src/entities/notification.entity';
+import { Notification } from '@entities/notification.entity';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
-import { User } from 'src/entities/user.entity';
+import { User } from '@entities/user.entity';
 import { NotiDto } from './dto/notification.dto';
-import { NotiType } from 'src/enums/noti-type.enum';
-import { Donation } from 'src/entities/donation.entity';
-import { Funding } from 'src/entities/funding.entity';
+import { NotiType } from '@enums/noti-type.enum';
+import { Donation } from '@entities/donation.entity';
+import { Funding } from '@entities/funding.entity';
 import { OnEvent } from '@nestjs/event-emitter';
 import { FriendDto } from '../friend/dto/friend.dto';
-import { ImageType } from 'src/enums/image-type.enum';
-import { Image } from 'src/entities/image.entity';
+import { ImageType } from '@enums/image-type.enum';
+import { Image } from '@entities/image.entity';
 
 @Injectable()
 export class NotificationService {

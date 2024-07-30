@@ -1,15 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Gratitude } from 'src/entities/gratitude.entity';
+import { Gratitude } from '@entities/gratitude.entity';
 import { Repository } from 'typeorm';
 import { GratitudeDto } from './dto/gratitude.dto';
-import { Funding } from 'src/entities/funding.entity';
-import { Image } from 'src/entities/image.entity';
-import { ImageType } from 'src/enums/image-type.enum';
+import { Funding } from '@entities/funding.entity';
+import { Image } from '@entities/image.entity';
+import { ImageType } from '@enums/image-type.enum';
 import {
   DefaultImageId,
   defaultGratitudeImageIds,
-} from 'src/enums/default-image-id';
+} from '@enums/default-image-id';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import assert from 'node:assert';
 import { GetGratitudeDto } from './dto/get-gratitude.dto';

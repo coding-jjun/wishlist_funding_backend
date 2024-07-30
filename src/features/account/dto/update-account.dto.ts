@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsNumber } from "class-validator";
-import { BankType } from "src/enums/bank-type.enum";
+import { BankType } from "@enums/bank-type.enum";
 
 export class UpdateAccountDto {
   @IsNotEmpty()

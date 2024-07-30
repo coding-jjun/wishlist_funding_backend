@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { And, LessThan, MoreThanOrEqual, Repository } from 'typeorm';
-import { Funding } from 'src/entities/funding.entity';
+import { Funding } from '@entities/funding.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Notification } from 'src/entities/notification.entity';
-import { NotiType } from 'src/enums/noti-type.enum';
+import { Notification } from '@entities/notification.entity';
+import { NotiType } from '@enums/noti-type.enum';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()

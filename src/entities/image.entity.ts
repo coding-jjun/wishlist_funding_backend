@@ -1,4 +1,4 @@
-import { ImageType } from 'src/enums/image-type.enum';
+import { ImageType } from '@enums/image-type.enum';
 import {
   Column,
   Entity,

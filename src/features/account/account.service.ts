@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Account } from 'src/entities/account.entity';
+import { Account } from '@entities/account.entity';
 import { Repository } from 'typeorm';
 import { CreateAccountDto } from './dto/create-account.dto';
-import { User } from 'src/entities/user.entity';
+import { User } from '@entities/user.entity';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { UpdateAccountDto } from './dto/update-account.dto';
 

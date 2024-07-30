@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { ErrorCode } from 'src/enums/error-code.enum';
-import { ErrorMsg } from 'src/enums/error-message.enum';
+import { ErrorCode } from '@enums/error-code.enum';
+import { ErrorMsg } from '@enums/error-message.enum';
 
 export class GiftogetherException extends HttpException {
   private errCode: string;

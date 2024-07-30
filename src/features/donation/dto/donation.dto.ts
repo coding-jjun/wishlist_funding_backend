@@ -1,6 +1,6 @@
 import { getNow } from 'src/app.module';
-import { Donation } from 'src/entities/donation.entity';
-import { DonationStatus } from 'src/enums/donation-status.enum';
+import { Donation } from '@entities/donation.entity';
+import { DonationStatus } from '@enums/donation-status.enum';
 
 export class DonationDto {
   donId: number;

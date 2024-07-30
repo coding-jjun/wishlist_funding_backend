@@ -1,4 +1,4 @@
-import { AuthType } from "src/enums/auth-type.enum";
+import { AuthType } from "@enums/auth-type.enum";
 
 export class UserDto {
   constructor(

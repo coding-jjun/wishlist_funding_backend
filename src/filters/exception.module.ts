@@ -1,7 +1,7 @@
 import { Logger, Module } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
 import { GiftogetherExceptionFilter } from './giftogether-exception.filter';
-import { GiftogetherError } from 'src/entities/error.entity';
+import { GiftogetherError } from '@entities/error.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({

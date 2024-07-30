@@ -1,4 +1,4 @@
-import { NotiType } from 'src/enums/noti-type.enum';
+import { NotiType } from '@enums/noti-type.enum';
 import {
   Column,
   Entity,

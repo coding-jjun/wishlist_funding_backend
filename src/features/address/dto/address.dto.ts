@@ -1,4 +1,4 @@
-import { Address } from 'src/entities/address.entity';
+import { Address } from '@entities/address.entity';
 
 export class AddressDto {
   addrId: number;

@@ -1,4 +1,4 @@
-import { BankType } from 'src/enums/bank-type.enum';
+import { BankType } from '@enums/bank-type.enum';
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne } from 'typeorm';
 import { User } from './user.entity';
 

@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/entities/user.entity';
+import { User } from '@entities/user.entity';
 import { Repository } from 'typeorm';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Account } from 'src/entities/account.entity';
-import { Image } from 'src/entities/image.entity';
+import { Account } from '@entities/account.entity';
+import { Image } from '@entities/image.entity';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
-import { ImageType } from 'src/enums/image-type.enum';
+import { ImageType } from '@enums/image-type.enum';
 import { UserDto } from './dto/user.dto';
 
 @Injectable()

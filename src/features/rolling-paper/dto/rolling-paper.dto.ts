@@ -1,4 +1,4 @@
-import { RollingPaper } from 'src/entities/rolling-paper.entity';
+import { RollingPaper } from '@entities/rolling-paper.entity';
 import { IsUrl } from 'class-validator';
 export class RollingPaperDto {
   rollId: number;

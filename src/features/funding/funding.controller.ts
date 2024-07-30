@@ -19,7 +19,7 @@ import { UpdateFundingDto } from './dto/update-funding.dto';
 import { GiftArray } from '../gift/dto/request-gift.dto';
 import { GiftService } from '../gift/gift.service';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
-import { FundTheme } from 'src/enums/fund-theme.enum';
+import { FundTheme } from '@enums/fund-theme.enum';
 
 @Controller('funding')
 export class FundingController {

@@ -1,19 +1,19 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from 'src/entities/user.entity';
+import { User } from '@entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
-import { AuthType } from 'src/enums/auth-type.enum';
+import { AuthType } from '@enums/auth-type.enum';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
-import { Image } from 'src/entities/image.entity';
-import { ImageType } from 'src/enums/image-type.enum';
+import { Image } from '@entities/image.entity';
+import { ImageType } from '@enums/image-type.enum';
 import { RedisClientType } from '@redis/client';
 import {
   DefaultImageId,
   defaultUserImageIds,
-} from 'src/enums/default-image-id';
+} from '@enums/default-image-id';
 import { UserDto } from '../user/dto/user.dto';
-import { Account } from 'src/entities/account.entity';
+import { Account } from '@entities/account.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';

@@ -15,7 +15,7 @@ import { Comment } from './comment.entity';
 import { Account } from './account.entity';
 import { Image } from './image.entity';
 import { Address } from './address.entity';
-import { AuthType } from 'src/enums/auth-type.enum';
+import { AuthType } from '@enums/auth-type.enum';
 
 @Entity()
 export class User {

@@ -1,16 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RollingPaper } from 'src/entities/rolling-paper.entity';
+import { RollingPaper } from '@entities/rolling-paper.entity';
 import { Repository } from 'typeorm';
 import { RollingPaperDto } from './dto/rolling-paper.dto';
-import { Funding } from 'src/entities/funding.entity';
-import { Image } from 'src/entities/image.entity';
+import { Funding } from '@entities/funding.entity';
+import { Image } from '@entities/image.entity';
 import {
   DefaultImageId,
   defaultRollingPaperImageIds,
-} from 'src/enums/default-image-id';
+} from '@enums/default-image-id';
 import { ImageType } from 'src/enums/image-type.enum';
-import { Donation } from 'src/entities/donation.entity';
+import { Donation } from '@entities/donation.entity';
 import { CreateRollingPaperDto } from './dto/create-rolling-paper.dto';
 import assert from 'assert';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
