@@ -86,36 +86,16 @@ export class UserController {
     }
   }
 
-  // @Get('/:userId/fundings')
-  // async getUserFunding(
-  //     @Param('userId', ParseIntPipe) userId: number,
-  // ): Promise<CommonResponse> {
-  //   try {
-  //     return {
-  //       message: '사용자의 펀딩 조회에 성공하였습니다.',
-  //       data: await this.fundService.findMyFunds(userId),
-  //     };
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // }
-
-  // @Get('/:userId/account')
-  // async getUserAccount(
-  //     @Param('userId', ParseIntPipe) userId: number,
-  // ) {
-  //     return await this.userService.getUserAccount(userId);
-  // }
-
   @Get('/:userId/donation')
   async getUserDonation(
     @Param('userId', ParseIntPipe) userId: number,
     @Query('status', new DefaultValuePipe('ongoing')) status: 'ongoing' | 'ended',
+    @Query('lastId', new DefaultValuePipe(null)) lastId?: number,
   ): Promise<CommonResponse> {
     try {
       return {
         message: 'Success',
-        data: await this.donaService.findAll(userId, status)
+        data: await this.donaService.findMineAll(userId, status, lastId)
       }
     } catch (error) {
       throw error;
