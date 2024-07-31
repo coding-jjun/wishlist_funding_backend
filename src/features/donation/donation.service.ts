@@ -191,7 +191,7 @@ export class DonationService {
     if (lastId) {
       query.andWhere('donation.donId < :lastId', { lastId })
     }
-    query.take(3);
+    query.take(10);
 
     const donations = (await query.getMany()).map(donation => new DonationListDto(donation));
 
