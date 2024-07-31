@@ -56,7 +56,7 @@ export class GratitudeService {
     }
 
     return new GetGratitudeDto(
-      funding.fundId,
+      funding.fundUuid,
       grat.gratTitle,
       grat.gratCont,
       returnImgUrl,
@@ -125,7 +125,7 @@ export class GratitudeService {
     this.eventEmitter.emit('CheckGratitude', funding.fundId);
 
     return new GetGratitudeDto(
-      funding.fundId,
+      funding.fundUuid,
       gratitudeDto.gratTitle,
       gratitudeDto.gratCont,
       returnImgUrl,
@@ -194,7 +194,7 @@ export class GratitudeService {
       });
       imgUrl = [image.imgUrl];
     }
-    return new GetGratitudeDto(gratId, gratTitle, gratCont, imgUrl);
+    return new GetGratitudeDto(funding.fundUuid, gratTitle, gratCont, imgUrl);
   }
 
   async deleteGratitude(gratId: number) {
