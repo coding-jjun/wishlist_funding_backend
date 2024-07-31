@@ -154,7 +154,7 @@ export class DonationService {
     // TODO 후원 등록 완료 Notification
   }
   
-  async findAll(userId: number, status: string): Promise<DonationDto[]> {
+  async findAll(userId: number, status: string): Promise<DonationListDto[]> {
     const currentDate = new Date();
     let query = this.donationRepo.createQueryBuilder('donation')
       .leftJoinAndSelect('donation.funding', 'funding')
