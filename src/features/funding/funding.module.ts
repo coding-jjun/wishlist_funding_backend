@@ -12,13 +12,17 @@ import { Image } from 'src/entities/image.entity';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { FundingTasksService } from './funding.tasks.service';
 import { Notification } from 'src/entities/notification.entity';
+import { DonationService } from '../donation/donation.service';
+import { Donation } from 'src/entities/donation.entity';
+import { RollingPaper } from 'src/entities/rolling-paper.entity';
+import { RollingPaperService } from '../rolling-paper/rolling-paper.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Funding, User, Comment, Friend, Gift, Image, Notification]),
+    TypeOrmModule.forFeature([Funding, User, Comment, Friend, Gift, Image, Notification, Donation, RollingPaper]),
   ],
   controllers: [FundingController],
-  providers: [FundingService, GiftService, GiftogetherExceptions, FundingTasksService],
+  providers: [FundingService, GiftService, DonationService, RollingPaperService, GiftogetherExceptions, FundingTasksService],
   exports: [FundingService],
 })
 export class FundingModule {}

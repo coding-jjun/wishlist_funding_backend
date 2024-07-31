@@ -1,8 +1,7 @@
-import { getNow } from 'src/app.module';
 import { Donation } from 'src/entities/donation.entity';
 import { DonationStatus } from 'src/enums/donation-status.enum';
 
-export class DonationListDto {
+export class MyDonationListDto {
   donId: number;
   fundUuid: string;
   fundTitle: string;

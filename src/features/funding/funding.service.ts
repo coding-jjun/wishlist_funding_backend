@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Funding } from 'src/entities/funding.entity';
-import { Repository, Like, MoreThan, Brackets } from 'typeorm';
+import { Repository, Brackets } from 'typeorm';
 import { CreateFundingDto } from './dto/create-funding.dto';
 import { User } from 'src/entities/user.entity';
 import { FundTheme } from 'src/enums/fund-theme.enum';
@@ -13,13 +13,9 @@ import { UpdateFundingDto } from './dto/update-funding.dto';
 import { Image } from 'src/entities/image.entity';
 import { ImageType } from 'src/enums/image-type.enum';
 import {
-  DefaultImageId,
   defaultFundingImageIds,
 } from 'src/enums/default-image-id';
-import { query } from 'express';
-import assert from 'assert';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
-import { UUID } from 'crypto';
 
 @Injectable()
 export class FundingService {

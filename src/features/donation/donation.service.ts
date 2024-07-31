@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Donation } from 'src/entities/donation.entity';
@@ -15,7 +15,8 @@ import { getNow } from 'src/app.module';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Image } from 'src/entities/image.entity';
 import { ImageType } from 'src/enums/image-type.enum';
-import { DonationListDto } from './dto/donation-list.dto';
+import { MyDonationListDto } from './dto/my-donation-list.dto';
+import { DonationListDto } from './dto/other-donation-list.dto';
 
 @Injectable()
 export class DonationService {
@@ -32,14 +33,9 @@ export class DonationService {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
 
-    @InjectRepository(Image)
-    private readonly imageRepo: Repository<Image>,
-
     private readonly rollService: RollingPaperService,
 
     private readonly g2gException: GiftogetherExceptions,
-
-    // private readonly imgService : ImageService
 
     private eventEmitter: EventEmitter2,
   ) {}
@@ -154,7 +150,7 @@ export class DonationService {
     // TODO 후원 등록 완료 Notification
   }
   
-  async findAll(userId: number, status: string): Promise<DonationDto[]> {
+  async findMineAll(userId: number, status: string, lastId?: number): Promise<{donations: MyDonationListDto[], lastId: number}> {
     const currentDate = new Date();
     let query = this.donationRepo.createQueryBuilder('donation')
       .leftJoinAndSelect('donation.funding', 'funding')
@@ -162,17 +158,48 @@ export class DonationService {
       .leftJoinAndSelect('funding.fundUser', 'fundUser')
       .leftJoinAndMapOne('fundUser.image', Image, 'image', 'fundUser.defaultImgId = image.imgId OR (fundUser.defaultImgId IS NULL AND image.subId = fundUser.userId AND image.imgType = :userType)', { userType: ImageType.User })
       .where('donation.userId = :userId', { userId })
-      .setParameter('currentDate', currentDate);
-  
+      .setParameter('currentDate', currentDate)
+      .orderBy('donation.donId', 'DESC');
+
     if (status === 'ongoing') {
       query.andWhere('funding.endAt >= :currentDate');
     } else if (status === 'ended') {
       query.andWhere('funding.endAt < :currentDate');
     }
+
+    if (lastId) {
+      query.andWhere('donation.donId < :lastId', { lastId })
+    };
+    query.take(10);
   
-    const donations = await query.orderBy('donation.donId', 'DESC').getMany();
-    return donations.map(donation => new DonationListDto(donation));
+    const donations = (await query.getMany()).map(donation => new MyDonationListDto(donation));
+    return {
+      donations: donations,
+      lastId: donations[donations.length - 1]?.donId,
+    }
   }
+
+  async findAll(fundUuid: string, lastId?: number): Promise<{donations: DonationListDto[], lastId: number}> {
+    const fund = await this.fundingRepo.findOne({ where: { fundUuid }});
+
+    const query = this.donationRepo.createQueryBuilder('donation')
+      .orderBy('donation.donId', 'DESC')
+      .where('donation.funding = :fundId', { fundId : fund.fundId })
+      .leftJoinAndSelect('donation.user', 'user')
+      .leftJoinAndMapOne('user.image', Image, 'image', '(user.defaultImgId = image.imgId OR (user.defaultImgId IS NULL AND image.subId = user.userId AND image.imgType = :userType))', { userType: ImageType.User })
+
+    if (lastId) {
+      query.andWhere('donation.donId < :lastId', { lastId })
+    }
+    query.take(3);
+
+    const donations = (await query.getMany()).map(donation => new DonationListDto(donation));
+
+    return {
+      donations: donations,
+      lastId: donations[donations.length - 1]?.donId
+    }
+  } 
 
   // DELETE
   async deleteDonation(donId: number): Promise<Boolean> {

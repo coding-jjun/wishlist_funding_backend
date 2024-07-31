@@ -20,11 +20,13 @@ import { GiftArray } from '../gift/dto/request-gift.dto';
 import { GiftService } from '../gift/gift.service';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { FundTheme } from 'src/enums/fund-theme.enum';
+import { DonationService } from '../donation/donation.service';
 
 @Controller('funding')
 export class FundingController {
   constructor(
     private fundingService: FundingService,
+    private donaService: DonationService,
     private readonly giftService: GiftService,
   ) {}
 
@@ -92,6 +94,17 @@ export class FundingController {
     } catch (error) {
       throw new HttpException('Failed to get fundings', HttpStatus.BAD_REQUEST);
     }
+  }
+
+  @Get(':fundUuid/donation')
+  async findDonation(
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
+    @Query('lastId', new DefaultValuePipe(null)) lastId?: number,
+  ): Promise<CommonResponse> {
+    return {
+      message: '펀딩의 후원 목록을 성공적으로 조회하였습니다.',
+      data: await this.donaService.findAll(fundUuid, lastId),
+    };
   }
 
   @Get(':fundUuid')
