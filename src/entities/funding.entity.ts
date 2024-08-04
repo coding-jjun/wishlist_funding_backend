@@ -129,7 +129,7 @@ export class Funding {
    */
   @Column('int', { nullable: true })
   @OneToOne(() => Image, (image) => image.imgId)
-  defaultImgId: number;
+  defaultImgId?: number;
 
   @OneToMany(() => Image, (image) => image.subId)
   images: Image[];
