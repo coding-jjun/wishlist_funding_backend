@@ -12,8 +12,8 @@ async function bootstrap() {
 
   if (debugOption) {
     nestFactoryOptions.httpsOptions = {
-      key: fs.readFileSync(process.env.SSL_CERTIFICATE_LOCATION),
-      cert: fs.readFileSync(process.env.SSL_KEY_LOCATION),
+      key: fs.readFileSync(process.env.SSL_KEY_LOCATION),
+      cert: fs.readFileSync(process.env.SSL_CERTIFICATE_LOCATION),
     };
   }
   
