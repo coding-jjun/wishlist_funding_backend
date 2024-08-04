@@ -10,7 +10,7 @@ async function bootstrap() {
   const debugOption = process.env.DEBUG === 'true';
   const nestFactoryOptions: Record<string, any> = {};
 
-  if (debugOption) {
+  if (!debugOption) {
     nestFactoryOptions.httpsOptions = {
       key: fs.readFileSync(process.env.SSL_KEY_LOCATION),
       cert: fs.readFileSync(process.env.SSL_CERTIFICATE_LOCATION),
