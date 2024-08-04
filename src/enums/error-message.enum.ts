@@ -28,7 +28,8 @@ export enum ErrorMsg {
   NotValidNick = "이미 사용 중인 닉네임 입니다.",
   PasswordIncorrect = "비밀번호가 틀렸습니다. 다시 시도해주세요.",
   UserFailedToCreate = '사용자 생성에 실패했습니다',
-
+  UserAccessDenied = "접근 권한이 없는 요청입니다.",
+  
   // Friend
   AlreadySendRequest = '이미 친구 요청을 보냈습니다.',
   AlreadyFriend = '이미 친구 상태입니다.',
@@ -54,4 +55,5 @@ export enum ErrorMsg {
 
   // Address
   AddressNotFound = '배송지 정보가 없습니다.',
+
 }

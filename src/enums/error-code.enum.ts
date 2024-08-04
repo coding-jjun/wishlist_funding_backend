@@ -28,6 +28,7 @@ export enum ErrorCode {
   NotValidNick = "0705",
   PasswordIncorrect = "0706",
   UserFailedToCreate = '0707',
+  UserAccessDenied = "0708",
 
   // Friend
   AlreadySendRequest = '0800',
@@ -53,5 +54,6 @@ export enum ErrorCode {
   WrongNotiType = '1200',
 
   // Address
-  AddressNotFound = '1300'
+  AddressNotFound = '1300',
+
 }

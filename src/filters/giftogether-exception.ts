@@ -107,6 +107,14 @@ export class GiftogetherExceptions {
     HttpStatus.FORBIDDEN,
   );
 
+  UserAccessDenied = new GiftogetherException(
+    ErrorMsg.UserAccessDenied,
+    ErrorCode.UserAccessDenied,
+    HttpStatus.NOT_FOUND
+  );
+
+
+
   // Friend
   AlreadySendRequest = new GiftogetherException(
     ErrorMsg.AlreadySendRequest,
