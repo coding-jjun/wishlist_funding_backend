@@ -5,6 +5,7 @@ export class MyDonationListDto {
   donId: number;
   fundUuid: string;
   fundTitle: string;
+  fundImg: string;
   donUserId: number;
   fundUserId: number;
   fundUserNick: string;
@@ -18,6 +19,7 @@ export class MyDonationListDto {
     this.donId = donation.donId;
     this.fundUuid = donation.funding.fundUuid;
     this.fundTitle = donation.funding.fundTitle;
+    this.fundImg = donation.funding.images ? donation.funding.images[0].imgUrl : '';
     this.donUserId = donation.user.userId;
     this.fundUserId = donation.funding.fundUser.userId;
     this.fundUserNick = donation.funding.fundUser.userNick;

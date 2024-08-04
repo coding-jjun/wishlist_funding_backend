@@ -157,6 +157,7 @@ export class DonationService {
       .leftJoinAndSelect('donation.user', 'user')
       .leftJoinAndSelect('funding.fundUser', 'fundUser')
       .leftJoinAndMapOne('fundUser.image', Image, 'image', 'fundUser.defaultImgId = image.imgId OR (fundUser.defaultImgId IS NULL AND image.subId = fundUser.userId AND image.imgType = :userType)', { userType: ImageType.User })
+      .leftJoinAndMapMany('funding.images', Image, 'fundImages', 'funding.defaultImgId = fundImages.imgId OR (funding.defaultImgId IS NULL AND fundImages.subId = funding.fundId AND fundImages.imgType = :fundType)', { fundType: ImageType.Funding })
       .where('donation.userId = :userId', { userId })
       .setParameter('currentDate', currentDate)
       .orderBy('donation.donId', 'DESC');
