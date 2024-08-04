@@ -10,6 +10,7 @@ import { Address } from 'src/entities/address.entity';
 import { User } from 'src/entities/user.entity';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { AddressDto } from './dto/address.dto';
+import { ValidCheck } from 'src/util/valid-check';
 
 @Injectable()
 export class AddressService {
@@ -19,9 +20,10 @@ export class AddressService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly g2gException: GiftogetherExceptions,
+    private readonly validCheck: ValidCheck,
   ) {}
 
-  async create(createAddressDto: CreateAddressDto): Promise<Address> {
+  async create(createAddressDto: CreateAddressDto, user: User): Promise<Address> {
     const address = new Address();
 
     address.addrRoad = createAddressDto.addrRoad;
@@ -32,14 +34,6 @@ export class AddressService {
     address.recvPhone = createAddressDto.recvPhone;
     address.recvReq = createAddressDto.recvReq;
     address.isDef = createAddressDto.isDef;
-
-    const user = await this.userRepository.findOne({
-      where: { userId: createAddressDto.userId },
-    });
-    if (!user) {
-      throw new NotFoundException('존재하지 않는 사용자입니다.');
-    }
-
     address.addrUser = user;
 
     if (createAddressDto.recvName) {
@@ -81,11 +75,12 @@ export class AddressService {
     return result;
   }
 
-  async findOne(addrId: number): Promise<Address> {
+  async findOne(addrId: number, userId: number): Promise<Address> {
     const addr = await this.addrRepository.findOne({
       where: { addrId },
       relations: ['addrUser']
     });
+    await this.validCheck.verifyUserMatch(addr.addrUser.userId, userId);
 
     if (!addr) {
       throw this.g2gException.AddressNotFound;
@@ -97,6 +92,7 @@ export class AddressService {
   async update(
     addrId: number,
     updateAddressDto: UpdateAddressDto,
+    userId: number
   ): Promise<Address> {
     const addr = await this.addrRepository.findOne({
       where: { addrId },
@@ -106,13 +102,17 @@ export class AddressService {
       throw new NotFoundException('배송지를 조회할 수 없습니다.');
     }
 
+    await this.validCheck.verifyUserMatch(addr.addrUser.userId, userId);
+
     if (updateAddressDto.isDef && !addr.isDef) {
+      // 기존의 기본 배송지
       const defaultAddr = await this.addrRepository.findOne({
         where: {
-          addrUser: { userId: addr.addrUser.userId },
+          addrUser: { userId: userId },
           isDef: true
         }
       });
+      // 기존의 기본 배송지를 false 로 변경
       if (defaultAddr) {
         defaultAddr.isDef = false;
         await this.addrRepository.save(defaultAddr);
@@ -131,7 +131,7 @@ export class AddressService {
     return await this.addrRepository.save(addr);
   }
 
-  async remove(addrId: number): Promise<Address> {
+  async remove(addrId: number, userId: number): Promise<Address> {
     const addr = await this.addrRepository.findOne({
       where: { addrId },
       relations: ['addrUser']
@@ -139,6 +139,8 @@ export class AddressService {
     if (!addr) {
       throw new NotFoundException('배송지를 조회할 수 없습니다.');
     }
+    await this.validCheck.verifyUserMatch(addr.addrUser.userId, userId);
+
     try {
       const result = await this.addrRepository.delete({ addrId });
       return addr;

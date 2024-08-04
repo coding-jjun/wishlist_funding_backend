@@ -38,8 +38,8 @@ import { AuthModule } from './features/auth/auth.module';
 import { RedisModule } from './features/auth/redis.module';
 import { EventModule } from './features/event/event.module';
 import { AccountModule } from './features/account/account.module';
-import { AccountService } from './features/account/account.service';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ValidCheckModule } from './util/valid-check.module';
 
 @Module({
   imports: [
@@ -103,6 +103,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     RedisModule,
     EventModule,
     AccountModule,
+    ValidCheckModule,
   ],
   controllers: [AppController],
   providers: [
