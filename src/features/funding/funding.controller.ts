@@ -12,7 +12,10 @@ import {
   Post,
   Put,
   Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { FundingService } from './funding.service';
 import { CreateFundingDto } from './dto/create-funding.dto';
 import { UpdateFundingDto } from './dto/update-funding.dto';
@@ -21,6 +24,8 @@ import { GiftService } from '../gift/gift.service';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { FundTheme } from 'src/enums/fund-theme.enum';
 import { DonationService } from '../donation/donation.service';
+import { JwtAuthGuard } from '../auth/guard/jwt-auth-guard';
+import { User } from 'src/entities/user.entity';
 
 @Controller('funding')
 export class FundingController {
@@ -31,28 +36,33 @@ export class FundingController {
   ) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   async create(
     @Body() createFundingDto: CreateFundingDto,
+    @Req() req: Request
   ): Promise<CommonResponse> {
+    const user = req.user as { user: User } as any;
     return {
       message: '성공적으로 생성했습니다.',
-      data: await this.fundingService.create(createFundingDto, ''),
+      data: await this.fundingService.create(createFundingDto, user),
     };
   }
 
   @Post(':fundUuid/gift')
+  @UseGuards(JwtAuthGuard)
   async createOrUpdateGift(
     @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
     @Body() giftArray: GiftArray,
+    @Req() req: Request
   ): Promise<CommonResponse> {
-    const funding = await this.fundingService.findOne(fundUuid);
-
+    const user = req.user as { user: User } as any;
     try {
+      const funding = await this.fundingService.findFundingByUuidAndUserId(fundUuid, user.userId);
       return {
         message: 'Success',
         data: await this.giftService.createOrUpdateGift(
-          funding.fundId,
-          giftArray.gifts,
+          funding,
+          giftArray.gifts
         ),
       };
     } catch (error) {
@@ -97,13 +107,17 @@ export class FundingController {
   }
 
   @Get(':fundUuid/donation')
+  @UseGuards(JwtAuthGuard)
   async findDonation(
+    @Req() req: Request,
     @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
     @Query('lastId', new DefaultValuePipe(null)) lastId?: number,
   ): Promise<CommonResponse> {
+    const user = req.user as { user: User } as any;
+    const funding = await this.fundingService.findFundingByUuidAndUserId(fundUuid, user.userId);
     return {
       message: '펀딩의 후원 목록을 성공적으로 조회하였습니다.',
-      data: await this.donaService.findAll(fundUuid, lastId),
+      data: await this.donaService.findAll(funding, lastId),
     };
   }
 
@@ -118,22 +132,27 @@ export class FundingController {
   }
 
   @Put(':fundUuid')
+  @UseGuards(JwtAuthGuard)
   async update(
+    @Req() req: Request,
     @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
     @Body() updateFunidngDto: UpdateFundingDto,
   ): Promise<CommonResponse> {
+    const user = req.user as { user: User } as any;
     return {
       message: 'success',
-      data: await this.fundingService.update(fundUuid, updateFunidngDto),
+      data: await this.fundingService.update(fundUuid, updateFunidngDto, user.userId),
     };
   }
 
   @Delete(':fundUuid')
+  @UseGuards(JwtAuthGuard)
   async remove(
+    @Req() req: Request,
     @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
   ): Promise<CommonResponse> {
-    await this.fundingService.remove(fundUuid);
-
+    const user = req.user as { user: User } as any;
+    await this.fundingService.remove(fundUuid, user.userId);
     return {
       message: '성공적으로 삭제되었습니다.',
       data: null,
