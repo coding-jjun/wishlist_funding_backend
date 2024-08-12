@@ -12,6 +12,7 @@ import { ImageType } from 'src/enums/image-type.enum';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NotiType } from 'src/enums/noti-type.enum';
 import { Notification } from 'src/entities/notification.entity';
+import { ValidCheck } from 'src/util/valid-check';
 
 @Injectable()
 export class FriendService {
@@ -24,6 +25,7 @@ export class FriendService {
     private readonly notiRepository: Repository<Notification>,
     private readonly g2gException: GiftogetherExceptions,
     private eventEmitter: EventEmitter2,
+    private readonly validCheck: ValidCheck,
   ) {}
 
   /**
@@ -31,11 +33,6 @@ export class FriendService {
    * @param userId
    */
   async getFriends(userId: number): Promise<{ result: any[]; total: number }> {
-    // const user = await this.userRepository.findOne({ where: { userId }});
-    // if (!user) {
-    // 	throw new HttpException('존재하지 않는 사용자입니다.', HttpStatus.BAD_REQUEST);
-    // }
-
     const friendIds = await this.friendRepository
       .createQueryBuilder('friend')
       .where('friend.status = :status', { status: FriendStatus.Friend })
@@ -115,14 +112,8 @@ export class FriendService {
   /**
    * 친구 신청
    */
-  async createFriend(friendDto: FriendDto): Promise<{ result; message; }> {
-    const { userId, friendId } = friendDto;
-
-    // const user = await this.userRepository.findOne({ where: { userId }});
-    // const friend = await this.userRepository.findOne({ where: { userId: friendId }});
-    // if (!user || !friend) {
-    // 	throw new HttpException('존재하지 않는 사용자입니다.', HttpStatus.BAD_REQUEST);
-    // }
+  async createFriend(userId: number, friendDto: FriendDto): Promise<{ result; message; }> {
+    const friendId = friendDto.friendId;
 
     if (userId === friendId) {
       throw new HttpException(
@@ -151,7 +142,7 @@ export class FriendService {
           friendship.status = FriendStatus.Friend;
           const result = await this.friendRepository.save(friendship);
 
-          this.eventEmitter.emit('AcceptFollow', friendDto);
+          this.eventEmitter.emit('AcceptFollow', userId, friendDto);
 
           return {
             result,
@@ -171,7 +162,7 @@ export class FriendService {
       });
       const result = await this.friendRepository.save(newFriendship);
       
-      this.eventEmitter.emit('IncomingFollow', friendDto);
+      this.eventEmitter.emit('IncomingFollow', userId, friendDto);
 
       return {
         result,
@@ -183,16 +174,8 @@ export class FriendService {
   /**
    * 친구 삭제, 거절, 취소
    */
-  async deleteFriend(
-    friendDto: FriendDto,
-  ): Promise<{ result; message: string }> {
-    const { userId, friendId } = friendDto;
-
-    // const user = await this.userRepository.findOne({ where: { userId }});
-    // const friend = await this.userRepository.findOne({ where: { userId: friendId }});
-    // if (!user || !friend) {
-    // 	throw new HttpException('존재하지 않는 사용자입니다.', HttpStatus.BAD_REQUEST);
-    // }
+  async deleteFriend(userId: number, friendDto: FriendDto): Promise<{ result; message: string }> {
+    const friendId = friendDto.friendId;
 
     if (userId == friendId) {
       throw new HttpException(
@@ -213,14 +196,14 @@ export class FriendService {
     if (friendship) {
       if (friendship.status === FriendStatus.Friend) {
         const noti1 = await this.notiRepository.createQueryBuilder('noti')
-        .where('noti.recvId = :recvId', { recvId: friendDto.friendId })
-        .andWhere('noti.sendId = :sendId', { sendId: friendDto.userId })
+        .where('noti.recvId = :recvId', { recvId: friendId })
+        .andWhere('noti.sendId = :sendId', { sendId: userId })
         .andWhere('noti.notiType = :notiType', { notiType: NotiType.NewFriend })
         .getOne();
 
         const noti2 = await this.notiRepository.createQueryBuilder('noti')
-        .where('noti.recvId = :recvId', { recvId: friendDto.userId })
-        .andWhere('noti.sendId = :sendId', { sendId: friendDto.friendId })
+        .where('noti.recvId = :recvId', { recvId: userId })
+        .andWhere('noti.sendId = :sendId', { sendId: friendId })
         .andWhere('noti.notiType = :notiType', { notiType: NotiType.NewFriend })
         .getOne();
 
@@ -233,8 +216,8 @@ export class FriendService {
         // 보낸 친구 요청 취소
         if (friendship.userId === userId) {
           const noti = await this.notiRepository.createQueryBuilder('noti')
-          .where('noti.recvId = :recvId', { recvId: friendDto.friendId })
-          .andWhere('noti.sendId = :sendId', { sendId: friendDto.userId })
+          .where('noti.recvId = :recvId', { recvId: friendId })
+          .andWhere('noti.sendId = :sendId', { sendId: userId })
           .andWhere('noti.notiType = :notiType', { notiType })
           .getOne();
 
@@ -246,8 +229,8 @@ export class FriendService {
           } else {
             const noti = await this.notiRepository
               .createQueryBuilder('noti')
-              .where('noti.recvId = :recvId', { recvId: friendDto.userId })
-              .andWhere('noti.sendId = :sendId', { sendId: friendDto.friendId })
+              .where('noti.recvId = :recvId', { recvId: userId })
+              .andWhere('noti.sendId = :sendId', { sendId: friendId })
               .andWhere('noti.notiType = :notiType', { notiType })
               .getOne();
             

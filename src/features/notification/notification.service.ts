@@ -107,11 +107,11 @@ export class NotificationService {
   }
 
   @OnEvent('AcceptFollow')
-  async handleAcceptFollow(friendDto: FriendDto) {
+  async handleAcceptFollow(userId: number, friendDto: FriendDto) {
     const noti1 = new Notification();
     const noti2 = new Notification();
     const receiver = await this.userRepository.findOneBy({ userId: friendDto.friendId })
-    const sender = await this.userRepository.findOneBy({ userId: friendDto.userId })
+    const sender = await this.userRepository.findOneBy({ userId: userId })
 
     noti1.sendId = sender;
     noti1.recvId = receiver;
@@ -123,7 +123,7 @@ export class NotificationService {
     if (!friendDto.notiId) {
       const deleteNoti = await this.notiRepository.createQueryBuilder("notification")
       .leftJoinAndSelect("notification.recvId", "receiver")
-      .where("notification.recvId = :recvId", { recvId: friendDto.userId })
+      .where("notification.recvId = :recvId", { recvId: userId })
       .andWhere("notification.sendId = :sendId", { sendId: friendDto.friendId }) // 여기서 senderId는 숫자 타입이어야 합니다.
       .andWhere("notification.notiType = :notiType", { notiType: NotiType.IncomingFollow })
       .getOne();
@@ -144,10 +144,10 @@ export class NotificationService {
   }
 
   @OnEvent('IncomingFollow')
-  async handleIncomingFollow(friendDto: FriendDto) {
+  async handleIncomingFollow(userId: number, friendDto: FriendDto) {
     const noti = new Notification();
     const receiver = await this.userRepository.findOneBy({ userId: friendDto.friendId })
-    const sender = await this.userRepository.findOneBy({ userId: friendDto.userId })
+    const sender = await this.userRepository.findOneBy({ userId: userId })
 
     noti.sendId = sender;
     noti.recvId = receiver;
