@@ -1,9 +1,6 @@
-import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsUrl } from 'class-validator';
 
 export class UpdateUserDto {
-  @IsNotEmpty()
-  userId: number;
-
   @IsNotEmpty()
   userNick: string;
 
@@ -16,16 +13,27 @@ export class UpdateUserDto {
   @IsNotEmpty()
   userPhone: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   userBirth: Date;
 
   @IsNotEmpty()
   userEmail: string;
-  
+
   @IsOptional()
   @IsNumber()
   userAcc: number;
 
-  @IsNotEmpty()
-  userImg: number;
+  /*
+   * fundImg와 defaultImgId 둘 중에 하나만 null이어야 함
+   */
+  @IsOptional()
+  @IsUrl()
+  userImg?: string;
+
+  /*
+   * fundImg와 defaultImgId 둘 중에 하나만 null이어야 함
+   */
+  @IsNumber()
+  @IsOptional()
+  defaultImgId?: number;
 }

@@ -1,63 +1,87 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Put,
+  ParseIntPipe,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
+import { Request } from 'express';
 import { AddressService } from './address.service';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
+import { AddressDto } from './dto/address.dto';
+import { JwtAuthGuard } from '../auth/guard/jwt-auth-guard';
+import { User } from 'src/entities/user.entity';
 
-@Controller('api/address')
+@Controller('address')
 export class AddressController {
   constructor(private readonly addressService: AddressService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   async create(
-    @Body() createAddressDto: CreateAddressDto
-    ): Promise<CommonResponse> {
-    const result = await this.addressService.create(createAddressDto);
-    
-    return {
-      timestamp: new Date(Date.now()),
-      message: '배송지를 추가하였습니다.',
-      data: result
-    };
-  }
-
-  @Get(':userId')
-  async findAll(
-    @Param('userId') userId: number,
+    @Body() createAddressDto: CreateAddressDto,
+    @Req() req: Request
   ): Promise<CommonResponse> {
-    const result = await this.addressService.findAll(userId);
+    const user = req.user as { user: User } as any;
+    const address = await this.addressService.create(createAddressDto, user);
 
     return {
-      timestamp: new Date(Date.now()),
-      message: '성공적으로 생성했습니다.',
-      data: result,
+      message: '배송지를 추가하였습니다.',
+      data: new AddressDto(address),
     };
   }
 
-  @Put('addrId')
+  @Get(':addrId')
+  @UseGuards(JwtAuthGuard)
+  async findOne(
+    @Param('addrId', ParseIntPipe) addrId: number,
+    @Req() req: Request
+  ): Promise<CommonResponse> {    
+    const user = req.user as { user: User } as any;
+    try {
+      const address = await this.addressService.findOne(addrId, user.userId);
+      return {
+        message: '배송지 조회에 성공하였습니다.',
+        data: new AddressDto(address),
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Put(':addrId')
+  @UseGuards(JwtAuthGuard)
   async update(
     @Param('addrId', ParseIntPipe) addrId: number,
-    @Body() updateAddressDto: UpdateAddressDto
+    @Body() updateAddressDto: UpdateAddressDto,
+    @Req() req: Request
   ): Promise<CommonResponse> {
-    const result = await this.addressService.update(addrId, updateAddressDto);
+    const user = req.user as { user: User } as any;
+    const address = await this.addressService.update(addrId, updateAddressDto, user.userId);
 
     return {
-      timestamp: new Date(Date.now()),
       message: '배송지 정보를 갱신하였습니다.',
-      data: result,
+      data: new AddressDto(address),
     };
   }
 
-  @Delete('addrId')
+  @Delete(':addrId')
   async remove(
     @Param('addrId', ParseIntPipe) addrId: number,
-    ): Promise<CommonResponse> {
-      const result = await this.addressService.remove(addrId);
-
-      return {
-        timestamp: new Date(Date.now()),
-        message: '배송지를 삭제하였습니다.',
-        data: result,
-      };
+    @Req() req: Request
+  ): Promise<CommonResponse> {
+    const user = req.user as { user: User } as any;
+    const address = await this.addressService.remove(addrId, user.userId);
+    return {
+      message: '배송지를 삭제하였습니다.',
+      data: new AddressDto(address),
+    };
   }
 }

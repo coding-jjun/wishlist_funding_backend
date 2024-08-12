@@ -3,11 +3,26 @@ import { IsNotEmpty, IsOptional } from 'class-validator';
 
 export class UpdateAddressDto {
   @IsNotEmpty()
-  addrId: number;
-
-  @IsOptional()
   addrNick: string;
 
-  @IsOptional()
+  @IsNotEmpty()
+  addrRoad: string;
+
+  @IsNotEmpty()
+  addrDetl: string;
+
+  @IsNotEmpty()
+  addrZip: string;
+
+  @IsNotEmpty()
+  recvName: string;
+
+  @IsNotEmpty()
+  recvPhone: string;
+
+  @IsNotEmpty()
+  recvReq: string;
+
+  @IsNotEmpty()
   isDef: boolean;
 }

@@ -1,36 +1,80 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Get,
   Param,
   ParseIntPipe,
+  Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { NotificationService } from './notification.service';
-import { Notification } from 'src/entities/notification.entity';
-import { NotiType, ReqType } from 'src/enums/notification.enum';
+import { NotiType } from 'src/enums/noti-type.enum';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
+import { CommonResponse } from 'src/interfaces/common-response.interface';
+import { CreateNotificationDto } from './dto/create-notification.dto';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
-@Controller('api/notification')
+@Controller('notification')
 export class NotificationController {
   constructor(
-    private notificationService: NotificationService,
+    private notiService: NotificationService,
+    private readonly g2gException: GiftogetherExceptions,
+
     // private appGateWay: AppGateWay,
   ) {}
 
   @Get('/:userId')
-  findAllByUser(
+  async findAllByUser(
     @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<Notification[]> {
-    return this.notificationService.findAllByUser(userId);
+    @Query('notiFilter', new DefaultValuePipe('all')) notiFilter: 'all' | 'friend' | 'funding' | 'comment',
+    @Query('lastId', new DefaultValuePipe(undefined)) lastId?: number,
+  ): Promise<CommonResponse> {
+    return {
+      data: await this.notiService.getAllNoti(userId, notiFilter, lastId),
+    };
+  }
+
+  @Post('')
+  async create(
+    @Body() createNotiDto: CreateNotificationDto,
+  ): Promise<CommonResponse> {
+    try {
+      let result;
+      switch (createNotiDto.notiType) {
+        case NotiType.IncomingFollow:
+        case NotiType.NewFriend:
+        case NotiType.FundClose:
+        case NotiType.FundAchieve:
+        case NotiType.NewDonate:
+        case NotiType.DonatedFundClose:
+        case NotiType.WriteGratitude:
+          result = await this.notiService.createNoti(createNotiDto);
+          break;
+        case (NotiType.CheckGratitude):
+          result = this.notiService.createMultiNoti(createNotiDto);
+          break;
+        default:
+          throw this.g2gException.WrongNotiType;
+      }
+        
+      return {
+        message: '알림이 성공적으로 생성되었습니다.',
+        data: result,
+      };
+
+    } catch (error) {
+      throw error;
+    }
   }
 
   @Put('/:notiId')
   async update(
     @Param('notiId', ParseIntPipe) notiId: number,
     @Body() updateNotificationDto: UpdateNotificationDto,
-  ): Promise<Notification> {
-    const newNoti = await this.notificationService.updateNotification(
+  ): Promise<CommonResponse> {
+    const newNoti = await this.notiService.updateNoti(
       notiId,
       updateNotificationDto,
     );
@@ -38,6 +82,8 @@ export class NotificationController {
     // if (newNoti.notiType == NotiType.FriendRequest && newNoti.reqType == ReqType.Accept) {
     //     this.appGateWay.notifyFriendResponse(newNoti);
     // }
-    return newNoti;
+    return {
+      data: newNoti,
+    };
   }
 }

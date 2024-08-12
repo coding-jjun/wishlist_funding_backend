@@ -1,53 +1,65 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
-import { CommonResponse } from 'src/interfaces/common-response.interface';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Logger,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { GratitudeDto } from './dto/gratitude.dto';
 import { GratitudeService } from './gratitude.service';
+import { CommonResponse } from 'src/interfaces/common-response.interface';
+import { Gratitude } from 'src/entities/gratitude.entity';
 
-@Controller('/api/gratitude')
+@Controller('gratitude')
 export class GratitudeController {
   constructor(private readonly gratitudeService: GratitudeService) {}
-  
-  @Get('/:gratId')
-  getGratitude(@Param('gratId') gratId: number): CommonResponse {
-    const data = this.gratitudeService.getGratitude(gratId);
-    return {
-      timestamp: new Date(Date.now()),
-      message: 'success',
-      data: data,
-    };
+
+  @Get('/:fundUuid')
+  async getGratitude(
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
+  ): Promise<CommonResponse> {
+    const data = await this.gratitudeService.getGratitude(fundUuid);
+    return { data };
   }
 
   @Post('/:fundUuid')
-  async createGratitude(@Param('fundUuid') fundUuid: string,
-                  @Body() createGratitudeDto: GratitudeDto): Promise<CommonResponse> {
+  async createGratitude(
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
+    @Body() createGratitudeDto: GratitudeDto,
+  ): Promise<CommonResponse> {
     return {
-      timestamp: new Date(Date.now()),
       message: '감사인사 생성 성공!',
-      data: await this.gratitudeService.createGratitude(fundUuid, createGratitudeDto)
+      data: await this.gratitudeService.createGratitude(
+        fundUuid,
+        createGratitudeDto,
+      ),
     };
   }
 
-  @Put('/:gratId')
-  updateGratitude(@Param('gratId') gratId: number,
-                  @Body() updateGratitudeDto: GratitudeDto): CommonResponse {
-    const data = this.gratitudeService.updateGratitude(gratId, updateGratitudeDto);
+  @Put('/:fundUuid')
+  async updateGratitude(
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
+    @Body() updateGratitudeDto: GratitudeDto,
+  ): Promise<CommonResponse> {
     return {
-      timestamp: new Date(Date.now()),
       message: 'success',
-      data: data,
+      data: await this.gratitudeService.updateGratitude(
+        fundUuid,
+        updateGratitudeDto,
+      ),
     };
   }
 
   @Delete('/:gratId')
-  deleteGratitude(@Param('gratId') gratId: number): CommonResponse {
-    const data = this.gratitudeService.deleteGratitude(gratId);
+  async deleteGratitude(
+    @Param('gratId') gratId: number,
+  ): Promise<CommonResponse> {
     return {
-      timestamp: new Date(Date.now()),
-      message: 'success',
-      data: data,
+      data: await this.gratitudeService.deleteGratitude(gratId),
     };
   }
-
-
-
 }

@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { NotificationModule } from './features/notification/notification.module';
@@ -18,7 +18,6 @@ import { readFileSync } from 'fs';
 import { Friend } from './entities/friend.entity';
 import { Address } from './entities/address.entity';
 import { AddressModule } from './features/address/address.module';
-
 import { CommentModule } from './features/comment/comment.module';
 import { Gratitude } from './entities/gratitude.entity';
 import { GratitudeModule } from './features/gratitude/gratitude.module';
@@ -27,9 +26,23 @@ import { Notification } from './entities/notification.entity';
 import { TokenModule } from './features/open-bank/token/token.module';
 import { OpenBankToken } from './entities/open-bank-token.entity';
 import { Account } from './entities/account.entity';
-import { GiftogetherMiddleware } from './interfaces/giftogether.middleware';
+import { ScheduleModule } from '@nestjs/schedule';
+import { MulterModule } from '@nestjs/platform-express';
+import { ImageModule } from './features/image/image.module';
+import { GiftModule } from './features/gift/gift.module';
+import { ExceptionModule } from './filters/exception.module';
+import { AuthModule } from './features/auth/auth.module';
+import { RedisModule } from './features/auth/redis.module';
+import { EventModule } from './features/event/event.module';
+import { AccountModule } from './features/account/account.module';
+import { ValidCheckModule } from './util/valid-check.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { TransformInterceptor } from './transform/transform.interceptor';
+import { Gift } from './entities/gift.entity';
+import { GiftogetherError } from './entities/error.entity';
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
@@ -46,18 +59,21 @@ import { GiftogetherMiddleware } from './interfaces/giftogether.middleware';
       synchronize: true,
       logging: true,
       entities: [
-        User, 
-        Funding, 
-        Comment, 
+        Account,
+        User,
+        Funding,
+        Comment,
         Donation,
-        RollingPaper, 
-        Notification, 
-        Friend, 
+        RollingPaper,
+        Notification,
+        Friend,
         Address,
         Gratitude,
         Image,
         OpenBankToken,
         Account,
+        Gift,
+        GiftogetherError,
       ],
       ssl: {
         ca: readFileSync('global-bundle.pem'),
@@ -78,12 +94,23 @@ import { GiftogetherMiddleware } from './interfaces/giftogether.middleware';
     CommentModule,
     GratitudeModule,
     TokenModule,
+    MulterModule,
+    ImageModule,
+    GiftModule,
+    ExceptionModule,
+    AuthModule,
+    RedisModule,
+    EventModule,
+    AccountModule,
+    ValidCheckModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TransformInterceptor,
+    },
+  ],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer): any {
-    consumer.apply(GiftogetherMiddleware).forRoutes('*');
-  }
-}
+export class AppModule {}

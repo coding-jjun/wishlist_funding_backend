@@ -7,6 +7,7 @@ import { Equal, Repository } from 'typeorm';
 import { Funding } from 'src/entities/funding.entity';
 import { GetCommentDto } from './dto/get-comment.dto';
 import { User } from 'src/entities/user.entity';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 function convertToGetCommentDto(comment: Comment): GetCommentDto {
   const { comId, content, regAt, isMod, authorId, author } = comment;
@@ -26,6 +27,7 @@ export class CommentService {
     @InjectRepository(Comment) private commentRepository: Repository<Comment>,
     @InjectRepository(Funding) private fundingRepository: Repository<Funding>,
     @InjectRepository(User) private userRepository: Repository<User>,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async create(createCommentDto: CreateCommentDto): Promise<GetCommentDto> {
@@ -51,6 +53,8 @@ export class CommentService {
     newComment.content = content;
 
     await this.commentRepository.save(newComment);
+
+    this.eventEmitter.emit('NewComment', { fundId, authorId });
 
     return convertToGetCommentDto(newComment);
   }

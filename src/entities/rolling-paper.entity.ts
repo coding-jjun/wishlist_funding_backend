@@ -3,26 +3,29 @@ import {
   Entity,
   OneToOne,
   JoinColumn,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   DeleteDateColumn,
+  ManyToOne,
 } from 'typeorm';
 import { Donation } from './donation.entity';
+import { Image } from './image.entity';
 
 @Entity()
 export class RollingPaper {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   rollId: number;
 
-  @OneToOne(() => Donation, {cascade: true})
-  @JoinColumn({ name: 'donId', referencedColumnName: 'donId' })
+  @OneToOne(() => Donation, { cascade: true })
+  @JoinColumn({ name: 'rollId', referencedColumnName: 'donId' })
   donation: Donation;
 
   @Column()
   fundId: number;
 
-  // @OneToOne(() => Image, img => img.imgId)
-  // @JoinColumn({ name: 'rollImg' })
-  // rollImg: string;
+  @Column('int', { nullable: true })
+  @ManyToOne(() => Image, (image) => image.imgId)
+  @JoinColumn({ name: 'defaultImgId' })
+  defaultImgId: number;
 
   @Column({ default: '축하해요' })
   rollMsg: string;

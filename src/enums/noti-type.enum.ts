@@ -1,12 +1,13 @@
 export enum NotiType {
   IncomingFollow = 'IncomingFollow', // 들어오는 친구 요청
-  AcceptFollow = 'AcceptFollow', // 내 요청에 대한 친구의 수락
+  NewFriend = 'NewFriend', // 새로운 친구
   FundClose = 'FundClose', // 내 펀딩 마감
   FundAchieve = 'FundAchieve', // 내 펀딩 달성
   NewDonate = 'NewDonate', // 내 펀딩에 들어온 새로운 후원
   DonatedFundClose = 'DonatedFundClose', // 내가 후원한 펀딩 마감
   WriteGratitude = 'WriteGratitude', // 감사인사 작성 권유
   CheckGratitude = 'CheckGratitude', // 내가 후원한 펀딩 감사인사 확인
+  NewComment = 'NewComment', // 새로운 댓글
 }
 
 export enum ReqType {

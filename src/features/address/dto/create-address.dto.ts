@@ -1,10 +1,10 @@
-import { IsBoolean, IsNotEmpty, IsNumber, IsOptional } from 'class-validator'
+import { IsBoolean, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 import { LargeNumberLike } from 'crypto';
 
 export class CreateAddressDto {
+
   @IsNotEmpty()
-  @IsNumber()
-  userId: number;
+  addrNick: string;
 
   @IsNotEmpty()
   addrRoad: string;
@@ -16,7 +16,13 @@ export class CreateAddressDto {
   addrZip: string;
 
   @IsOptional()
-  addrNick: string;
+  recvName: string;
+
+  @IsOptional()
+  recvPhone: string;
+
+  @IsOptional()
+  recvReq: string;
 
   @IsNotEmpty()
   isDef: boolean;

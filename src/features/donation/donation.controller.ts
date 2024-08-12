@@ -12,7 +12,7 @@ import { DonationService } from './donation.service';
 import { CreateDonationDto } from './dto/create-donation.dto';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 
-@Controller('api/donation')
+@Controller('donation')
 export class DonationController {
   constructor(private donationService: DonationService) {}
 
@@ -20,24 +20,29 @@ export class DonationController {
   // @Get(':fundUuid')
   // async findOne(@Param('fundUuid', ParseUUIDPipe) fundUuid: string): Promise<CommonResponse> {
   @Post('/:fundUuid')
-  async createDonation(@Param('fundUuid') fundUuid: string,
-                       @Body() createDonationDto: CreateDonationDto,
-  ): Promise<CommonResponse>  {
-
+  async createDonation(
+    @Param('fundUuid') fundUuid: string,
+    @Body() createDonationDto: CreateDonationDto,
+  ): Promise<CommonResponse> {
+    try {
       return {
-        timestamp: new Date(Date.now()),
         message: 'Donation 생성 완료',
-        data: await this.donationService.createDonation(fundUuid, createDonationDto)
+        data: await this.donationService.createDonation(
+          fundUuid,
+          createDonationDto,
+        ),
       };
+    } catch (error) {
+      throw error;
+    }
   }
 
   // 마이페이지에서 후원내역 조회
   @Get()
   async getAllDonations() {
     return {
-      timestamp: new Date(Date.now()),
       message: 'Donation list 조회 성공',
-      data: await this.donationService.getAllDonations()
+      data: await this.donationService.getAllDonations(),
     };
   }
 
@@ -45,9 +50,8 @@ export class DonationController {
   @Get('/:orderId')
   async getOneDonation(@Param('orderId') orderId: string) {
     return {
-      timestamp: new Date(Date.now()),
       message: 'Donation 조회 성공',
-      data: await this.donationService.getOneDonation(orderId)
+      data: await this.donationService.getOneDonation(orderId),
     };
   }
 
@@ -55,9 +59,8 @@ export class DonationController {
   @Delete('/:donId')
   async deleteDonation(@Param('donId') donId: number) {
     return {
-      timestamp: new Date(Date.now()),
       message: 'Donation 삭제 성공',
-      data: await this.donationService.deleteDonation(donId)
+      data: await this.donationService.deleteDonation(donId),
     };
   }
 }
