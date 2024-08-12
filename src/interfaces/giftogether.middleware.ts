@@ -24,11 +24,7 @@ export class GiftogetherMiddleware implements NestMiddleware {
     }
     
     this.logger.debug(
-      `${logHeader}
-      ${logDate}
-      ${logAgent}
-      ${logClientIp}
-      ${params}`
+      `\n${logHeader}\n${logDate}\n${logAgent}\n${logClientIp}\n${params}`
     );
 
     next();

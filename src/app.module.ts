@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { NotificationModule } from './features/notification/notification.module';
@@ -40,6 +40,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TransformInterceptor } from './transform/transform.interceptor';
 import { Gift } from './entities/gift.entity';
 import { GiftogetherError } from './entities/error.entity';
+import { GiftogetherMiddleware } from './interfaces/giftogether.middleware';
 @Module({
   imports: [
     ScheduleModule.forRoot(),
@@ -113,4 +114,14 @@ import { GiftogetherError } from './entities/error.entity';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {  
+  configure(consumer: MiddlewareConsumer): any {
+    consumer.apply(GiftogetherMiddleware).forRoutes('');
+  }
+}
+
+export function getNow(): string {
+  const event = new Date();
+  event.setTime(event.getTime() - event.getTimezoneOffset() * 60 * 1000);
+  return event.toISOString();
+}
