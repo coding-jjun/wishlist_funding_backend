@@ -58,7 +58,7 @@ import { GiftogetherMiddleware } from './interfaces/giftogether.middleware';
       username: process.env.DB_DEV_USERNAME,
       database: process.env.DB_DEV_DATABASE,
       synchronize: true,
-      logging: true,
+      logging: process.env.DEBUG === 'true',
       entities: [
         Account,
         User,
