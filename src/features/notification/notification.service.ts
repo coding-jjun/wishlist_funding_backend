@@ -128,8 +128,6 @@ export class NotificationService {
       .andWhere("notification.notiType = :notiType", { notiType: NotiType.IncomingFollow })
       .getOne();
 
-      console.log('deleteNoti.notiId: '+ deleteNoti.notiId);
-
       if (deleteNoti) {
         await this.notiRepository.delete(deleteNoti.notiId);
       };
