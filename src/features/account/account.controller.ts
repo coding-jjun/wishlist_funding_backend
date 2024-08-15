@@ -69,7 +69,7 @@ export class AccountController {
     }
   }
 
-  @Delete('accId')
+  @Delete(':accId')
   @UseGuards(JwtAuthGuard)
   async delete(
     @Param('accId', ParseIntPipe) accId: number,
