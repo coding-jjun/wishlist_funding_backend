@@ -7,6 +7,7 @@ import {
   Res,
   UseGuards,
   Post,
+  Logger,
 } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
@@ -115,6 +116,9 @@ export class AuthController {
     const token = new TokenDto()
     token.accessToken = await this.authService.createAccessToken(user.userId);
     token.refreshToken = await this.authService.createRefreshToken(user.userId);
+
+    Logger.debug("accessToken: " + token.accessToken); // redirect로 변경되면서 디버그 환경에서 token을 확인하기 어려워졌습니다.
+    Logger.debug("refreshToken: " + token.refreshToken); // redirect로 변경되면서 디버그 환경에서 token을 확인하기 어려워졌습니다.
 
     res.cookie("access_token", token.accessToken, this.cookieOptions);
     res.cookie("refresh_token", token.refreshToken, this.cookieOptions);
