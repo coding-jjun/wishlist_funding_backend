@@ -276,7 +276,7 @@ export class FundingService {
     // }
 
     const gifts = await this.giftService.createOrUpdateGift(
-      funding.fundId,
+      funding_save,
       createFundingDto.gifts,
     );
 
@@ -357,6 +357,15 @@ export class FundingService {
     const { gifts, count } = await this.giftService.findAllGift(funding.fundId);
 
     return new FundingDto(funding, gifts);
+  }
+
+  async find(fundUuid: string): Promise<Funding> {
+    const funding = await this.fundingRepository.findOneBy({ fundUuid });
+    if (!funding) {
+      throw this.g2gException.FundingNotExists;
+    }
+
+    return funding;
   }
 
   async remove(fundUuid: string): Promise<void> {

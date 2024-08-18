@@ -45,13 +45,13 @@ export class FundingController {
     @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
     @Body() giftArray: GiftArray,
   ): Promise<CommonResponse> {
-    const funding = await this.fundingService.findOne(fundUuid);
+    const funding = await this.fundingService.find(fundUuid);
 
     try {
       return {
         message: 'Success',
         data: await this.giftService.createOrUpdateGift(
-          funding.fundId,
+          funding,
           giftArray.gifts,
         ),
       };
