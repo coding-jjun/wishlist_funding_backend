@@ -46,7 +46,7 @@ export class User {
   @Column('date', { nullable: true })
   userBirth: Date;
 
-  @OneToOne(() => Account, (account) => account.user, { nullable: true })
+  @OneToOne(() => Account, (account) => account.user, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'userAcc' })
   account: Account;
 

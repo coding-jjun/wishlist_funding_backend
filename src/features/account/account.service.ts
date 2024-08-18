@@ -6,6 +6,7 @@ import { CreateAccountDto } from './dto/create-account.dto';
 import { User } from 'src/entities/user.entity';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { UpdateAccountDto } from './dto/update-account.dto';
+import { ValidCheck } from 'src/util/valid-check';
 
 @Injectable()
 export class AccountService {
@@ -13,32 +14,26 @@ export class AccountService {
     @InjectRepository(Account)
     private readonly accRepository: Repository<Account>,
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
     private readonly g2gException: GiftogetherExceptions,
+    private readonly validCheck: ValidCheck,
   ) {}
 
-  async create(createAccountDto: CreateAccountDto): Promise<Account> {
+  async create(createAccountDto: CreateAccountDto, user: User): Promise<Account> {
     const account = new Account();
 
     account.accNum = createAccountDto.accNum;
     account.bank = createAccountDto.bank;
-
-    const user = await this.userRepository.findOne({
-      where: { userId: createAccountDto.userId }
-    });
-    if (!user) {
-      throw this.g2gException.UserNotFound;
-    }
-
     account.user = user;
 
     return await this.accRepository.save(account);
   }
 
-  async findOne(accId: number): Promise<Account> {
+  async findOne(accId: number, userId: number): Promise<Account> {
     const account = await this.accRepository.findOne({
-      where: { accId }
+      where: { accId },
+      relations: ['user']
     });
+    await this.validCheck.verifyUserMatch(account.user.userId, userId);
 
     if (!account) {
       throw this.g2gException.AccountNotFound;
@@ -47,10 +42,12 @@ export class AccountService {
     return account;
   }
 
-  async update(accId: number, updateAccountDto: UpdateAccountDto): Promise<Account> {
+  async update(accId: number, updateAccountDto: UpdateAccountDto, userId: number): Promise<Account> {
     const account = await this.accRepository.findOne({
-      where: { accId }
+      where: { accId },
+      relations: ['user']
     });
+    await this.validCheck.verifyUserMatch(account.user.userId, userId);
 
     if (!account) {
       throw this.g2gException.AccountNotFound;
@@ -62,17 +59,18 @@ export class AccountService {
     return await this.accRepository.save(account);
   }
 
-  async delete(accId: number): Promise<Account> {
+  async delete(accId: number, userId: number): Promise<Account> {
     const account = await this.accRepository.findOne({
-      where: { accId }
+      where: { accId },
+      relations: ['user']
     });
-
+    await this.validCheck.verifyUserMatch(account.user.userId, userId);
+    
     if (!account) {
       throw this.g2gException.AccountNotFound;
     }
 
     await this.accRepository.delete({ accId });
-
     return account;
   }
 }
