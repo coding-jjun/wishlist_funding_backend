@@ -10,13 +10,25 @@ async function bootstrap() {
   const debugOption = process.env.DEBUG === 'true';
   const nestFactoryOptions: Record<string, any> = {};
 
-  if (debugOption) {
+  if (!debugOption) {
+    // DEBUG=false
     nestFactoryOptions.httpsOptions = {
       key: fs.readFileSync(process.env.SSL_KEY_LOCATION),
       cert: fs.readFileSync(process.env.SSL_CERTIFICATE_LOCATION),
     };
+    nestFactoryOptions.logger = ['log', 'fatal', 'error', 'warn'];
+  } else {
+    // DEBUG=true
+    nestFactoryOptions.logger = [
+      'log',
+      'fatal',
+      'error',
+      'warn',
+      'debug',
+      'verbose',
+    ];
   }
-  
+
   console.log(nestFactoryOptions);
 
   const app = await NestFactory.create(AppModule, nestFactoryOptions);
