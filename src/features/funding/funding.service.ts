@@ -228,18 +228,6 @@ export class FundingService {
     );
   }
 
-  // async findMyFunds(
-  //   userId: number,
-  // ): Promise<any> {
-  //   const fundings = await this.fundingRepository
-  //   .createQueryBuilder('funding')
-  //   .where('funding.fundUser = :userId', { userId })
-  //   .andWhere('funding.endAt > :now', { now: new Date() })
-  //   .getMany();
-
-  //   return fundings;
-  // }
-
   async create(
     createFundingDto: CreateFundingDto,
     accessToken: string,
@@ -265,27 +253,27 @@ export class FundingService {
 
     const funding_save = await this.fundingRepository.save(funding);
 
-    if (createFundingDto.fundImg?.length > 0) {
-      // subId = fundId, imgType = "Funding" Image 객체를 만든다.
-      const images = createFundingDto.fundImg.map(
-        (url) => new Image(url, ImageType.Funding, funding_save.fundId),
-      );
+    // if (createFundingDto.fundImg?.length > 0) {
+    //   // subId = fundId, imgType = "Funding" Image 객체를 만든다.
+    //   const images = createFundingDto.fundImg.map(
+    //     (url) => new Image(url, ImageType.Funding, funding_save.fundId),
+    //   );
 
-      this.imageRepository.save(images);
-    } else {
-      // defaultImgId 필드에 funding 기본 이미지 ID를 넣는다.
-      if (
-        createFundingDto.defaultImgId === null ||
-        !defaultFundingImageIds.includes(createFundingDto.defaultImgId)
-      ) {
-        this.fundingRepository.remove(funding_save);
-        throw this.g2gException.DefaultImgIdNotExist;
-      }
+    //   this.imageRepository.save(images);
+    // } else {
+    //   // defaultImgId 필드에 funding 기본 이미지 ID를 넣는다.
+    //   if (
+    //     createFundingDto.defaultImgId === null ||
+    //     !defaultFundingImageIds.includes(createFundingDto.defaultImgId)
+    //   ) {
+    //     this.fundingRepository.remove(funding_save);
+    //     throw this.g2gException.DefaultImgIdNotExist;
+    //   }
 
-      await this.fundingRepository.update(funding_save.fundId, {
-        defaultImgId: createFundingDto.defaultImgId,
-      });
-    }
+    //   await this.fundingRepository.update(funding_save.fundId, {
+    //     defaultImgId: createFundingDto.defaultImgId,
+    //   });
+    // }
 
     const gifts = await this.giftService.createOrUpdateGift(
       funding.fundId,
@@ -300,7 +288,7 @@ export class FundingService {
     updateFundingDto: UpdateFundingDto,
   ): Promise<FundingDto> {
     Logger.log(updateFundingDto);
-    const { fundTitle, fundCont, fundImg, fundTheme, endAt, defaultImgId } =
+    const { fundTitle, fundCont, fundTheme, endAt } =
       updateFundingDto;
     const funding = await this.fundingRepository.findOne({
       relations: {
@@ -330,29 +318,29 @@ export class FundingService {
     }
     funding.endAt = endAt;
 
-    // 기존 image 삭제
-    this.imageRepository.delete({
-      imgType: ImageType.Funding,
-      subId: funding.fundId,
-    });
+    // // 기존 image 삭제
+    // this.imageRepository.delete({
+    //   imgType: ImageType.Funding,
+    //   subId: funding.fundId,
+    // });
 
-    if (fundImg?.length > 0) {
-      // subId = fundId, imgType = "Funding" Image 객체를 만든다.
-      const images = fundImg.map(
-        (url) => new Image(url, ImageType.Funding, fundId),
-      );
+    // if (fundImg?.length > 0) {
+    //   // subId = fundId, imgType = "Funding" Image 객체를 만든다.
+    //   const images = fundImg.map(
+    //     (url) => new Image(url, ImageType.Funding, fundId),
+    //   );
 
-      Logger.log(defaultImgId);
-      this.imageRepository.save(images);
-    } else {
-      // defaultImgId 필드에 funding 기본 이미지 ID를 넣는다.
-      if (
-        defaultImgId === undefined ||
-        !defaultFundingImageIds.includes(defaultImgId)
-      ) {
-        throw this.g2gException.DefaultImgIdNotExist;
-      }
-    }
+    //   Logger.log(defaultImgId);
+    //   this.imageRepository.save(images);
+    // } else {
+    //   // defaultImgId 필드에 funding 기본 이미지 ID를 넣는다.
+    //   if (
+    //     defaultImgId === undefined ||
+    //     !defaultFundingImageIds.includes(defaultImgId)
+    //   ) {
+    //     throw this.g2gException.DefaultImgIdNotExist;
+    //   }
+    // }
     this.fundingRepository.update(
       { fundId },
       {
@@ -360,7 +348,7 @@ export class FundingService {
         fundCont,
         fundTheme,
         endAt,
-        defaultImgId: defaultImgId ?? null,
+        // defaultImgId: defaultImgId ?? null,
       },
     );
 
