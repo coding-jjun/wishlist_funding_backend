@@ -17,7 +17,6 @@ import { Account } from 'src/entities/account.entity';
 
 @Module({
   imports: [
-    forwardRef(() => UserModule),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
     }),
