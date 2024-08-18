@@ -8,11 +8,14 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { GratitudeDto } from './dto/gratitude.dto';
 import { GratitudeService } from './gratitude.service';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { Gratitude } from 'src/entities/gratitude.entity';
+import { JwtAuthGuard } from '../auth/guard/jwt-auth-guard';
 
 @Controller('gratitude')
 export class GratitudeController {
@@ -27,9 +30,11 @@ export class GratitudeController {
   }
 
   @Post('/:fundUuid')
+  @UseGuards(JwtAuthGuard)
   async createGratitude(
     @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
     @Body() createGratitudeDto: GratitudeDto,
+    @Req() req: Request,
   ): Promise<CommonResponse> {
     return {
       message: '감사인사 생성 성공!',
@@ -41,6 +46,7 @@ export class GratitudeController {
   }
 
   @Put('/:fundUuid')
+  @UseGuards(JwtAuthGuard)
   async updateGratitude(
     @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
     @Body() updateGratitudeDto: GratitudeDto,
@@ -54,12 +60,14 @@ export class GratitudeController {
     };
   }
 
-  @Delete('/:gratId')
+  @Delete('/:fundUuid')
+  @UseGuards(JwtAuthGuard)
   async deleteGratitude(
-    @Param('gratId') gratId: number,
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
   ): Promise<CommonResponse> {
     return {
-      data: await this.gratitudeService.deleteGratitude(gratId),
+      message: '감사인사 삭제 성공했습니다',
+      data: await this.gratitudeService.deleteGratitude(fundUuid),
     };
   }
 }
