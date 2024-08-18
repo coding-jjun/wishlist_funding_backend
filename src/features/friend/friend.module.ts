@@ -8,10 +8,12 @@ import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { NotificationService } from '../notification/notification.service';
 import { Notification } from 'src/entities/notification.entity';
 import { Funding } from 'src/entities/funding.entity';
+import { AuthModule } from '../auth/auth.module';
+import { ValidCheck } from 'src/util/valid-check';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Friend, User, Notification])],
+  imports: [TypeOrmModule.forFeature([Friend, User, Notification]), AuthModule],
   controllers: [FriendController],
-  providers: [FriendService, GiftogetherExceptions],
+  providers: [FriendService, GiftogetherExceptions, ValidCheck],
 })
 export class FriendModule {}
