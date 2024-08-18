@@ -23,10 +23,7 @@ export class UserService {
   ) {}
 
   // 사용자 정보 조회
-  async getUserInfo(id: number): Promise<UserDto> {
-    const user = await this.userRepository.findOne({
-      where: { userId: id },
-    });
+  async getUserInfo(user: User): Promise<UserDto> {
     const where = user.defaultImgId
       ? { imgId: user.defaultImgId }
       : { imgType: ImageType.User, subId: user.userId };
@@ -47,11 +44,9 @@ export class UserService {
 
 
   async updateUser(
-    userId: number,
+    user: User,
     updateUserDto: UpdateUserDto,
   ): Promise<UserDto> {
-    const user = await this.userRepository.findOne({ where: { userId } });
-
     user.userNick = updateUserDto.userNick;
     user.userPw = updateUserDto.userPw;
     user.userName = updateUserDto.userName;
@@ -70,7 +65,7 @@ export class UserService {
 
     if (updateUserDto.userImg) {
       user.defaultImgId = null;
-      user.image = new Image(updateUserDto.userImg, ImageType.User, userId);
+      user.image = new Image(updateUserDto.userImg, ImageType.User, user.userId);
       imageUrl = user.image.imgUrl;
     } else {
       user.defaultImgId = updateUserDto.defaultImgId!;
@@ -80,7 +75,7 @@ export class UserService {
         })
       ).imgUrl;
     }
-    await this.userRepository.update(userId, user);
+    await this.userRepository.update(user.userId, user);
 
     return new UserDto(
       user.userNick,
@@ -95,11 +90,7 @@ export class UserService {
     );
   }
 
-  async deleteUser(userId: number): Promise<UserDto> {
-    const user = await this.userRepository.findOne({ where: { userId } });
-    if (!user) {
-      throw this.g2gException.UserAlreadyDeleted;
-    }
+  async deleteUser(user: User): Promise<UserDto> {
     await this.userRepository.softDelete(user.userId);
 
     const image = user.defaultImgId
