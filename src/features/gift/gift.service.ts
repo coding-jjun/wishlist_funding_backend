@@ -7,6 +7,7 @@ import { RequestGiftDto } from './dto/request-gift.dto';
 import { ResponseGiftDto } from './dto/response-gift.dto';
 import { isURL } from 'class-validator';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { ImageType } from 'src/enums/image-type.enum';
 
 @Injectable()
 export class GiftService {
@@ -46,14 +47,6 @@ export class GiftService {
     funding: Funding,
     gifts: RequestGiftDto[],
   ): Promise<ResponseGiftDto[]> {
-    // const funding = await this.fundingRepository.findOneBy({ fundId });
-    // if (!funding) {
-    //   throw new HttpException(
-    //     '존재하지 않는 펀딩입니다.',
-    //     HttpStatus.BAD_REQUEST,
-    //   );
-    // }
-
     const giftPromises = gifts.map(async (gift) => {
       let savedGift: Gift;
 
@@ -76,6 +69,12 @@ export class GiftService {
         // giftId가 없거나 기존 Gift를 찾지 못한 경우 새로운 Gift 생성
         savedGift = await this.createNewGift(funding, gift);
       }
+
+      // if (gift.giftImg?.length > 0) {
+      //   const images = gift.giftImg.map(
+      //     (url) => new Image(url, ImageType.Funding, savedGift.giftId)
+      //   )
+      // }
 
       return new ResponseGiftDto(savedGift);
     });

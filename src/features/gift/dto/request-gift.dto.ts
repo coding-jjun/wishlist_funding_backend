@@ -24,6 +24,10 @@ export class RequestGiftDto {
 
   @IsOptional()
   giftCont?: string;
+
+  @IsOptional()
+  @IsUrl()
+  giftImg?: string;
 }
 
 export class GiftArray {
