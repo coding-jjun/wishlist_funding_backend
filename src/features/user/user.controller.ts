@@ -6,11 +6,13 @@ import {
   Get,
   HttpException,
   HttpStatus,
-  Param,
   ParseIntPipe,
   Put,
   Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AddressService } from '../address/address.service';
@@ -19,6 +21,8 @@ import { FundingService } from '../funding/funding.service';
 import { FundTheme } from 'src/enums/fund-theme.enum';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { DonationService } from '../donation/donation.service';
+import { JwtAuthGuard } from '../auth/guard/jwt-auth-guard';
+import { User } from 'src/entities/user.entity';
 
 @Controller('user')
 export class UserController {
@@ -30,23 +34,26 @@ export class UserController {
     private readonly g2gExceptions: GiftogetherExceptions,
   ) {}
 
-  @Get('/:userId')
+  @Get()
+  @UseGuards(JwtAuthGuard)
   async getUser(
-    @Param('userId', ParseIntPipe) userId: number,
+    @Req() req: Request,
   ): Promise<CommonResponse> {
+    const user = req.user as { user: User } as any;
     try {
       return {
         message: '사용자 정보 조회에 성공하였습니다.',
-        data: await this.userService.getUserInfo(userId),
+        data: await this.userService.getUserInfo(user),
       };
     } catch (error) {
       throw this.g2gExceptions.UserNotFound;
     }
   }
 
-  @Get(':userId/funding')
+  @Get('/funding')
+  @UseGuards(JwtAuthGuard)
   async findAll(
-    @Param('userId') userId: number,
+    @Req() req: Request,
     @Query('fundPublFilter', new DefaultValuePipe('both'))
     fundPublFilter: 'all' | 'friends' | 'both' | 'mine',
     @Query(
@@ -66,11 +73,12 @@ export class UserController {
     @Query('lastFundUuid', new DefaultValuePipe(undefined)) lastFundUuid?: string,
     @Query('lastEndAt', new DefaultValuePipe(undefined)) lastEndAt?: string,
   ): Promise<CommonResponse> {
+    const user = req.user as { user: User } as any;
     try {
       const themesArray = Array.isArray(fundThemes) ? fundThemes : [fundThemes];
       const lastEndAtDate = lastEndAt ? new Date(lastEndAt) : undefined;
       const data = await this.fundService.findAll(
-        userId,
+        user.userId,
         fundPublFilter,
         themesArray,
         status,
@@ -86,58 +94,66 @@ export class UserController {
     }
   }
 
-  @Get('/:userId/donation')
+  @Get('/donation')
+  @UseGuards(JwtAuthGuard)
   async getUserDonation(
-    @Param('userId', ParseIntPipe) userId: number,
+    @Req() req: Request,
     @Query('status', new DefaultValuePipe('ongoing')) status: 'ongoing' | 'ended',
     @Query('lastId', new DefaultValuePipe(null)) lastId?: number,
   ): Promise<CommonResponse> {
+    const user = req.user as { user: User } as any;
     try {
       return {
         message: 'Success',
-        data: await this.donaService.findMineAll(userId, status, lastId)
+        data: await this.donaService.findMineAll(user.userId, status, lastId)
       }
     } catch (error) {
       throw error;
     }
   }
 
-  @Get('/:userId/address')
+  @Get('/address')
+  @UseGuards(JwtAuthGuard)
   async getUserAddress(
-    @Param('userId', ParseIntPipe) userId: number,
+    @Req() req: Request
   ): Promise<CommonResponse> {
+    const user = req.user as { user: User } as any;
     try {
       return {
         message: 'success',
-        data: await this.addrService.findAll(userId),
+        data: await this.addrService.findAll(user.userId),
       };
     } catch (error) {
       throw error;
     }
   }
 
-  @Put('/:userId')
+  @Put()
+  @UseGuards(JwtAuthGuard)
   async updateUser(
-    @Param('userId', ParseIntPipe) userId: number,
+    @Req() req: Request,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<CommonResponse> {
+    const user = req.user as { user: User } as any;
     try {
       return {
         message: '사용자 정보 갱신에 성공하였습니다.',
-        data: await this.userService.updateUser(userId, updateUserDto),
+        data: await this.userService.updateUser(user, updateUserDto),
       };
     } catch (error) {
       throw this.g2gExceptions.UserNotUpdated;
     }
   }
 
-  @Delete('/:userId')
+  @Delete()
+  @UseGuards(JwtAuthGuard)
   async deleteUser(
-    @Param('userId', ParseIntPipe) userId: number,
+    @Req() req: Request
   ): Promise<CommonResponse> {
+    const user = req.user as { user: User } as any;
     return {
       message: '사용자 정보 삭제에 성공하였습니다.',
-      data: await this.userService.deleteUser(userId),
+      data: await this.userService.deleteUser(user),
     };
   }
 }

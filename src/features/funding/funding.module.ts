@@ -16,13 +16,16 @@ import { DonationService } from '../donation/donation.service';
 import { Donation } from 'src/entities/donation.entity';
 import { RollingPaper } from 'src/entities/rolling-paper.entity';
 import { RollingPaperService } from '../rolling-paper/rolling-paper.service';
+import { ValidCheck } from 'src/util/valid-check';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Funding, User, Comment, Friend, Gift, Image, Notification, Donation, RollingPaper]),
+    AuthModule
   ],
   controllers: [FundingController],
-  providers: [FundingService, GiftService, DonationService, RollingPaperService, GiftogetherExceptions, FundingTasksService],
+  providers: [FundingService, GiftService, DonationService, RollingPaperService, GiftogetherExceptions, FundingTasksService, ValidCheck],
   exports: [FundingService],
 })
 export class FundingModule {}

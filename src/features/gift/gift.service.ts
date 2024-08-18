@@ -43,16 +43,9 @@ export class GiftService {
   }
 
   async createOrUpdateGift(
-    fundId: number,
+    funding: Funding,
     gifts: RequestGiftDto[],
   ): Promise<ResponseGiftDto[]> {
-    const funding = await this.fundingRepository.findOneBy({ fundId });
-    if (!funding) {
-      throw new HttpException(
-        '존재하지 않는 펀딩입니다.',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
 
     const giftPromises = gifts.map(async (gift) => {
       let savedGift: Gift;

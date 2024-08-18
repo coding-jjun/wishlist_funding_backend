@@ -180,12 +180,10 @@ export class DonationService {
     }
   }
 
-  async findAll(fundUuid: string, lastId?: number): Promise<{donations: DonationListDto[], lastId: number}> {
-    const fund = await this.fundingRepo.findOne({ where: { fundUuid }});
-
+  async findAll(funding: Funding, lastId?: number): Promise<{donations: DonationListDto[], lastId: number}> {
     const query = this.donationRepo.createQueryBuilder('donation')
       .orderBy('donation.donId', 'DESC')
-      .where('donation.funding = :fundId', { fundId : fund.fundId })
+      .where('donation.funding = :fundId', { fundId : funding.fundId })
       .leftJoinAndSelect('donation.user', 'user')
       .leftJoinAndMapOne('user.image', Image, 'image', '(user.defaultImgId = image.imgId OR (user.defaultImgId IS NULL AND image.subId = user.userId AND image.imgType = :userType))', { userType: ImageType.User })
 
