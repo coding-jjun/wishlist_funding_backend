@@ -11,6 +11,9 @@ import { Image } from './image.entity';
 
 @Entity()
 export class Gratitude {
+  /**
+   * fundId와 동일한 값을 가지고 있습니다.
+   */
   @PrimaryColumn()
   gratId: number;
 
