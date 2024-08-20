@@ -5,6 +5,9 @@ import { IsNotEmpty, IsNumber, IsOptional, IsUrl } from 'class-validator';
 export class UpdateUserDto {
   @IsNotEmpty()
   userNick: string;
+  
+  @IsNotEmpty()
+  userPw: string;
 
   @IsNotEmpty()
   userName: string;

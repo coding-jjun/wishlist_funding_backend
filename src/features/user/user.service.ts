@@ -51,11 +51,15 @@ export class UserService {
     userDto: UpdateUserDto,
   ): Promise<UserDto> {
     user.userNick = userDto.userNick;
-    user.userPw = userDto.userPw;
     user.userName = userDto.userName;
     user.userPhone = userDto.userPhone;
     user.userBirth = userDto.userBirth;
     user.userEmail = userDto.userEmail;
+    
+    if (userDto.userPw) {
+      const hashPw = await bcrypt.hash(userDto.userPw, 10);
+      user.userPw = hashPw;
+    }
 
     let imageUrl = '';
 
