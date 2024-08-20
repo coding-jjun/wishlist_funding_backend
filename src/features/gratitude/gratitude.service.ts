@@ -52,7 +52,7 @@ export class GratitudeService {
       const images = await this.imgRepo.find({
         where: { imgType: ImageType.Gratitude, subId: grat.gratId },
       });
-      returnImgUrl.push(images.map((i) => i.imgUrl));
+      returnImgUrl.push(...images.map((i) => i.imgUrl));
     }
 
     return new GetGratitudeDto(
