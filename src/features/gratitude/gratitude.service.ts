@@ -72,26 +72,24 @@ export class GratitudeService {
     });
     if (!funding) throw this.g2gException.FundingNotExists;
 
-    const grat = await this.gratitudeRepo.findOne({
+    let grat = await this.gratitudeRepo.findOne({
       where: { gratId: funding.fundId },
     });
     if (grat) throw this.g2gException.GratitudeAlreadyExists;
+
+    grat = new Gratitude(
+      funding.fundId,
+      gratitudeDto.gratTitle,
+      gratitudeDto.gratCont,
+    );
 
     const returnImgUrl = gratitudeDto.gratImg;
 
     if (gratitudeDto.gratImg.length > 0) {
       // 사용자 정의 이미지 제공시,
       // 1. 새 grat 생성 및 저장.
-      // 2. gratId를 subId로 갖는 새 image 생성 및 저장.
-      const insertResult = await this.gratitudeRepo.insert(
-        new Gratitude(
-          funding.fundId,
-          gratitudeDto.gratTitle,
-          gratitudeDto.gratCont,
-        ),
-      );
-
-      const grat = insertResult.generatedMaps[0] as Gratitude;
+      // 2. gratId(=fundId)를 subId로 갖는 새 image 생성 및 저장.
+      this.gratitudeRepo.insert(grat);
 
       this.imgRepo.insert(
         gratitudeDto.gratImg.map(
@@ -106,11 +104,6 @@ export class GratitudeService {
       // 기본 이미지 제공시,
       // 1. defaultImgId를 갖는 새 grat 생성 및 저장.
 
-      const grat = new Gratitude(
-        funding.fundId,
-        gratitudeDto.gratTitle,
-        gratitudeDto.gratCont,
-      );
       grat.defaultImgId = gratitudeDto.defaultImgId!;
 
       this.gratitudeRepo.insert(grat);
