@@ -41,7 +41,7 @@ export class GratitudeService {
     });
     if (!grat) throw this.g2gException.GratitudeNotExist;
 
-    let returnImgUrl = [];
+    let returnImgUrl: string[] = [];
 
     if (grat.defaultImgId) {
       const img = await this.imgRepo.findOne({
