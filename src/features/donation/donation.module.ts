@@ -9,10 +9,15 @@ import { Funding } from 'src/entities/funding.entity';
 import { User } from 'src/entities/user.entity';
 import { Image } from 'src/entities/image.entity';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { AuthModule } from '../auth/auth.module';
+import { ValidCheck } from 'src/util/valid-check';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Donation, RollingPaper, Funding, User, Image])],
+  imports: [
+    TypeOrmModule.forFeature([Donation, RollingPaper, Funding, User, Image]),
+    AuthModule
+  ],
   controllers: [DonationController],
-  providers: [DonationService, RollingPaperService, GiftogetherExceptions],
+  providers: [DonationService, RollingPaperService, GiftogetherExceptions, ValidCheck],
 })
 export class DonationModule {}
