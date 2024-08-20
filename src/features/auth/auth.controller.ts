@@ -151,9 +151,9 @@ export class AuthController {
     return res.redirect(process.env.LOGIN_URL);
   }
 
-  @Get('/token')
+  @Post('/token')
   async reIssueAccessToken(@Body() tokenDto: TokenDto): Promise<CommonResponse>{
-    this.authService.chkValidRefreshToken(tokenDto.userId, tokenDto.refreshToken);
+    await this.authService.chkValidRefreshToken(tokenDto.userId, tokenDto.refreshToken);
     return {
       message: 'Access Token 재발급 완료',
       data: await this.authService.createAccessToken(tokenDto.userId)
