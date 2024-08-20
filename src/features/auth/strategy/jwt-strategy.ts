@@ -26,10 +26,13 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
    * @param tokenInfo : passport 에서 자동으로 secretKey를 이용해 token 을 decode 한다.
    * @param done 
    */
-  async validate(tokenInfo: any, done:any) {
+  async validate(tokenInfo: any, done: any) {
     // 사용자 인증/인가
     const userId = tokenInfo.userId;
-    const user =  await this.userRepository.findOneBy({userId});
+    const user = await this.userRepository.findOne({
+      where: { userId },
+      relations: ['account']
+    });
     if(!user){
       throw this.jwtException.UserNotFound;
     }

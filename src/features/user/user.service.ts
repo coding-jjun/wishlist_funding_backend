@@ -8,6 +8,7 @@ import { Image } from 'src/entities/image.entity';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { ImageType } from 'src/enums/image-type.enum';
 import { UserDto } from './dto/user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -39,36 +40,38 @@ export class UserService {
       user.userId,
       user.userEmail,
       user.authId,
+      user.account?.bank,
+      user.account?.accNum
     );
   }
 
 
   async updateUser(
     user: User,
-    updateUserDto: UpdateUserDto,
+    userDto: UpdateUserDto,
   ): Promise<UserDto> {
-    user.userNick = updateUserDto.userNick;
-    user.userPw = updateUserDto.userPw;
-    user.userName = updateUserDto.userName;
-    user.userPhone = updateUserDto.userPhone;
-    user.userBirth = updateUserDto.userBirth;
-    user.userEmail = updateUserDto.userEmail;
+    user.userNick = userDto.userNick;
+    user.userPw = userDto.userPw;
+    user.userName = userDto.userName;
+    user.userPhone = userDto.userPhone;
+    user.userBirth = userDto.userBirth;
+    user.userEmail = userDto.userEmail;
 
-    if (updateUserDto.userAcc) {
+    if (userDto.userAcc) {
       const account = await this.accRepository.findOneBy({
-        accId: updateUserDto.userAcc,
+        accId: userDto.userAcc,
       });
       user.account = account;
     }
 
     let imageUrl = '';
 
-    if (updateUserDto.userImg) {
+    if (userDto.userImg) {
       user.defaultImgId = null;
-      user.image = new Image(updateUserDto.userImg, ImageType.User, user.userId);
+      user.image = new Image(userDto.userImg, ImageType.User, user.userId);
       imageUrl = user.image.imgUrl;
     } else {
-      user.defaultImgId = updateUserDto.defaultImgId!;
+      user.defaultImgId = userDto.defaultImgId;
       imageUrl = (
         await this.imgRepository.findOne({
           where: { imgId: user.defaultImgId },
@@ -87,6 +90,8 @@ export class UserService {
       user.userId,
       user.userEmail,
       user.authId,
+      user.account?.bank,
+      user.account?.accNum
     );
   }
 
@@ -113,11 +118,4 @@ export class UserService {
       user.authId,
     );
   }
-
-  // 사용자 계좌 조회
-  // async getUserAccount(userId: number) {
-  //     const account = await this.accountRepository.findOneBy({ userId: userId });
-
-  //     return account;
-  // }
 }

@@ -133,7 +133,7 @@ export class AuthService {
   }
 
   async createUser(userDto: CreateUserDto) {
-    const { userImg, userAcc, userPw, defaultImgId, ...userInfo } = userDto;
+    const { userImg, userPw, defaultImgId, ...userInfo } = userDto;
     const user = new User();
 
     Object.assign(user, userInfo);
@@ -146,15 +146,6 @@ export class AuthService {
     }
 
     try {
-      // Account
-      if (userAcc) {
-        const account = await this.accRepository.findOneBy({
-          accId: userAcc,
-        });
-        if (account) {
-          userSaved.account = account;
-        }
-      }
       // Image
       let imgUrl = null;
       if (userImg) {
