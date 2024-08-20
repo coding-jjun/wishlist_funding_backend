@@ -15,10 +15,6 @@ export class UpdateUserDto {
   @IsNotEmpty()
   userBirth: Date;
 
-  @IsOptional()
-  @IsNumber()
-  userAcc?: number;
-
   /*
    * fundImg와 defaultImgId 둘 중에 하나만 null이어야 함
    */

@@ -57,13 +57,6 @@ export class UserService {
     user.userBirth = userDto.userBirth;
     user.userEmail = userDto.userEmail;
 
-    if (userDto.userAcc) {
-      const account = await this.accRepository.findOneBy({
-        accId: userDto.userAcc,
-      });
-      user.account = account;
-    }
-
     let imageUrl = '';
 
     if (userDto.userImg) {

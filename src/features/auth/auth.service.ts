@@ -192,18 +192,11 @@ export class AuthService {
 
   async updateUser(user: User, userDto: UpdateUserDto): Promise<UserDto> {
     // TODO 사용자 정보를 repo에서 조회 후 updateUser 하도록 refactoring 예정
-    const { userImg, userAcc, ...userInfo } = userDto;
+    const { userImg, ...userInfo } = userDto;
     const userId = user.userId;
     const defaultImgId = userDto.defaultImgId;
 
     Object.assign(user, userInfo);
-
-    if (userAcc) {
-      const account = await this.accRepository.findOneBy({
-        accId: userAcc,
-      });
-      user.account = account;
-    }
 
     // 0. image 테이블에 등록된 사용자 프로필 이미지 삭제
     this.imgRepository.delete({ imgType: ImageType.User, imgId: userId });
