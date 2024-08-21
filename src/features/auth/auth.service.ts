@@ -306,9 +306,11 @@ export class AuthService {
   }
 
   
-  async logout(userId: number, refreshToken: string) {
+  async logout(refreshToken: string) {
+    const tokenInfo = await this.verifyRefreshToken(refreshToken);
+    const userId = tokenInfo.userId;
 
-    await this.chkValidRefreshToken(userId, refreshToken);
+    await this.chkValidRefreshToken(refreshToken);
     try {
     
       // refresh token blacklist 등록
@@ -326,16 +328,12 @@ export class AuthService {
 
 
   // refresh token 유효성 검사 절차
-  async chkValidRefreshToken(userId:number, refreshToken: string){
+  async chkValidRefreshToken(refreshToken: string): Promise<number> {
     if( !refreshToken){
       throw this.jwtException.TokenMissing;
     }
     const tokenInfo = await this.verifyRefreshToken(refreshToken);
-    const storedId = tokenInfo.userId;
-
-    if(userId != storedId){
-      throw this.jwtException.NotValidToken;
-    }
+    const userId = tokenInfo.userId;
     
     const isInBlackList = await this.isBlackListToken(userId, refreshToken);
     if(isInBlackList){
@@ -347,7 +345,7 @@ export class AuthService {
       // 중복 로그인시, 기존 로그인한 회원은 해당 에러에 걸린다.
       throw this.jwtException.NotValidToken;
     }
-    return true;
+    return userId;
   }
 
   

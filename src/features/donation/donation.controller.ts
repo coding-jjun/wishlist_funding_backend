@@ -5,12 +5,15 @@ import {
   Param,
   Body,
   Delete,
-  HttpException,
-  HttpStatus,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { DonationService } from './donation.service';
 import { CreateDonationDto } from './dto/create-donation.dto';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
+import { JwtAuthGuard } from '../auth/guard/jwt-auth-guard';
+import { User } from 'src/entities/user.entity';
+import { Request } from 'express';
 
 @Controller('donation')
 export class DonationController {
@@ -19,15 +22,54 @@ export class DonationController {
   // // 펀딩페이지에서 후원하기 + 롤링페이퍼 등록
   // @Get(':fundUuid')
   // async findOne(@Param('fundUuid', ParseUUIDPipe) fundUuid: string): Promise<CommonResponse> {
+
+  // 회원 후원 생성
   @Post('/:fundUuid')
-  async createDonation(
+  @UseGuards(JwtAuthGuard)
+  async createUserDonation(
+    @Req() req: Request,
+    @Param('fundUuid') fundUuid: string,
+    @Body() createDonationDto: CreateDonationDto,
+  ): Promise<CommonResponse> {
+    const user = req.user as { user: User } as any;
+    try {
+      return {
+        message: 'Donation 생성 완료',
+        data: await this.donationService.createUserDonation(
+          fundUuid,
+          createDonationDto,
+          user
+        ),
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // 회원 후원 취소
+  @Delete('/:donId')
+  @UseGuards(JwtAuthGuard)
+  async deleteDonation(
+    @Req() req: Request,
+    @Param('donId') donId: number) {
+      const user = req.user as { user: User } as any;
+    return {
+      message: 'Donation 삭제 성공',
+      data: await this.donationService.deleteDonation(user.userId, donId),
+    };
+  }
+
+
+  // 비회원 후원 생성  
+  @Post('/guest/:fundUuid')
+  async createGuestDonation(
     @Param('fundUuid') fundUuid: string,
     @Body() createDonationDto: CreateDonationDto,
   ): Promise<CommonResponse> {
     try {
       return {
         message: 'Donation 생성 완료',
-        data: await this.donationService.createDonation(
+        data: await this.donationService.createGuestDonation(
           fundUuid,
           createDonationDto,
         ),
@@ -37,17 +79,8 @@ export class DonationController {
     }
   }
 
-  // 마이페이지에서 후원내역 조회
-  @Get()
-  async getAllDonations() {
-    return {
-      message: 'Donation list 조회 성공',
-      data: await this.donationService.getAllDonations(),
-    };
-  }
-
   // 비회원 후원내역 조회
-  @Get('/:orderId')
+  @Get('/guest/:orderId')
   async getOneDonation(@Param('orderId') orderId: string) {
     return {
       message: 'Donation 조회 성공',
@@ -55,12 +88,13 @@ export class DonationController {
     };
   }
 
-  // 후원 취소
-  @Delete('/:donId')
-  async deleteDonation(@Param('donId') donId: number) {
+  // 비회원 후원 취소
+  @Delete('/guest/:orderId')
+  async deleteGuestDonation(@Param('orderId') orderId: string) {
     return {
       message: 'Donation 삭제 성공',
-      data: await this.donationService.deleteDonation(donId),
+      data: await this.donationService.deleteGuestDonation(orderId),
     };
   }
+
 }
