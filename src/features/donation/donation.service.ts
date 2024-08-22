@@ -17,6 +17,7 @@ import { Image } from 'src/entities/image.entity';
 import { ImageType } from 'src/enums/image-type.enum';
 import { MyDonationListDto } from './dto/my-donation-list.dto';
 import { DonationListDto } from './dto/other-donation-list.dto';
+import { ValidCheck } from 'src/util/valid-check';
 
 @Injectable()
 export class DonationService {
@@ -38,10 +39,10 @@ export class DonationService {
     private readonly g2gException: GiftogetherExceptions,
 
     private eventEmitter: EventEmitter2,
+    private readonly validCheck: ValidCheck,
   ) {}
 
-  async getAllDonations(): Promise<Donation[]> {
-    const userId = 1;
+  async getAllDonations(userId: number): Promise<Donation[]> {
     // TODO: donation paging 처리
     const result = await this.donationRepo
       .createQueryBuilder('d')
@@ -64,23 +65,6 @@ export class DonationService {
     return result;
   }
 
-  async createOrFindDonator(
-    userId: number,
-    guest: CreateGuestDto,
-  ): Promise<User> {
-    if (guest) {
-      const { userNick, userPhone, accBank, accNum } = guest;
-      const user = new User();
-      // TODO 주소관련 정보
-      // const address = new Address();
-      user.userNick = userNick;
-      user.userPhone = userPhone;
-      // user.accId = 1;
-      return this.userRepo.save(user);
-    }
-    return this.userRepo.findOne({ where: { userId } });
-  }
-
   async updateFundingSum(funding: Funding, donAmnt: number) {
     funding.fundSum += donAmnt;
     // TODO 펀딩 목표금액 달성 확인 후 Notification
@@ -92,23 +76,43 @@ export class DonationService {
     return funding;
   }
 
-  // CREATE
-  async createDonation(fundUuid: string, createDonationDto: CreateDonationDto) {
+  async validFundingDate(fundUuid: string){
     const funding = await this.fundingRepo.findOne({ where: { fundUuid } });
     const now = getNow();
 
     if (new Date(funding.endAt).getTime() < new Date(now).getTime()) {
       throw this.g2gException.FundingClosed;
     }
-     
-    const tmpUserId = 1;
+    return funding;
+  }
+
+  async createUserDonation(fundUuid: string, createDonationDto: CreateDonationDto, user:User){
+    const funding = await this.validFundingDate(fundUuid);
+    return await this.createDonation(funding, createDonationDto, user);
+  }
+
+  async createGuest(guest: CreateGuestDto){
+    if(!guest || typeof guest === 'string'){
+      throw this.g2gException.UserFailedToCreate
+    }
+    const { userNick, userPhone, accBank, accNum } = guest;
+    const user = new User();
+    // TODO 주소관련 정보
+    // const address = new Address();
+    user.userNick = userNick;
+    user.userPhone = userPhone;
+    // user.accId = 1;
+    return this.userRepo.save(user);
+  }
+
+  async createGuestDonation(fundUuid: string, createDonationDto: CreateDonationDto){
+    const funding = await this.validFundingDate(fundUuid);
+    const user = await this.createGuest(createDonationDto.guest);
+    return await this.createDonation(funding, createDonationDto, user);
+  }
+
+  async createDonation(funding: Funding, createDonationDto: CreateDonationDto, user:User) {
     const donAmnt = createDonationDto.donAmnt;
-
-    const user = await this.createOrFindDonator(
-      tmpUserId,
-      createDonationDto.guest,
-    );
-
     const updateFunding = await this.updateFundingSum(funding, donAmnt);
 
     const donation = new Donation();
@@ -135,7 +139,7 @@ export class DonationService {
     if (updateFunding.fundSum >= updateFunding.fundGoal) {
       this.eventEmitter.emit('FundAchieve', {
         recvId: updateFunding.fundUser,  // Handling server as a sender
-        subId: fundUuid
+        subId: funding.fundUuid
       });
     }
 
@@ -143,11 +147,10 @@ export class DonationService {
     this.eventEmitter.emit('NewDonate', {
       recvId: updateFunding.fundUser,
       sendId: user.userId,
-      subId: fundUuid
+      subId: funding.fundUuid
     });
 
     return new DonationDto(savedDonation, rollingPaper.rollId);
-    // TODO 후원 등록 완료 Notification
   }
   
   async findMineAll(userId: number, status: string, lastId?: number): Promise<{donations: MyDonationListDto[], lastId: number}> {
@@ -180,12 +183,10 @@ export class DonationService {
     }
   }
 
-  async findAll(fundUuid: string, lastId?: number): Promise<{donations: DonationListDto[], lastId: number}> {
-    const fund = await this.fundingRepo.findOne({ where: { fundUuid }});
-
+  async findAll(funding: Funding, lastId?: number): Promise<{donations: DonationListDto[], lastId: number}> {
     const query = this.donationRepo.createQueryBuilder('donation')
       .orderBy('donation.donId', 'DESC')
-      .where('donation.funding = :fundId', { fundId : fund.fundId })
+      .where('donation.funding = :fundId', { fundId : funding.fundId })
       .leftJoinAndSelect('donation.user', 'user')
       .leftJoinAndMapOne('user.image', Image, 'image', '(user.defaultImgId = image.imgId OR (user.defaultImgId IS NULL AND image.subId = user.userId AND image.imgType = :userType))', { userType: ImageType.User })
 
@@ -202,11 +203,34 @@ export class DonationService {
     }
   } 
 
-  // DELETE
-  async deleteDonation(donId: number): Promise<Boolean> {
-    const donation = await this.donationRepo.findOne({ where: { donId } });
+  // Guest Delete
+  async deleteGuestDonation(orderId: string): Promise<Boolean> {
+    const donation = await this.donationRepo.findOne({
+      where: { orderId },
+    });
     if (donation) {
       console.log(donation);
+      await this.donationRepo.softDelete(donation.donId);
+      await this.rollingPaperRepo.softDelete({ rollId: donation.donId });
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  // DELETE
+  async deleteDonation(userId:number, donId: number): Promise<Boolean> {
+    const donation = await this.donationRepo.findOne({
+      relations: {
+        user : true,
+      },
+      where: { donId },
+    });
+    if (donation) {
+      console.log(donation);
+
+      // userId 유효성 검사
+      await this.validCheck.verifyUserMatch(donation.user.userId, userId)
       await this.donationRepo.softDelete(donId);
       await this.rollingPaperRepo.softDelete({ rollId: donId });
       return true;

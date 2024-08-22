@@ -24,6 +24,7 @@ import { LoginDto } from './dto/login.dto';
 import { ValidDto } from './dto/valid.dto';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { TokenDto } from './dto/token.dto';
+import { RefreshTokenDto } from './dto/refresh.token.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -37,7 +38,7 @@ export class AuthController {
     path: '/',
     secure: true,
     // sameSite: 'none' as 'none', // 크로스 도메인 요청을 허용하기 위해 none으로 설정
-    domain: '.giftogether.co.kr' // 애플리케이션 도메인으로 설정
+    domain: process.env.COOKIE_DOMAIN // 애플리케이션 도메인으로 설정
   };
 
   @Get('kakao')
@@ -151,18 +152,19 @@ export class AuthController {
     return res.redirect(process.env.LOGIN_URL);
   }
 
-  @Get('/token')
-  async reIssueAccessToken(@Body() tokenDto: TokenDto): Promise<CommonResponse>{
-    this.authService.chkValidRefreshToken(tokenDto.userId, tokenDto.refreshToken);
+  @Post('/token')
+  async reIssueAccessToken(@Body() tokenDto: RefreshTokenDto): Promise<CommonResponse>{
+    const userId = await this.authService.chkValidRefreshToken(tokenDto.refreshToken);
     return {
       message: 'Access Token 재발급 완료',
-      data: await this.authService.createAccessToken(tokenDto.userId)
+      data: await this.authService.createAccessToken(userId),
     }; 
   }
   
   @Post('/logout')
-  async logout(@Body() tokenDto: TokenDto): Promise<CommonResponse>{
-    await this.authService.logout(tokenDto.userId, tokenDto.refreshToken);
+  @UseGuards(JwtAuthGuard)
+  async logout(@Body() tokenDto: RefreshTokenDto): Promise<CommonResponse>{
+    await this.authService.logout(tokenDto.refreshToken);
     return {
       message: '로그아웃 성공',
       data: true

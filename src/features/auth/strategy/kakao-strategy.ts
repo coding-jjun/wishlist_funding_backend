@@ -7,6 +7,7 @@ import { AuthType } from 'src/enums/auth-type.enum';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { TokenDto } from '../dto/token.dto';
+import { DefaultImageId } from 'src/enums/default-image-id';
 
 @Injectable()
 export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
@@ -34,7 +35,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
 
     createUserDto.authType = AuthType.Kakao;
     createUserDto.authId = resProfile.id;
-    createUserDto.userEmail = kakaoAccount.name || null;
+    createUserDto.userEmail = kakaoAccount.email;
     createUserDto.userName = kakaoAccount.name;
 
     // user == 로그인
@@ -48,6 +49,8 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
       const isValidNick = await this.authService.validUserInfo("userNick", kakaoAccount.profile.nickname);
       if(isValidNick){
         createUserDto.userNick = kakaoAccount.profile.nickname;
+      }else{
+        // TODO 기본 닉네임 생성
       }
     
       // 핸드폰 번호 유효성 검증
@@ -66,10 +69,8 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
           kakaoAccount.birthday,
         );
       }
+      createUserDto.userImg = kakaoAccount.profile.thumbnail_image_url;
 
-      if (kakaoAccount.profile.is_default_image) {
-        createUserDto.userImg = kakaoAccount.profile.thumbnail_image_url;
-      }
       user = await this.authService.createUser(createUserDto);
       type = "signup"
     }else{

@@ -1,4 +1,4 @@
-import { Logger, Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { NotificationModule } from './features/notification/notification.module';
@@ -26,21 +26,21 @@ import { Notification } from './entities/notification.entity';
 import { TokenModule } from './features/open-bank/token/token.module';
 import { OpenBankToken } from './entities/open-bank-token.entity';
 import { Account } from './entities/account.entity';
+import { ScheduleModule } from '@nestjs/schedule';
 import { MulterModule } from '@nestjs/platform-express';
 import { ImageModule } from './features/image/image.module';
-import { Gift } from './entities/gift.entity';
 import { GiftModule } from './features/gift/gift.module';
-import { GiftogetherError } from './entities/error.entity';
 import { ExceptionModule } from './filters/exception.module';
-import { APP_INTERCEPTOR } from '@nestjs/core';
-import { TransformInterceptor } from './transform/transform.interceptor';
 import { AuthModule } from './features/auth/auth.module';
 import { RedisModule } from './features/auth/redis.module';
 import { EventModule } from './features/event/event.module';
 import { AccountModule } from './features/account/account.module';
-import { ScheduleModule } from '@nestjs/schedule';
 import { ValidCheckModule } from './util/valid-check.module';
-
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { TransformInterceptor } from './transform/transform.interceptor';
+import { Gift } from './entities/gift.entity';
+import { GiftogetherError } from './entities/error.entity';
+import { GiftogetherMiddleware } from './interfaces/giftogether.middleware';
 @Module({
   imports: [
     ScheduleModule.forRoot(),
@@ -114,7 +114,11 @@ import { ValidCheckModule } from './util/valid-check.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {  
+  configure(consumer: MiddlewareConsumer): any {
+    consumer.apply(GiftogetherMiddleware).forRoutes('');
+  }
+}
 
 export function getNow(): string {
   const event = new Date();

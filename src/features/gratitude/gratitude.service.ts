@@ -41,7 +41,7 @@ export class GratitudeService {
     });
     if (!grat) throw this.g2gException.GratitudeNotExist;
 
-    let returnImgUrl = [];
+    let returnImgUrl: string[] = [];
 
     if (grat.defaultImgId) {
       const img = await this.imgRepo.findOne({
@@ -52,7 +52,7 @@ export class GratitudeService {
       const images = await this.imgRepo.find({
         where: { imgType: ImageType.Gratitude, subId: grat.gratId },
       });
-      returnImgUrl.push(images.map((i) => i.imgUrl));
+      returnImgUrl.push(...images.map((i) => i.imgUrl));
     }
 
     return new GetGratitudeDto(
@@ -72,24 +72,24 @@ export class GratitudeService {
     });
     if (!funding) throw this.g2gException.FundingNotExists;
 
-    const grat = await this.gratitudeRepo.findOne({
+    let grat = await this.gratitudeRepo.findOne({
       where: { gratId: funding.fundId },
     });
     if (grat) throw this.g2gException.GratitudeAlreadyExists;
+
+    grat = new Gratitude(
+      funding.fundId,
+      gratitudeDto.gratTitle,
+      gratitudeDto.gratCont,
+    );
 
     const returnImgUrl = gratitudeDto.gratImg;
 
     if (gratitudeDto.gratImg.length > 0) {
       // 사용자 정의 이미지 제공시,
       // 1. 새 grat 생성 및 저장.
-      // 2. gratId를 subId로 갖는 새 image 생성 및 저장.
-      const grat = await this.gratitudeRepo.save(
-        new Gratitude(
-          funding.fundId,
-          gratitudeDto.gratTitle,
-          gratitudeDto.gratCont,
-        ),
-      );
+      // 2. gratId(=fundId)를 subId로 갖는 새 image 생성 및 저장.
+      this.gratitudeRepo.insert(grat);
 
       this.imgRepo.insert(
         gratitudeDto.gratImg.map(
@@ -104,11 +104,6 @@ export class GratitudeService {
       // 기본 이미지 제공시,
       // 1. defaultImgId를 갖는 새 grat 생성 및 저장.
 
-      const grat = new Gratitude(
-        funding.fundId,
-        gratitudeDto.gratTitle,
-        gratitudeDto.gratCont,
-      );
       grat.defaultImgId = gratitudeDto.defaultImgId!;
 
       this.gratitudeRepo.insert(grat);
@@ -197,16 +192,21 @@ export class GratitudeService {
     return new GetGratitudeDto(funding.fundUuid, gratTitle, gratCont, imgUrl);
   }
 
-  async deleteGratitude(gratId: number) {
-    const gratitude = await this.gratitudeRepo.findOneBy({ gratId });
+  /**
+   * HARD DELETE 라는 점에 유의할 것
+   * @param fundUuid fundId를 찾기 위해 한 번 쿼리를 날려야 함
+   * @returns boolean
+   */
+  async deleteGratitude(fundUuid: string): Promise<boolean> {
+    const fund = await this.fundingRepo.findOne({ where: { fundUuid } });
+    const gratitude = await this.gratitudeRepo.findOne({
+      where: { gratId: fund.fundId },
+    });
     if (gratitude) {
-      console.log(gratitude);
-      gratitude.isDel = true;
-      // TODO delete gratitude Images
-      await this.gratitudeRepo.save(gratitude);
+      await this.gratitudeRepo.delete({ gratId: gratitude.gratId });
       return true;
-    } else {
-      return false;
     }
+
+    throw this.g2gException.GratitudeNotExist;
   }
 }

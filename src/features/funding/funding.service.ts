@@ -16,6 +16,7 @@ import {
   defaultFundingImageIds,
 } from 'src/enums/default-image-id';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { ValidCheck } from 'src/util/valid-check';
 
 @Injectable()
 export class FundingService {
@@ -35,7 +36,24 @@ export class FundingService {
     private giftService: GiftService,
 
     private readonly g2gException: GiftogetherExceptions,
+
+    private readonly validCheck: ValidCheck
   ) {}
+
+  async findFundingByUuidAndUserId(fundUuid:string, userId: number): Promise<Funding> {
+    const funding = await this.fundingRepository.findOne({
+      relations: {
+        fundUser: true,
+      },
+      where: { fundUuid },
+    });
+    if (!funding) {
+      throw this.g2gException.FundingNotExists;
+    }
+    await this.validCheck.verifyUserMatch(funding.fundUser.userId, userId);
+    return funding;
+  }
+
 
   async findAll(
     userId: number,
@@ -230,11 +248,9 @@ export class FundingService {
 
   async create(
     createFundingDto: CreateFundingDto,
-    accessToken: string,
+    user: User,
   ): Promise<FundingDto> {
     // TODO - accessToken -> User 객체로 변환하기
-    const users = await this.userRepository.find();
-    const user = users[0];
     let funding = new Funding(
       user,
       createFundingDto.fundTitle,
@@ -286,19 +302,12 @@ export class FundingService {
   async update(
     fundUuid: string,
     updateFundingDto: UpdateFundingDto,
+    userId: number
   ): Promise<FundingDto> {
     Logger.log(updateFundingDto);
     const { fundTitle, fundCont, fundTheme, endAt } =
       updateFundingDto;
-    const funding = await this.fundingRepository.findOne({
-      relations: {
-        fundUser: true,
-      },
-      where: { fundUuid },
-    });
-    if (!funding) {
-      throw this.g2gException.FundingNotExists;
-    }
+    const funding = await this.findFundingByUuidAndUserId(fundUuid, userId);
     const fundId = funding.fundId;
 
     funding.fundTitle = fundTitle;
@@ -359,17 +368,8 @@ export class FundingService {
     return new FundingDto(funding, gifts);
   }
 
-  async find(fundUuid: string): Promise<Funding> {
-    const funding = await this.fundingRepository.findOneBy({ fundUuid });
-    if (!funding) {
-      throw this.g2gException.FundingNotExists;
-    }
-
-    return funding;
-  }
-
-  async remove(fundUuid: string): Promise<void> {
-    const funding = await this.fundingRepository.findOneBy({ fundUuid });
+  async remove(fundUuid: string, userId: number): Promise<void> {
+    const funding = await this.findFundingByUuidAndUserId(fundUuid, userId);
     this.fundingRepository.remove(funding);
   }
 }
