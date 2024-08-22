@@ -12,9 +12,6 @@ import { FundingDto } from './dto/funding.dto';
 import { UpdateFundingDto } from './dto/update-funding.dto';
 import { Image } from 'src/entities/image.entity';
 import { ImageType } from 'src/enums/image-type.enum';
-import {
-  defaultFundingImageIds,
-} from 'src/enums/default-image-id';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { ValidCheck } from 'src/util/valid-check';
 

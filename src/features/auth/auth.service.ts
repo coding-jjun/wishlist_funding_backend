@@ -8,16 +8,13 @@ import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { Image } from 'src/entities/image.entity';
 import { ImageType } from 'src/enums/image-type.enum';
 import { RedisClientType } from '@redis/client';
-import {
-  DefaultImageId,
-  defaultUserImageIds,
-} from 'src/enums/default-image-id';
 import { UserDto } from '../user/dto/user.dto';
 import { Account } from 'src/entities/account.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
+import { DefaultImageIds } from 'src/enums/default-image-id';
 
 @Injectable()
 export class AuthService {
@@ -170,7 +167,7 @@ export class AuthService {
         // 기본 이미지 제공시,
         // 1. 기본 이미지 가져오기
         // 2. user의 defaultImgId를 새 이미지의 id로 설정
-        if (!defaultImgId || !defaultUserImageIds.includes(defaultImgId))
+        if (!defaultImgId || !DefaultImageIds.User.includes(defaultImgId))
           throw this.g2gException.DefaultImgIdNotExist;
 
         const defaultImage = await this.imgRepository.findOne({
@@ -233,7 +230,7 @@ export class AuthService {
       // 1. 기본 이미지 가져오기
       // 2. user의 defaultImgId를 새 이미지의 id로 설정
 
-      if (!defaultImgId || !defaultUserImageIds.includes(defaultImgId))
+      if (!defaultImgId || !DefaultImageIds.User.includes(defaultImgId))
         throw this.g2gException.DefaultImgIdNotExist;
 
       const defaultImage = await this.imgRepository.findOne({

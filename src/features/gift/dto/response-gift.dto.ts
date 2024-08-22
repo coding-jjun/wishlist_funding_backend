@@ -7,13 +7,15 @@ export class ResponseGiftDto {
   giftOrd: number;
   giftOpt: string;
   giftCont: string;
+  giftImg: string;
 
-  constructor(gift: Gift) {
+  constructor(gift: Gift, url: string) {
     this.giftId = gift.giftId;
     this.fundId = gift.funding.fundId;
     this.giftUrl = gift.giftUrl;
     this.giftOrd = gift.giftOrd;
     this.giftOpt = gift.giftOpt;
     this.giftCont = gift.giftCont;
+    this.giftImg = url;
   }
 }
