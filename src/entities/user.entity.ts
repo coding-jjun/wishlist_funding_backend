@@ -8,7 +8,6 @@ import {
   OneToMany,
   OneToOne,
   JoinColumn,
-  ManyToOne,
 } from 'typeorm';
 import { Funding } from './funding.entity';
 import { Comment } from './comment.entity';

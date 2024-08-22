@@ -14,8 +14,8 @@ import {
 } from 'src/enums/default-image-id';
 import { UserDto } from '../user/dto/user.dto';
 import { Account } from 'src/entities/account.entity';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 
