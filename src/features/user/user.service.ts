@@ -9,6 +9,7 @@ import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { ImageType } from 'src/enums/image-type.enum';
 import { UserDto } from './dto/user.dto';
 import * as bcrypt from 'bcrypt';
+import { defaultUserImageIds } from 'src/enums/default-image-id';
 
 @Injectable()
 export class UserService {
@@ -49,71 +50,85 @@ export class UserService {
     user: User,
     userDto: UpdateUserDto,
   ): Promise<UserDto> {
-    console.log(user);
-    
+    const userId = user.userId;
+    const { userImg, defaultImgId, ...userInfo } = userDto;
+  
+    // 1. userInfo를 user 객체에 병합
+    Object.assign(user, userInfo);
+  
     let imageUrl = '';
+  
+    // 2. 이미지 처리
+    if (userImg) { // 사용자 지정 이미지가 제공된 경우
+      // 기존 사용자 지정 프로필 이미지가 있는 경우 삭제
+      if (!user.defaultImgId) {
+        await this.imgRepository.delete({
+          imgType: ImageType.User,
+          subId: userId,
+        });
+      }
+  
+      // 새로운 이미지 생성 및 저장
+      const newImage = new Image(userImg, ImageType.User, userId);
+      const savedImage = await this.imgRepository.save(newImage);
 
-    for (const key of Object.keys(userDto)) {
-      if (userDto[key] !== undefined && userDto[key] !== null) {
-        // 프로필 사진을 새로 변경하는 경우
-        if (key === 'userImg') {
-          imageUrl = userDto[key];      
-          // 기존 사용자 지정 프로필 사진이 있는 경우
-          if (!user.defaultImgId) {
-            // 기존 사용자 지정 프로필 사진 삭제
-            await this.imgRepository.delete({
-              imgType: ImageType.User,
-              subId: user.userId,
-            });
-          }
-          
-          // 새로운 이미지 생성 및 저장
-          const newImage = new Image(userDto.userImg, ImageType.User, user.userId);
-          await this.imgRepository.save(newImage);
-          
-          user.defaultImgId = null;
-        } else {
-          if (key === 'defaultImgId') {
-            if (!user.defaultImgId) {
-              await this.imgRepository.delete({
-                imgType: ImageType.User,
-                subId: user.userId,
-              });
-            }
-          }
-          user[key] = userDto[key];
+      user.defaultImgId = null;  // 기본 이미지 ID를 null로 설정
+      imageUrl = savedImage.imgUrl;  // 이미지 URL 설정
+    } else if (defaultImgId) { // 기본 이미지가 제공된 경우
+      // 기본 이미지 ID가 유효한지 확인
+      if (!defaultUserImageIds.includes(defaultImgId)) {
+        throw this.g2gException.DefaultImgIdNotExist;
+      }
+  
+      // 기존 사용자 지정 프로필 이미지가 있는 경우 삭제
+      if (!user.defaultImgId) {
+        await this.imgRepository.delete({
+          imgType: ImageType.User,
+          subId: userId,
+        });
+      }
+  
+      const defaultImage = await this.imgRepository.findOne({
+        where: { imgId: defaultImgId },
+      });
+  
+      if (defaultImage) {
+        user.defaultImgId = defaultImage.imgId;  // 기본 이미지 ID 설정
+        imageUrl = defaultImage.imgUrl;  // 이미지 URL 설정
+      } else {
+        throw this.g2gException.DefaultImgIdNotExist;
+      }
+    } else { // 기본 이미지나 사용자 지정 이미지가 제공되지 않은 경우
+      if (user.defaultImgId) {
+        const image = await this.imgRepository.findOne({
+          where: { imgId: user.defaultImgId },
+        });
+        if (image) {
+          imageUrl = image.imgUrl;  // 기존 기본 이미지의 URL 설정
+        }
+      } else {
+        const image = await this.imgRepository.findOne({
+          where: { 
+            imgType: ImageType.User,
+            subId: userId,
+          },
+        });
+        if (image) {
+          imageUrl = image.imgUrl;  // 기존 사용자 지정 이미지의 URL 설정
         }
       }
     }
   
+    // 3. 비밀번호 해시 처리
     if (userDto.userPw) {
       const hashPw = await bcrypt.hash(userDto.userPw, 10);
       user.userPw = hashPw;
     }
   
-    if (user.defaultImgId) {
-      const image = await this.imgRepository.findOne({
-        where: { imgId: user.defaultImgId },
-      });
-      if (image) {
-        imageUrl = image.imgUrl;
-      }
-    } else {
-      if (!userDto.userImg) {
-        const image = await this.imgRepository.findOne({
-          where: { 
-            imgType: ImageType.User,
-            subId: user.userId
-          },
-        });
-        if (image) {
-          imageUrl = image.imgUrl;
-        }
-      }
-    }
-
-    await this.userRepository.update(user.userId, user);
-
+    // 4. 사용자 정보 업데이트
+    await this.userRepository.update(userId, user);
+  
+    // 5. 업데이트된 사용자 정보를 반환
     return new UserDto(
       user.userNick,
       user.userName,
@@ -128,7 +143,6 @@ export class UserService {
       user.account?.accNum
     );
   }
-  
 
   async deleteUser(user: User): Promise<UserDto> {
     await this.userRepository.softDelete(user.userId);

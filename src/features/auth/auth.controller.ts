@@ -128,19 +128,6 @@ export class AuthController {
     return res.redirect(process.env.LOGIN_URL);
     
   }
-  
-
-  @Patch('/signup/extra')
-  @UseGuards(JwtAuthGuard)
-  async extraSignup(
-    @Req() req: any,
-    @Body() updateUserDto: UpdateUserDto,
-  ): Promise<CommonResponse> {
-    return {
-      message: '추가 회원가입 완료',
-      data: await this.authService.updateUser(req.user, updateUserDto)
-    }; 
-  }
 
   @Post(`/signup`)
   async signup(
