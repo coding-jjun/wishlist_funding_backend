@@ -69,7 +69,7 @@ export class GiftService {
     });
   
     if (!existGift) {
-      throw new Error('Gift not found');
+      throw this.g2gException.GiftNotFound;
     }
   
     // Update gift properties

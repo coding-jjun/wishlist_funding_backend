@@ -7,6 +7,7 @@ export enum ErrorMsg {
 
   // Gift
   IncorrectGiftUrl = '선물 URL이 유효하지 않습니다.',
+  GiftNotFound = '선물 정보가 없습니다.',
 
   // Gratitude
   GratitudeAlreadyExists = '감사인사가 이미 존재합니다.',

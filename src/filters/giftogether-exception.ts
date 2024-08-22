@@ -38,6 +38,12 @@ export class GiftogetherExceptions {
     HttpStatus.BAD_REQUEST,
   );
 
+  GiftNotFound = new GiftogetherException(
+    ErrorMsg.GiftNotFound,
+    ErrorCode.GiftNotFound,
+    HttpStatus.NOT_FOUND
+  )
+
   // Gratitude
   GratitudeAlreadyExists = new GiftogetherException(
     ErrorMsg.GratitudeAlreadyExists,
