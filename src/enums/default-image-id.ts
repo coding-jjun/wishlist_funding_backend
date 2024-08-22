@@ -1,5 +1,5 @@
 /**
- * Funding: 0 ~ 7
+ * Gift: 1 ~ 7
  * Gratitude: 8 ~ 15
  * RollingPaper: 16 ~ 23
  * User: 24 ~ 31

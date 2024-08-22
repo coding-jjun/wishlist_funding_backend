@@ -30,38 +30,20 @@ export class GiftController {
     }
   }
 
-  // @Post(':fundUuid')
-  // async createOrUpdateGift(
-  //   @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
-  //   @Body() giftArray: GiftArray,
+  // @Put(':giftId')
+  // async updateGift(
+  //   @Param('giftId', ParseIntPipe) giftId: number,
+  //   @Body() requestGiftDto: RequestGiftDto,
   // ): Promise<CommonResponse> {
-  //   const funding = await this.fundingService.findOne(fundUuid);
-
   //   try {
   //     return {
-  //       timestamp: new Date(),
   //       message: 'Success',
-  //       data: await this.giftService.createOrUpdateGift(funding.fundId, giftArray.gifts),
-  //     }
+  //       data: await this.giftService.updateGift(giftId, requestGiftDto),
+  //     };
   //   } catch (error) {
-  //     throw error
+  //     throw new HttpException('Failed to update gift', HttpStatus.BAD_REQUEST);
   //   }
   // }
-
-  @Put(':giftId')
-  async updateGift(
-    @Param('giftId', ParseIntPipe) giftId: number,
-    @Body() requestGiftDto: RequestGiftDto,
-  ): Promise<CommonResponse> {
-    try {
-      return {
-        message: 'Success',
-        data: await this.giftService.updateGift(giftId, requestGiftDto),
-      };
-    } catch (error) {
-      throw new HttpException('Failed to update gift', HttpStatus.BAD_REQUEST);
-    }
-  }
 
   @Delete(':giftId')
   async deleteGift(
