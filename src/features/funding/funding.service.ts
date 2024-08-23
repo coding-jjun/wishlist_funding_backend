@@ -14,6 +14,7 @@ import { Image } from 'src/entities/image.entity';
 import { ImageType } from 'src/enums/image-type.enum';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { ValidCheck } from 'src/util/valid-check';
+import { DefaultImageIds, getRandomDefaultImgId } from 'src/enums/default-image-id';
 
 @Injectable()
 export class FundingService {
@@ -28,7 +29,7 @@ export class FundingService {
     private friendRepository: Repository<Friend>,
 
     @InjectRepository(Image)
-    private imageRepository: Repository<Image>,
+    private imgRepository: Repository<Image>,
 
     private giftService: GiftService,
 
@@ -232,7 +233,7 @@ export class FundingService {
 
     if (fund.defaultImgId) {
       // 펀딩의 기본 이미지가 있을 경우, 그 이미지를 추가
-      const img = await this.imageRepository.findOne({
+      const img = await this.imgRepository.findOne({
         where: { imgId: fund.defaultImgId },
       });
   
@@ -241,7 +242,7 @@ export class FundingService {
       }
     } else {
       // 펀딩의 기본 이미지가 없을 경우, 펀딩과 연결된 다른 이미지들을 추가
-      const images = await this.imageRepository.find({
+      const images = await this.imgRepository.find({
         where: { imgType: ImageType.Funding, subId: fund.fundId },
       });
   
@@ -275,34 +276,29 @@ export class FundingService {
 
     const funding_save = await this.fundingRepository.save(funding);
 
-    // if (createFundingDto.fundImg?.length > 0) {
-    //   // subId = fundId, imgType = "Funding" Image 객체를 만든다.
-    //   const images = createFundingDto.fundImg.map(
-    //     (url) => new Image(url, ImageType.Funding, funding_save.fundId),
-    //   );
-
-    //   this.imageRepository.save(images);
-    // } else {
-    //   // defaultImgId 필드에 funding 기본 이미지 ID를 넣는다.
-    //   if (
-    //     createFundingDto.defaultImgId === null ||
-    //     !defaultFundingImageIds.includes(createFundingDto.defaultImgId)
-    //   ) {
-    //     this.fundingRepository.remove(funding_save);
-    //     throw this.g2gException.DefaultImgIdNotExist;
-    //   }
-
-    //   await this.fundingRepository.update(funding_save.fundId, {
-    //     defaultImgId: createFundingDto.defaultImgId,
-    //   });
-    // }
+    let fundImg : string[] = [];
+    if (createFundingDto.fundImg) {
+      // subId = fundId, imgType = "Funding" Image 객체를 만든다.
+      const image = new Image(createFundingDto.fundImg, ImageType.Funding, funding_save.fundId);
+      await this.imgRepository.save(image);
+      fundImg.push(image.imgUrl);
+    } else {
+      const defaultImgId = getRandomDefaultImgId(DefaultImageIds.Funding);
+      await this.fundingRepository.update(funding_save.fundId, { defaultImgId });
+      const image = await this.imgRepository.findOne({
+        where: { imgId: defaultImgId }
+      });
+      if (image) {
+        fundImg.push(image.imgUrl);
+      }
+    }
 
     const gifts = await this.giftService.createOrUpdateGift(
       funding_save,
       createFundingDto.gifts,
     );
 
-    return new FundingDto(funding_save, gifts);
+    return new FundingDto(funding_save, gifts, fundImg);
   }
 
   async update(
@@ -310,16 +306,16 @@ export class FundingService {
     updateFundingDto: UpdateFundingDto,
     userId: number
   ): Promise<FundingDto> {
-    Logger.log(updateFundingDto);
-    const { fundTitle, fundCont, fundTheme, endAt } =
+    const { fundTitle, fundImg, fundCont, fundTheme, endAt } =
       updateFundingDto;
     const funding = await this.findFundingByUuidAndUserId(fundUuid, userId);
     const fundId = funding.fundId;
 
     funding.fundTitle = fundTitle;
     funding.fundCont = fundCont;
-    // funding.fundImg = fundImg; // TODO - add relation on funding.entity
     funding.fundTheme = fundTheme;
+
+    let defaultImgId = null;
 
     // endAt이 앞당겨지면 안된다.
     if (funding.endAt > endAt) {
@@ -333,45 +329,73 @@ export class FundingService {
     }
     funding.endAt = endAt;
 
-    // // 기존 image 삭제
-    // this.imageRepository.delete({
-    //   imgType: ImageType.Funding,
-    //   subId: funding.fundId,
-    // });
+    // 이미지 업데이트
+    const fundingImg = await this.updateFundingImage(funding, fundImg, fundId);
 
-    // if (fundImg?.length > 0) {
-    //   // subId = fundId, imgType = "Funding" Image 객체를 만든다.
-    //   const images = fundImg.map(
-    //     (url) => new Image(url, ImageType.Funding, fundId),
-    //   );
-
-    //   Logger.log(defaultImgId);
-    //   this.imageRepository.save(images);
-    // } else {
-    //   // defaultImgId 필드에 funding 기본 이미지 ID를 넣는다.
-    //   if (
-    //     defaultImgId === undefined ||
-    //     !defaultFundingImageIds.includes(defaultImgId)
-    //   ) {
-    //     throw this.g2gException.DefaultImgIdNotExist;
-    //   }
-    // }
-    this.fundingRepository.update(
+    // Funding 업데이트
+    await this.fundingRepository.update(
       { fundId },
       {
         fundTitle,
         fundCont,
         fundTheme,
         endAt,
-        // defaultImgId: defaultImgId ?? null,
+        defaultImgId: funding.defaultImgId,
       },
     );
+  
+    const { gifts, fundImgUrls } = await this.giftService.findAllGift(funding);
+    const finalImgUrls = [fundingImg, ...fundImgUrls];
+  
+    return new FundingDto(funding, gifts, finalImgUrls);
+  }
 
-    // let gifts = await this.giftService.createGift(funding.fundId, updateFundingDto.gifts ?? []);
-
-    const { gifts, count } = await this.giftService.findAllGift(funding);
-
-    return new FundingDto(funding, gifts);
+  private async updateFundingImage(
+    funding: Funding,
+    fundImg: string | undefined,
+    fundId: number
+  ): Promise<string> {
+    if (fundImg) {
+      // 지정한 funding 이미지가 존재할 때
+      if (funding.defaultImgId) {
+        // 기본 이미지를 사용 중이었을 경우 새로운 이미지로 교체
+        const image = new Image(fundImg, ImageType.Funding, fundId);
+        await this.imgRepository.save(image);
+        funding.defaultImgId = null; // 기본 이미지를 해제
+        return fundImg;
+      } else {
+        // 기존 지정 이미지가 존재하는 경우
+        const existImg = await this.imgRepository.findOne({
+          where: { imgType: ImageType.Funding, subId: fundId },
+        });
+  
+        if (existImg && existImg.imgUrl !== fundImg) {
+          // 기존 이미지의 URL과 다르면 업데이트
+          await this.imgRepository.delete({ imgType: ImageType.Funding, subId: fundId });
+          const image = new Image(fundImg, ImageType.Funding, fundId);
+          await this.imgRepository.save(image);
+        }
+        return fundImg;
+      }
+    } else {
+      // 지정한 funding 이미지가 없을 때
+      if (funding.defaultImgId) {
+        // 기본 이미지가 설정된 경우 기본 이미지를 반환
+        const defaultImg = await this.imgRepository.findOne({
+          where: { imgId: funding.defaultImgId },
+        });
+        return defaultImg?.imgUrl || '';
+      } else {
+        // 기존 지정 이미지를 사용 중이었으나 삭제 후 기본 이미지 설정
+        await this.imgRepository.delete({ imgType: ImageType.Funding, subId: fundId });
+        const randomId = getRandomDefaultImgId(DefaultImageIds.Funding);
+        funding.defaultImgId = randomId;
+        const defaultImg = await this.imgRepository.findOne({
+          where: { imgId: randomId },
+        });
+        return defaultImg?.imgUrl || '';
+      }
+    }
   }
 
   async remove(fundUuid: string, userId: number): Promise<void> {
