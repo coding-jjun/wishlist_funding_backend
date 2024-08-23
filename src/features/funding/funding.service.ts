@@ -221,26 +221,35 @@ export class FundingService {
       relations: { fundUser: true },
       where: { fundUuid },
     });
-    const gifts = (await this.giftService.findAllGift(fund.fundId)).gifts;
+
+    if (!fund) {
+      throw this.g2gException.FundingNotExists;
+    }
+
+    const { gifts, fundImgUrls } = await this.giftService.findAllGift(fund);
+
+    let finalImgUrls: string[] = [];
 
     if (fund.defaultImgId) {
-      // fund 기본 이미지로 DTO를 생성한다.
+      // 펀딩의 기본 이미지가 있을 경우, 그 이미지를 추가
       const img = await this.imageRepository.findOne({
         where: { imgId: fund.defaultImgId },
       });
-
-      return new FundingDto(fund, gifts, [img.imgUrl]);
+  
+      if (img) {
+        finalImgUrls = [img.imgUrl, ...fundImgUrls]; // 펀딩 기본 이미지 + gift 이미지들
+      }
+    } else {
+      // 펀딩의 기본 이미지가 없을 경우, 펀딩과 연결된 다른 이미지들을 추가
+      const images = await this.imageRepository.find({
+        where: { imgType: ImageType.Funding, subId: fund.fundId },
+      });
+  
+      finalImgUrls = [...images.map((img) => img.imgUrl), ...fundImgUrls]; // 펀딩의 이미지 + gift 이미지들
     }
-
-    const images = await this.imageRepository.find({
-      where: { imgType: ImageType.Funding, subId: fund.fundId },
-    });
-
-    return new FundingDto(
-      fund,
-      gifts,
-      images.map((img) => img.imgUrl),
-    );
+  
+    // FundingDto에 펀딩 이미지와 gift 이미지 URL들을 포함하여 반환
+    return new FundingDto(fund, gifts, finalImgUrls);
   }
 
   async create(
@@ -360,7 +369,7 @@ export class FundingService {
 
     // let gifts = await this.giftService.createGift(funding.fundId, updateFundingDto.gifts ?? []);
 
-    const { gifts, count } = await this.giftService.findAllGift(funding.fundId);
+    const { gifts, count } = await this.giftService.findAllGift(funding);
 
     return new FundingDto(funding, gifts);
   }

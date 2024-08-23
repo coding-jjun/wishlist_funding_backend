@@ -19,16 +19,16 @@ import { RequestGiftDto } from './dto/request-gift.dto';
 export class GiftController {
   constructor(private readonly giftService: GiftService) {}
 
-  @Get(':fundId')
-  async findAllGift(@Param('fundId') fundId: number): Promise<CommonResponse> {
-    try {
-      return {
-        data: await this.giftService.findAllGift(fundId),
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
+  // @Get(':fundId')
+  // async findAllGift(@Param('fundId') fundId: number): Promise<CommonResponse> {
+  //   try {
+  //     return {
+  //       data: await this.giftService.findAllGift(fundId),
+  //     };
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // }
 
   // @Put(':giftId')
   // async updateGift(

@@ -9,6 +9,7 @@ import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { ImageType } from 'src/enums/image-type.enum';
 import { Image } from 'src/entities/image.entity';
 import { DefaultImageIds, getRandomDefaultImgId } from 'src/enums/default-image-id';
+import { bool } from 'sharp';
 
 @Injectable()
 export class GiftService {
@@ -26,25 +27,53 @@ export class GiftService {
   ) {}
 
   async findAllGift(
-    fundId: number,
-  ): Promise<{ gifts: ResponseGiftDto[]; count: number }> {
-    const funding = await this.fundRepository.findOneBy({ fundId });
-    if (!funding) {
-      throw new HttpException(
-        '존재하지 않는 펀딩입니다.',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
+    fund: Funding,
+  ): Promise<{ gifts: ResponseGiftDto[]; fundImgUrls: string[], count: number }> {
     const [gifts, count] = await this.giftRepository.findAndCount({
-      where: { funding: { fundId } },
+      where: { funding: { fundId: fund.fundId }},
       relations: ['funding'],
+      order: { giftOrd: 'ASC' },
     });
 
-    // Gift 배열을 ResponseGiftDto 배열로 변환
-    const responseGifts = gifts.map((gift) => new ResponseGiftDto(gift, ''));
+    const fundImgUrls: string[] = [];
 
-    return { gifts: responseGifts, count };
+    // Gift 배열을 ResponseGiftDto 배열로 변환
+    const responseGifts = await Promise.all(
+      gifts.map(async (gift) => {
+        const { imgUrl, isDef } = await this.getGiftImageUrl(gift);
+        if (imgUrl && !isDef) {
+          fundImgUrls.push(imgUrl);
+        }
+        return new ResponseGiftDto(gift, imgUrl || '');
+      })
+    );
+
+    return { gifts: responseGifts, fundImgUrls, count };
+  }
+
+  private async getGiftImageUrl(
+    gift: Gift
+  ): Promise<{ imgUrl: string | null, isDef: boolean }> {
+    let defImg = false;
+    if (gift.defaultImgId) {
+      defImg = true;
+      const image = await this.imgRepository.findOne({
+        where: { imgId: gift.defaultImgId },
+      });
+      return {
+        imgUrl: image ? image.imgUrl : null,
+        isDef: defImg,
+      }
+    }
+  
+    const image = await this.imgRepository.findOne({
+      where: { imgType: ImageType.Gift, subId: gift.giftId },
+    });
+  
+    return {
+      imgUrl: image ? image.imgUrl : null,
+      isDef: defImg,
+    };
   }
 
   async createOrUpdateGift(

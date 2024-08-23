@@ -131,6 +131,6 @@ export class Funding {
   @OneToOne(() => Image, (image) => image.imgId)
   defaultImgId?: number;
 
-  @OneToMany(() => Image, (image) => image.subId)
-  images: Image[];
+  @OneToOne(() => Image, (image) => image.subId)
+  image: Image;
 }

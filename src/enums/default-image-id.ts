@@ -3,6 +3,7 @@
  * Gratitude: 8 ~ 15
  * RollingPaper: 16 ~ 23
  * User: 24 ~ 31
+ * Funding: 32 ~ 39
  */
 export enum DefaultImageId {
   Gift = 1,
@@ -17,6 +18,9 @@ export enum DefaultImageId {
   User = 24,
   User2 = 25,
   User3 = 26,
+  Funding = 32,
+  Funding2 = 33,
+  Funding3 = 34,
 }
 
 export const DefaultImageIds = {
@@ -39,6 +43,11 @@ export const DefaultImageIds = {
     DefaultImageId.Gift,
     DefaultImageId.Gift2,
     DefaultImageId.Gift3,
+  ],
+  Funding: [
+    DefaultImageId.Funding,
+    DefaultImageId.Funding2,
+    DefaultImageId.Funding3,
   ],
 };
 
