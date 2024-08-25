@@ -44,6 +44,11 @@ export class RollingPaperService {
     });
     if (!fund) throw this.g2gException.FundingNotExists;
 
+    // NOTE - 일단은 롤링페이퍼 받아보는 API는 언제나 가능하게 구현했지만, 펀딩 완료시에 호출 가능하도록 한다면 바로 변경 가능합니다
+    if (fund.endAt < new Date(Date.now())) {
+      throw this.g2gException.FundingNotClosed;
+    }
+
     // fund 개설자만이 rollingPaper를 볼 수 있습니다.
     await this.validChecker.verifyUserMatch(fund.fundUser.userId, user.userId);
 
