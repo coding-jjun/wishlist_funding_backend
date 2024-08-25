@@ -6,14 +6,11 @@ import { GratitudeDto } from './dto/gratitude.dto';
 import { Funding } from 'src/entities/funding.entity';
 import { Image } from 'src/entities/image.entity';
 import { ImageType } from 'src/enums/image-type.enum';
-import {
-  DefaultImageId,
-  defaultGratitudeImageIds,
-} from 'src/enums/default-image-id';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import assert from 'node:assert';
 import { GetGratitudeDto } from './dto/get-gratitude.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { DefaultImageIds } from 'src/enums/default-image-id';
 
 @Injectable()
 export class GratitudeService {
@@ -99,7 +96,7 @@ export class GratitudeService {
     } else {
       if (!gratitudeDto.defaultImgId)
         throw this.g2gException.DefaultImgIdNotExist;
-      if (!defaultGratitudeImageIds.includes(gratitudeDto.defaultImgId))
+      if (!DefaultImageIds.Gratitude.includes(gratitudeDto.defaultImgId))
         throw this.g2gException.DefaultImgIdNotExist;
       // 기본 이미지 제공시,
       // 1. defaultImgId를 갖는 새 grat 생성 및 저장.
@@ -164,7 +161,7 @@ export class GratitudeService {
       });
     } else {
       if (!defaultImgId) throw this.g2gException.DefaultImgIdNotExist;
-      if (!defaultGratitudeImageIds.includes(defaultImgId))
+      if (!DefaultImageIds.Gratitude.includes(defaultImgId))
         throw this.g2gException.DefaultImgIdNotExist;
       // 기본 이미지 제공시,
       // 1. defaultImgId를 grat 업데이트

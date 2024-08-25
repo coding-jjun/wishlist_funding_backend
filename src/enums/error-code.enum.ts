@@ -8,6 +8,7 @@ export enum ErrorCode {
 
   // Gift
   IncorrectGiftUrl = '0200',
+  GiftNotFound = '0201',
 
   // Gratitude
   GratitudeAlreadyExists = '0300',

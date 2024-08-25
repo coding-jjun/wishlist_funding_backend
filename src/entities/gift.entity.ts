@@ -4,6 +4,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Funding } from './funding.entity';
@@ -30,7 +31,11 @@ export class Gift {
   @Column({ nullable: true })
   giftCont: string;
 
-  @OneToMany(() => Image, (image) => image.imgId, { nullable: true })
-  @JoinColumn({ name: 'imgId' })
-  images: Image[];
+  @OneToOne(() => Image, (image) => image.subId, { nullable: true })
+  // @JoinColumn({ name: 'imgId' })
+  image: Image;
+
+  @Column({ nullable: true })
+  @ManyToOne(() => Image, (image) => image.imgId)
+  defaultImgId?: number;
 }

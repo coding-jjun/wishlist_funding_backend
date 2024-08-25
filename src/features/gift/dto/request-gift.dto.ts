@@ -13,9 +13,11 @@ export class RequestGiftDto {
   @IsNumber()
   giftId?: number;
 
+  @IsNotEmpty()
   @IsUrl()
   giftUrl: string;
 
+  @IsNotEmpty()
   @IsNumber()
   giftOrd: number;
 
@@ -24,6 +26,10 @@ export class RequestGiftDto {
 
   @IsOptional()
   giftCont?: string;
+
+  @IsOptional()
+  @IsUrl()
+  giftImg?: string;
 }
 
 export class GiftArray {

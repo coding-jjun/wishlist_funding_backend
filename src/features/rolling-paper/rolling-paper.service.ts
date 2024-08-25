@@ -5,17 +5,13 @@ import { Repository } from 'typeorm';
 import { RollingPaperDto } from './dto/rolling-paper.dto';
 import { Funding } from 'src/entities/funding.entity';
 import { Image } from 'src/entities/image.entity';
-import {
-  DefaultImageId,
-  defaultRollingPaperImageIds,
-} from 'src/enums/default-image-id';
 import { ImageType } from 'src/enums/image-type.enum';
 import { Donation } from 'src/entities/donation.entity';
 import { CreateRollingPaperDto } from './dto/create-rolling-paper.dto';
-import assert from 'assert';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { ValidCheck } from 'src/util/valid-check';
 import { User } from 'src/entities/user.entity';
+import { DefaultImageIds } from 'src/enums/default-image-id';
 
 @Injectable()
 export class RollingPaperService {
@@ -114,7 +110,7 @@ export class RollingPaperService {
       // 기본값 이미지
       if (
         !crpDto.defaultImgId ||
-        !defaultRollingPaperImageIds.includes(crpDto.defaultImgId)
+        !DefaultImageIds.RollingPaper.includes(crpDto.defaultImgId)
       )
         throw this.g2gException.DefaultImgIdNotExist;
 

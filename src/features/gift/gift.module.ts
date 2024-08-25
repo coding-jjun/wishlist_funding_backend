@@ -1,16 +1,14 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Funding } from 'src/entities/funding.entity';
-import { Gift } from 'src/entities/gift.entity';
+import { Module } from '@nestjs/common';
 import { GiftController } from './gift.controller';
 import { GiftService } from './gift.service';
-import { Module } from '@nestjs/common';
-import { FundingService } from '../funding/funding.service';
-import { User } from 'src/entities/user.entity';
-import { Friend } from 'src/entities/friend.entity';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { Gift } from 'src/entities/gift.entity';
+import { Funding } from 'src/entities/funding.entity';
+import { Image } from 'src/entities/image.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Gift, Funding])],
+  imports: [TypeOrmModule.forFeature([Gift, Funding, Image])],
   controllers: [GiftController],
   providers: [GiftService, GiftogetherExceptions],
   exports: [GiftService],

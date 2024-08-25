@@ -19,7 +19,7 @@ export class MyDonationListDto {
     this.donId = donation.donId;
     this.fundUuid = donation.funding.fundUuid;
     this.fundTitle = donation.funding.fundTitle;
-    this.fundImg = donation.funding.images ? donation.funding.images[0].imgUrl : '';
+    this.fundImg = donation.funding.image ? donation.funding.image.imgUrl : '';
     this.donUserId = donation.user.userId;
     this.fundUserId = donation.funding.fundUser.userId;
     this.fundUserNick = donation.funding.fundUser.userNick;
