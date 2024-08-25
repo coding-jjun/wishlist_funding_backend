@@ -9,7 +9,7 @@ import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { ImageType } from 'src/enums/image-type.enum';
 import { UserDto } from './dto/user.dto';
 import * as bcrypt from 'bcrypt';
-import { defaultUserImageIds } from 'src/enums/default-image-id';
+import { DefaultImageIds } from 'src/enums/default-image-id';
 
 @Injectable()
 export class UserService {
@@ -76,7 +76,7 @@ export class UserService {
       imageUrl = savedImage.imgUrl;  // 이미지 URL 설정
     } else if (defaultImgId) { // 기본 이미지가 제공된 경우
       // 기본 이미지 ID가 유효한지 확인
-      if (!defaultUserImageIds.includes(defaultImgId)) {
+      if (!DefaultImageIds.User.includes(defaultImgId)) {
         throw this.g2gException.DefaultImgIdNotExist;
       }
   
