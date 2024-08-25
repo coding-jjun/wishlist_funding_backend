@@ -6,10 +6,13 @@ import { RollingPaper } from 'src/entities/rolling-paper.entity';
 import { Funding } from 'src/entities/funding.entity';
 import { Image } from 'src/entities/image.entity';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { AuthModule } from '../auth/auth.module';
+import { ValidCheck } from 'src/util/valid-check';
+import { User } from 'src/entities/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([RollingPaper, Funding, Image])],
+  imports: [TypeOrmModule.forFeature([RollingPaper, Funding, Image, User]), AuthModule],
   controllers: [RollingPaperController],
-  providers: [RollingPaperService, GiftogetherExceptions],
+  providers: [RollingPaperService, GiftogetherExceptions, ValidCheck],
 })
 export class RollingPaperModule {}

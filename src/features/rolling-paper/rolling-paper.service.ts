@@ -14,6 +14,8 @@ import { Donation } from 'src/entities/donation.entity';
 import { CreateRollingPaperDto } from './dto/create-rolling-paper.dto';
 import assert from 'assert';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { ValidCheck } from 'src/util/valid-check';
+import { User } from 'src/entities/user.entity';
 
 @Injectable()
 export class RollingPaperService {
@@ -28,11 +30,22 @@ export class RollingPaperService {
     private readonly imgRepo: Repository<Image>,
 
     private readonly g2gException: GiftogetherExceptions,
+
+    private readonly validChecker: ValidCheck,
   ) {}
 
-  async getAllRollingPapers(fundUuid: string): Promise<RollingPaperDto[]> {
-    const fund = await this.fundingRepo.findOne({ where: { fundUuid } });
+  async getAllRollingPapers(
+    fundUuid: string,
+    user: User,
+  ): Promise<RollingPaperDto[]> {
+    const fund = await this.fundingRepo.findOne({
+      where: { fundUuid },
+      relations: ['fundUser'],
+    });
     if (!fund) throw this.g2gException.FundingNotExists;
+
+    // fund 개설자만이 rollingPaper를 볼 수 있습니다.
+    await this.validChecker.verifyUserMatch(fund.fundUser.userId, user.userId);
 
     const rolls = await this.rollingPaperRepo.find({
       where: { fundId: fund.fundId },
