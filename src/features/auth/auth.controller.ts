@@ -148,7 +148,7 @@ export class AuthController {
   ) {
     res.cookie("user", await this.authService.createUser(createUserDto), this.cookieOptions);
 
-    return res.redirect(process.env.LOGIN_URL);
+    return res.json({ message: 'success' });
   }
 
   @Get('/token')
