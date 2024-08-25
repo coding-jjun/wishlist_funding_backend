@@ -24,10 +24,6 @@ export class CreateUserDto {
   userBirth: Date;
 
   @IsOptional()
-  @IsNumber()
-  userAcc?: number;
-
-  @IsOptional()
   userEmail?: string;
 
   /**

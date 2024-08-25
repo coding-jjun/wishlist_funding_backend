@@ -10,8 +10,8 @@ import { ImageType } from 'src/enums/image-type.enum';
 import { RedisClientType } from '@redis/client';
 import { UserDto } from '../user/dto/user.dto';
 import { Account } from 'src/entities/account.entity';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { DefaultImageIds } from 'src/enums/default-image-id';
@@ -130,7 +130,7 @@ export class AuthService {
   }
 
   async createUser(userDto: CreateUserDto) {
-    const { userImg, userAcc, userPw, defaultImgId, ...userInfo } = userDto;
+    const { userImg, userPw, defaultImgId, ...userInfo } = userDto;
     const user = new User();
 
     Object.assign(user, userInfo);
@@ -143,15 +143,6 @@ export class AuthService {
     }
 
     try {
-      // Account
-      if (userAcc) {
-        const account = await this.accRepository.findOneBy({
-          accId: userAcc,
-        });
-        if (account) {
-          userSaved.account = account;
-        }
-      }
       // Image
       let imgUrl = null;
       if (userImg) {
@@ -198,18 +189,11 @@ export class AuthService {
 
   async updateUser(user: User, userDto: UpdateUserDto): Promise<UserDto> {
     // TODO 사용자 정보를 repo에서 조회 후 updateUser 하도록 refactoring 예정
-    const { userImg, userAcc, ...userInfo } = userDto;
+    const { userImg, ...userInfo } = userDto;
     const userId = user.userId;
     const defaultImgId = userDto.defaultImgId;
 
     Object.assign(user, userInfo);
-
-    if (userAcc) {
-      const account = await this.accRepository.findOneBy({
-        accId: userAcc,
-      });
-      user.account = account;
-    }
 
     // 0. image 테이블에 등록된 사용자 프로필 이미지 삭제
     this.imgRepository.delete({ imgType: ImageType.User, imgId: userId });

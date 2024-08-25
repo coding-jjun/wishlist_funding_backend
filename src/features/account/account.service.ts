@@ -21,6 +21,10 @@ export class AccountService {
   async create(createAccountDto: CreateAccountDto, user: User): Promise<Account> {
     const account = new Account();
 
+    if (user.account) {
+      await this.accRepository.delete(user.account);
+    }
+
     account.accNum = createAccountDto.accNum;
     account.bank = createAccountDto.bank;
     account.user = user;

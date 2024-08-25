@@ -30,6 +30,11 @@ export class GiftogetherExceptions {
     ErrorCode.FundingClosed,
     HttpStatus.BAD_REQUEST,
   );
+  FundingNotClosed = new GiftogetherException(
+    ErrorMsg.FundingNotClosed,
+    ErrorCode.FundingNotClosed,
+    HttpStatus.BAD_REQUEST,
+  );
 
   // Gift
   IncorrectGiftUrl = new GiftogetherException(

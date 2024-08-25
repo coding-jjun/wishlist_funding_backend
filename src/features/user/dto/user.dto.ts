@@ -1,4 +1,5 @@
 import { AuthType } from "src/enums/auth-type.enum";
+import { BankType } from "src/enums/bank-type.enum";
 
 export class UserDto {
   constructor(
@@ -11,5 +12,7 @@ export class UserDto {
     public userId: number,
     public userEmail?: string,
     public authId?: string,
+    public bank?: BankType,
+    public accNum?: string,
   ) {}
 }
