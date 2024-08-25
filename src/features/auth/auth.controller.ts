@@ -134,9 +134,15 @@ export class AuthController {
     @Body() createUserDto: CreateUserDto,
     @Res() res: Response
   ) {
-    res.cookie("user", await this.authService.createUser(createUserDto), this.cookieOptions);
-
-    return res.redirect(process.env.LOGIN_URL);
+    const user = await this.authService.createUser(createUserDto)
+    const token = new TokenDto();
+    token.accessToken = await this.authService.createAccessToken(user.userId);
+    token.refreshToken = await this.authService.createRefreshToken(user.userId);
+    
+    res.cookie("access_token", token.accessToken, this.cookieOptions);
+    res.cookie("refresh_token", token.refreshToken, this.cookieOptions);
+    res.cookie("user", user, this.cookieOptions);
+    return res.json({ message: 'success' });
   }
 
   @Post('/token')
