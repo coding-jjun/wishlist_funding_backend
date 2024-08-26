@@ -87,15 +87,20 @@ export class CommentController {
 
   /**
    * 댓글 삭제
+   * @permission 해당 댓글 작성자
+   * @param fundUuid Path Param
+   * @param comId Query Param
    */
-  @Delete()
+  @Delete(':fundUuid')
   @UseGuards(JwtAuthGuard)
   async remove(
-    @Query('fundId') fundId: number,
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
     @Query('comId') comId: number,
+    @Req() req: Request,
   ): Promise<CommonResponse> {
+    const user = req.user as Partial<User>;
     return {
-      data: await this.commentService.remove(fundId, comId),
+      data: await this.commentService.remove(user, fundUuid, comId),
     };
   }
 }

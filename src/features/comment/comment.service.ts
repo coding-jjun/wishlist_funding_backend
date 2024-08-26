@@ -72,7 +72,7 @@ export class CommentService {
    */
   async findMany(fundUuid: string): Promise<GetCommentDto[]> {
     const funding = await this.fundingRepository.findOne({
-      where: { fundUuid },
+      where: { fundUuid, comments: { isDel: false } },
       relations: {
         comments: {
           author: true,
@@ -117,13 +117,17 @@ export class CommentService {
   /**
    * soft delete
    */
-  async remove(fundId: number, comId: number) {
+  async remove(user: Partial<User>, fundUuid: string, comId: number) {
     const comment = await this.commentRepository.findOne({
-      where: { comId, fundId },
+      relations: { funding: true, author: true },
+      where: { comId, funding: { fundUuid } },
     });
     if (!comment) {
-      throw new HttpException('comment not found!', HttpStatus.NOT_FOUND);
+      throw this.g2gException.CommentNotFound;
     }
+    // 오직 본인만이 자신이 작성한 댓글을 삭제할 수 있다.
+    await this.validCheck.verifyUserMatch(user.userId, comment.authorId);
+
     comment.isDel = true;
     this.commentRepository.save(comment);
 
