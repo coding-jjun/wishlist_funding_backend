@@ -12,11 +12,14 @@ import {
   HttpStatus,
   UseFilters,
   Put,
+  UseGuards,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
+import { JwtAuthGuard } from '../auth/guard/jwt-auth-guard';
 
 @Controller('comment')
 export class CommentController {
@@ -25,12 +28,14 @@ export class CommentController {
   /**
    * 댓글 생성
    */
-  @Post()
+  @Post(':fundUuid')
+  @UseGuards(JwtAuthGuard)
   async create(
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
     @Body() createCommentDto: CreateCommentDto,
   ): Promise<CommonResponse> {
     return {
-      data: await this.commentService.create(createCommentDto),
+      data: await this.commentService.create(fundUuid, createCommentDto),
     };
   }
 
@@ -39,18 +44,13 @@ export class CommentController {
    * @param fundId 펀딩에 딸린 모든 댓글을 요청한다
    * @returns Comment[]
    */
-  @Get()
-  async findMany(@Query('fundId') fundId: number): Promise<CommonResponse> {
-    Logger.log(`fundId: ${fundId}`);
-    if (!fundId) {
-      throw new HttpException(
-        '`fundId` query is invalid',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+  @Get(':fundUuid')
+  async findMany(
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
+  ): Promise<CommonResponse> {
     return {
       message: 'success',
-      data: await this.commentService.findMany(fundId),
+      data: await this.commentService.findMany(fundUuid),
     };
   }
 
@@ -58,6 +58,7 @@ export class CommentController {
    * 댓글 수정
    */
   @Put()
+  @UseGuards(JwtAuthGuard)
   async update(
     @Query('fundId') fundId: number,
     @Query('comId') comId: number,
@@ -72,6 +73,7 @@ export class CommentController {
    * 댓글 삭제
    */
   @Delete()
+  @UseGuards(JwtAuthGuard)
   async remove(
     @Query('fundId') fundId: number,
     @Query('comId') comId: number,
