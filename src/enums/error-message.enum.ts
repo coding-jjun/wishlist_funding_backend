@@ -17,6 +17,7 @@ export enum ErrorMsg {
   // RollingPaper
 
   // Comment
+  CommentNotFound = "해당 댓글이 존재하지 않습니다.",
 
   // Image
   IncorrectImageUrl = '이미지 URL이 유효하지 않습니다.',

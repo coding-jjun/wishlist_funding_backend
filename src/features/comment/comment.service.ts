@@ -9,6 +9,7 @@ import { GetCommentDto } from './dto/get-comment.dto';
 import { User } from 'src/entities/user.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { ValidCheck } from 'src/util/valid-check';
 
 function convertToGetCommentDto(comment: Comment): GetCommentDto {
   const { comId, content, regAt, isMod, authorId, author } = comment;
@@ -24,6 +25,7 @@ export class CommentService {
     @InjectRepository(User) private userRepository: Repository<User>,
     private eventEmitter: EventEmitter2,
     private readonly g2gException: GiftogetherExceptions,
+    private readonly validCheck: ValidCheck,
   ) {}
 
   async create(
@@ -87,19 +89,23 @@ export class CommentService {
   }
 
   async update(
-    fundId: number,
+    user: Partial<User>,
+    fundUuid: string,
     comId: number,
     updateCommentDto: UpdateCommentDto,
   ): Promise<GetCommentDto> {
     const { content } = updateCommentDto;
 
     const comment = await this.commentRepository.findOne({
-      relations: { author: true },
-      where: { comId, fundId },
+      relations: { funding: true, author: true },
+      where: { comId, funding: { fundUuid } },
     });
     if (!comment) {
-      throw new HttpException('comment not found!', HttpStatus.NOT_FOUND);
+      throw this.g2gException.CommentNotFound;
     }
+    // 오직 본인만이 자신이 작성한 댓글을 수정할 수 있다.
+    await this.validCheck.verifyUserMatch(user.userId, comment.authorId);
+
     comment.content = content;
     comment.isMod = true;
 

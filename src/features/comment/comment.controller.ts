@@ -61,16 +61,27 @@ export class CommentController {
 
   /**
    * 댓글 수정
+   * @permission 해당 댓글 작성자
+   * @param fundUuid Path Param
+   * @param comId Query Param
+   * @param updateCommentDto 변경될 데이터
    */
-  @Put()
+  @Put(':fundUuid')
   @UseGuards(JwtAuthGuard)
   async update(
-    @Query('fundId') fundId: number,
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
     @Query('comId') comId: number,
     @Body() updateCommentDto: UpdateCommentDto,
+    @Req() req: Request,
   ): Promise<CommonResponse> {
+    const user = req.user as Partial<User>;
     return {
-      data: await this.commentService.update(fundId, comId, updateCommentDto),
+      data: await this.commentService.update(
+        user,
+        fundUuid,
+        comId,
+        updateCommentDto,
+      ),
     };
   }
 

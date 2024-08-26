@@ -17,6 +17,7 @@ export enum ErrorCode {
   // RollingPaper
 
   // Comment
+  CommentNotFound = "0500",
 
   // Image
   IncorrectImageUrl = '0600',
