@@ -120,7 +120,7 @@ export class CommentService {
   async remove(user: Partial<User>, fundUuid: string, comId: number) {
     const comment = await this.commentRepository.findOne({
       relations: { funding: true, author: true },
-      where: { comId, funding: { fundUuid } },
+      where: { comId, funding: { fundUuid }, isDel: false },
     });
     if (!comment) {
       throw this.g2gException.CommentNotFound;
