@@ -8,10 +8,11 @@ import { Comment } from 'src/entities/comment.entity';
 import { AuthModule } from '../auth/auth.module';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth-guard';
 import { JwtService } from '@nestjs/jwt';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Funding, User, Comment]), AuthModule],
   controllers: [CommentController],
-  providers: [CommentService, JwtService],
+  providers: [CommentService, JwtService, GiftogetherExceptions],
 })
 export class CommentModule {}

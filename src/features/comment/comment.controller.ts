@@ -14,12 +14,15 @@ import {
   Put,
   UseGuards,
   ParseUUIDPipe,
+  Req,
 } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth-guard';
+import { Request } from 'express';
+import { User } from 'src/entities/user.entity';
 
 @Controller('comment')
 export class CommentController {
@@ -33,9 +36,11 @@ export class CommentController {
   async create(
     @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
     @Body() createCommentDto: CreateCommentDto,
+    @Req() req: Request,
   ): Promise<CommonResponse> {
+    const user = req.user as Partial<User>;
     return {
-      data: await this.commentService.create(fundUuid, createCommentDto),
+      data: await this.commentService.create(user, fundUuid, createCommentDto),
     };
   }
 

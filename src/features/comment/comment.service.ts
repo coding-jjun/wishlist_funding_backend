@@ -8,6 +8,7 @@ import { Funding } from 'src/entities/funding.entity';
 import { GetCommentDto } from './dto/get-comment.dto';
 import { User } from 'src/entities/user.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 function convertToGetCommentDto(comment: Comment): GetCommentDto {
   const { comId, content, regAt, isMod, authorId, author } = comment;
@@ -22,24 +23,26 @@ export class CommentService {
     @InjectRepository(Funding) private fundingRepository: Repository<Funding>,
     @InjectRepository(User) private userRepository: Repository<User>,
     private eventEmitter: EventEmitter2,
+    private readonly g2gException: GiftogetherExceptions,
   ) {}
 
   async create(
+    user: Partial<User>,
     fundUuid: string,
     createCommentDto: CreateCommentDto,
   ): Promise<GetCommentDto> {
-    let { authorId, content } = createCommentDto;
+    const { content } = createCommentDto;
 
     const where = { fundUuid };
     const funding = await this.fundingRepository.findOne({ where });
     if (!funding) {
-      throw new HttpException('funding does not exist', HttpStatus.NOT_FOUND);
+      throw this.g2gException.FundingNotExists;
     }
     const author = await this.userRepository.findOne({
-      where: { userId: authorId },
+      where: { userId: user.userId! },
     });
     if (!author) {
-      throw new HttpException('author does not exist', HttpStatus.NOT_FOUND);
+      throw this.g2gException.UserNotFound;
     }
 
     const newComment = new Comment({
@@ -50,9 +53,12 @@ export class CommentService {
       content,
     });
 
-    await this.commentRepository.save(newComment);
+    await this.commentRepository.insert(newComment);
 
-    this.eventEmitter.emit('NewComment', { fundId: funding.fundId, authorId });
+    this.eventEmitter.emit('NewComment', {
+      fundId: funding.fundId,
+      authorId: author.userId,
+    });
 
     return convertToGetCommentDto(newComment);
   }
