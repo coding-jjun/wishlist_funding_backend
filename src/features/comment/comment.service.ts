@@ -85,7 +85,7 @@ export class CommentService {
       },
     });
 
-    return funding.comments.map(convertToGetCommentDto);
+    return funding.comments?.map(convertToGetCommentDto) ?? [];
   }
 
   async update(
