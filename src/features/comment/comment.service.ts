@@ -82,6 +82,9 @@ export class CommentService {
       .where('funding.fundUuid = :fundUuid', { fundUuid })
       .orderBy('funding.regAt', 'DESC')
       .getOne();
+    if (!funding) {
+      throw this.g2gException.FundingNotExists;
+    }
 
     return funding.comments?.map(convertToGetCommentDto) ?? [];
   }
