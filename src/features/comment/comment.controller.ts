@@ -12,11 +12,17 @@ import {
   HttpStatus,
   UseFilters,
   Put,
+  UseGuards,
+  ParseUUIDPipe,
+  Req,
 } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
+import { JwtAuthGuard } from '../auth/guard/jwt-auth-guard';
+import { Request } from 'express';
+import { User } from 'src/entities/user.entity';
 
 @Controller('comment')
 export class CommentController {
@@ -25,12 +31,16 @@ export class CommentController {
   /**
    * 댓글 생성
    */
-  @Post()
+  @Post(':fundUuid')
+  @UseGuards(JwtAuthGuard)
   async create(
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
     @Body() createCommentDto: CreateCommentDto,
+    @Req() req: Request,
   ): Promise<CommonResponse> {
+    const user = req.user as Partial<User>;
     return {
-      data: await this.commentService.create(createCommentDto),
+      data: await this.commentService.create(user, fundUuid, createCommentDto),
     };
   }
 
@@ -39,45 +49,58 @@ export class CommentController {
    * @param fundId 펀딩에 딸린 모든 댓글을 요청한다
    * @returns Comment[]
    */
-  @Get()
-  async findMany(@Query('fundId') fundId: number): Promise<CommonResponse> {
-    Logger.log(`fundId: ${fundId}`);
-    if (!fundId) {
-      throw new HttpException(
-        '`fundId` query is invalid',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+  @Get(':fundUuid')
+  async findMany(
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
+  ): Promise<CommonResponse> {
     return {
       message: 'success',
-      data: await this.commentService.findMany(fundId),
+      data: await this.commentService.findMany(fundUuid),
     };
   }
 
   /**
    * 댓글 수정
+   * @permission 해당 댓글 작성자
+   * @param fundUuid Path Param
+   * @param comId Query Param
+   * @param updateCommentDto 변경될 데이터
    */
-  @Put()
+  @Put(':fundUuid')
+  @UseGuards(JwtAuthGuard)
   async update(
-    @Query('fundId') fundId: number,
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
     @Query('comId') comId: number,
     @Body() updateCommentDto: UpdateCommentDto,
+    @Req() req: Request,
   ): Promise<CommonResponse> {
+    const user = req.user as Partial<User>;
     return {
-      data: await this.commentService.update(fundId, comId, updateCommentDto),
+      data: await this.commentService.update(
+        user,
+        fundUuid,
+        comId,
+        updateCommentDto,
+      ),
     };
   }
 
   /**
    * 댓글 삭제
+   * @permission 해당 댓글 작성자
+   * @param fundUuid Path Param
+   * @param comId Query Param
    */
-  @Delete()
+  @Delete(':fundUuid')
+  @UseGuards(JwtAuthGuard)
   async remove(
-    @Query('fundId') fundId: number,
+    @Param('fundUuid', ParseUUIDPipe) fundUuid: string,
     @Query('comId') comId: number,
+    @Req() req: Request,
   ): Promise<CommonResponse> {
+    const user = req.user as Partial<User>;
     return {
-      data: await this.commentService.remove(fundId, comId),
+      data: await this.commentService.remove(user, fundUuid, comId),
     };
   }
 }

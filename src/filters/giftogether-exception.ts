@@ -46,8 +46,8 @@ export class GiftogetherExceptions {
   GiftNotFound = new GiftogetherException(
     ErrorMsg.GiftNotFound,
     ErrorCode.GiftNotFound,
-    HttpStatus.NOT_FOUND
-  )
+    HttpStatus.NOT_FOUND,
+  );
 
   // Gratitude
   GratitudeAlreadyExists = new GiftogetherException(
@@ -64,6 +64,11 @@ export class GiftogetherExceptions {
   // RollingPaper
 
   // Comment
+  CommentNotFound = new GiftogetherException(
+    ErrorMsg.CommentNotFound,
+    ErrorCode.CommentNotFound,
+    HttpStatus.NOT_FOUND,
+  );
 
   // Image
   IncorrectImageUrl = new GiftogetherException(
@@ -94,23 +99,23 @@ export class GiftogetherExceptions {
   NotValidEmail = new GiftogetherException(
     ErrorMsg.NotValidEmail,
     ErrorCode.NotValidEmail,
-    HttpStatus.BAD_REQUEST
-  )
+    HttpStatus.BAD_REQUEST,
+  );
   NotValidPhone = new GiftogetherException(
     ErrorMsg.NotValidPhone,
     ErrorCode.NotValidPhone,
-    HttpStatus.BAD_REQUEST
-  )
+    HttpStatus.BAD_REQUEST,
+  );
   NotValidNick = new GiftogetherException(
     ErrorMsg.NotValidNick,
     ErrorCode.NotValidNick,
-    HttpStatus.BAD_REQUEST
-  )
+    HttpStatus.BAD_REQUEST,
+  );
   PasswordIncorrect = new GiftogetherException(
     ErrorMsg.PasswordIncorrect,
     ErrorCode.PasswordIncorrect,
-    HttpStatus.UNAUTHORIZED 
-  )
+    HttpStatus.UNAUTHORIZED,
+  );
 
   UserFailedToCreate = new GiftogetherException(
     ErrorMsg.UserFailedToCreate,
@@ -121,10 +126,8 @@ export class GiftogetherExceptions {
   UserAccessDenied = new GiftogetherException(
     ErrorMsg.UserAccessDenied,
     ErrorCode.UserAccessDenied,
-    HttpStatus.NOT_FOUND
+    HttpStatus.NOT_FOUND,
   );
-
-
 
   // Friend
   AlreadySendRequest = new GiftogetherException(
@@ -142,8 +145,8 @@ export class GiftogetherExceptions {
   WrongNotiType = new GiftogetherException(
     ErrorMsg.WrongNotiType,
     ErrorCode.WrongNotiType,
-    HttpStatus.BAD_REQUEST
-  )
+    HttpStatus.BAD_REQUEST,
+  );
 
   // Auth
   JwtNotExpired = new GiftogetherException(
@@ -199,12 +202,12 @@ export class GiftogetherExceptions {
     ErrorMsg.AccountNotFound,
     ErrorCode.AccountNotFound,
     HttpStatus.NOT_FOUND,
-  )
+  );
 
   // Address
   AddressNotFound = new GiftogetherException(
     ErrorMsg.AddressNotFound,
     ErrorCode.AddressNotFound,
-    HttpStatus.NOT_FOUND
-  )
+    HttpStatus.NOT_FOUND,
+  );
 }

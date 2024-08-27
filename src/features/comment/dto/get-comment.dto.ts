@@ -1,8 +1,10 @@
 export class GetCommentDto {
-  comId: Number;
-  content: string;
-  regAt: Date;
-  isMod: boolean;
-  authorId: number;
-  authorName: string;
+  constructor(
+    public comId: Number,
+    public content: string,
+    public regAt: Date,
+    public isMod: boolean,
+    public authorId: number,
+    public authorName: string,
+  ) {}
 }

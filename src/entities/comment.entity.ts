@@ -39,4 +39,8 @@ export class Comment {
 
   @Column('bool', { default: false })
   isDel: boolean;
+
+  constructor(comment: Partial<Comment>) {
+    Object.assign(this, comment);
+  }
 }
