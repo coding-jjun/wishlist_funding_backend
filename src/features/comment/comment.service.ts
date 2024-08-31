@@ -80,7 +80,7 @@ export class CommentService {
         { isDel: false },
       )
       .where('funding.fundUuid = :fundUuid', { fundUuid })
-      .orderBy('funding.regAt', 'DESC')
+      .orderBy('comment.regAt', 'DESC')
       .getOne();
     if (!funding) {
       throw this.g2gException.FundingNotExists;
