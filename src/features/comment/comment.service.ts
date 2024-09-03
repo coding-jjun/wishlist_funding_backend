@@ -71,21 +71,22 @@ export class CommentService {
    * @returns Comment[]
    */
   async findMany(fundUuid: string): Promise<GetCommentDto[]> {
-    const funding = await this.fundingRepository.findOne({
-      where: { fundUuid, comments: { isDel: false } },
-      relations: {
-        comments: {
-          author: true,
-        },
-      },
-      order: {
-        comments: {
-          regAt: 'DESC',
-        },
-      },
-    });
+    const funding = await this.fundingRepository
+      .createQueryBuilder('funding')
+      .leftJoinAndSelect(
+        'funding.comments',
+        'comment',
+        'comment.isDel = :isDel',
+        { isDel: false },
+      )
+      .where('funding.fundUuid = :fundUuid', { fundUuid })
+      .orderBy('comment.regAt', 'DESC')
+      .getOne();
+    if (!funding) {
+      throw this.g2gException.FundingNotExists;
+    }
 
-    return funding.comments.map(convertToGetCommentDto);
+    return funding?.comments.map(convertToGetCommentDto) ?? [];
   }
 
   async update(
