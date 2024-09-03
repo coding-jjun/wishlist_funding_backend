@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { ImageDto } from './dto/image.dto';
+import {
+  DeleteObjectCommand,
+  HeadObjectCommand,
+  NotFound,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 @Injectable()
 export class ImageService {
@@ -9,6 +15,10 @@ export class ImageService {
     maxAttempts: 30,
   });
 
+  private readonly bucketName = process.env.AWS_S3_BUCKET_NAME;
+
+  constructor(private readonly g2gException: GiftogetherExceptions) {}
+
   getObjectUrlOf(filename: string): string {
     return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.amazonaws.com/${filename}`;
   }
@@ -16,7 +26,7 @@ export class ImageService {
   async upload(filename: string, file: Buffer): Promise<string> {
     await this.s3Client.send(
       new PutObjectCommand({
-        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Bucket: this.bucketName,
         Key: filename,
         Body: file,
       }),
@@ -24,44 +34,48 @@ export class ImageService {
 
     return this.getObjectUrlOf(filename);
   }
-}
 
-/**
- *
-constructor(
-  @InjectRepository(Image)
-  private readonly imageRepo: Repository<Image>,
-) {}
+  async delete(url: string): Promise<void> {
+    const regex = /^(https?):\/\/([^\/]+)\/(.*)?$/;
+    const matches = url.match(regex);
 
-async createImages(subId: number, imgType: ImageType, fileNames: string[]): Promise<Image[]>{
-  const images: Image[] = [];
-  try {
-    for (const fileName of fileNames) {
-      const image = new Image();
-      image.subId = subId;
-      image.imgType = imgType;
-      // TODO await generate S3 URL
-      image.imgUrl = fileName;
-      const savedImage = await this.imageRepo.save(image);
-      images.push(savedImage);
+    if (!matches) {
+      this.g2gException.IncorrectImageUrl;
     }
-  }catch(error){
-    console.error("Failed to create Images : ", error);
-  }
-  return images;
-}
 
+    // const protocol = matches[1];
+    const host = matches[2];
+    const uri = matches[3];
 
-async findImages(subId: number, imgType: ImageType){
-  try {
-    const images = await this.imageRepo.find({
-      where: { subId, imgType },
-    });
-    return images;
-    
-  } catch (error) {
-    console.error('Failed to find Images : ', error);
-    throw error;
+    if (host !== process.env.AWS_S3_HOST) {
+      this.g2gException.IncorrectImageUrl;
+    }
+    if (!uri) {
+      this.g2gException.ImageUriNotSpecified;
+    }
+
+    // 파일이 존재하는지 먼저 확인한다.
+    await this.s3Client
+      .send(
+        new HeadObjectCommand({
+          Bucket: this.bucketName,
+          Key: uri,
+        }),
+      )
+      .catch((e) => {
+        if (e instanceof NotFound) {
+          throw this.g2gException.ImageNotFound;
+        }
+        throw e;
+      })
+      .then(() => {
+        // 그리고 마침내 삭제 요청을 보낸다.
+        this.s3Client.send(
+          new DeleteObjectCommand({
+            Bucket: this.bucketName,
+            Key: uri,
+          }),
+        );
+      });
   }
 }
-*/

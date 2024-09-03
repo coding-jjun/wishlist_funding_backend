@@ -21,6 +21,9 @@ export enum ErrorCode {
 
   // Image
   IncorrectImageUrl = '0600',
+  IncorrectImageHost = '0601',
+  ImageUriNotSpecified = '0602',
+  ImageNotFound = '0603',
 
   // User
   UserNotFound = '0700',

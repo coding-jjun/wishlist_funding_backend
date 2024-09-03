@@ -1,5 +1,7 @@
 import {
+  Body,
   Controller,
+  Delete,
   FileTypeValidator,
   ParseFilePipe,
   Post,
@@ -14,6 +16,7 @@ import { ImageDto } from './dto/image.dto';
 import { v4 as uuidv4 } from 'uuid';
 import * as sharp from 'sharp';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth-guard';
+import { UrlDto } from './dto/url.dto';
 
 @Controller('image')
 export class ImageController {
@@ -51,6 +54,26 @@ export class ImageController {
     return {
       message: '성공적으로 파일이 업로드 되었습니다.',
       data: uploadedImages,
+    };
+  }
+
+  /**
+   * 파일 URL로부터 파일명을 추출한 다음
+   * 데이터베이스에 저장이 되어있는지 확인한 후
+   * S3에 저장된 파일을 포함하여 제거합니다.
+   * @authorization JWT Bearer Token
+   * @param imgUrl 제거하고자 하는 이미지의 파일 URL
+   */
+  @Delete()
+  @UseGuards(JwtAuthGuard)
+  async deleteFile(@Body() urlDto: UrlDto): Promise<CommonResponse> {
+    const { url } = urlDto;
+
+    await this.imageService.delete(url);
+
+    return {
+      message: '성공적으로 파일이 삭제되었습니다.',
+      data: null,
     };
   }
 }

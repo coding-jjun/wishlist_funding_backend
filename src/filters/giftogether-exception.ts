@@ -77,6 +77,23 @@ export class GiftogetherExceptions {
     HttpStatus.BAD_REQUEST,
   );
 
+  IncorrectImageHost = new GiftogetherException(
+    ErrorMsg.IncorrectImageHost,
+    ErrorCode.IncorrectImageHost,
+    HttpStatus.BAD_REQUEST,
+  );
+
+  ImageUriNotSpecified = new GiftogetherException(
+    ErrorMsg.ImageUriNotSpecified,
+    ErrorCode.ImageUriNotSpecified,
+    HttpStatus.BAD_REQUEST,
+  );
+
+  ImageNotFound = new GiftogetherException(
+    ErrorMsg.ImageNotFound,
+    ErrorCode.ImageNotFound,
+    HttpStatus.NOT_FOUND,
+  );
   // User
   UserNotFound = new GiftogetherException(
     ErrorMsg.UserNotFound,
