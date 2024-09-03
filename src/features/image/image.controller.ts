@@ -1,10 +1,10 @@
 import {
   Controller,
   FileTypeValidator,
-  MaxFileSizeValidator,
   ParseFilePipe,
   Post,
   UploadedFiles,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
@@ -13,6 +13,7 @@ import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { ImageDto } from './dto/image.dto';
 import { v4 as uuidv4 } from 'uuid';
 import * as sharp from 'sharp';
+import { JwtAuthGuard } from '../auth/guard/jwt-auth-guard';
 
 @Controller('image')
 export class ImageController {
@@ -20,12 +21,11 @@ export class ImageController {
 
   @Post()
   @UseInterceptors(FilesInterceptor('files'))
+  @UseGuards(JwtAuthGuard)
   async uploadFiles(
     @UploadedFiles(
       new ParseFilePipe({
-        validators: [
-          new FileTypeValidator({ fileType: 'image/*' }),
-        ],
+        validators: [new FileTypeValidator({ fileType: 'image/*' })],
       }),
     )
     files: Express.Multer.File[],
@@ -34,15 +34,13 @@ export class ImageController {
     const urls = [];
 
     for (const file of files) {
-      const buffer = await sharp(file.buffer)
-        .resize(300)
-        .toBuffer();
+      const buffer = await sharp(file.buffer).resize(300).toBuffer();
 
       const regex = /\.([0-9a-z]+)(?:[\?#]|$)/i;
       const match = file.originalname.match(regex);
       const extension = match[1];
 
-      const filename = uuidv4() + "." + extension;
+      const filename = uuidv4() + '.' + extension;
 
       const url = await this.imageService.upload(filename, buffer);
       urls.push(url);
