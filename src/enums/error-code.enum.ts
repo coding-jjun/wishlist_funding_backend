@@ -49,6 +49,7 @@ export enum ErrorCode {
   
   // Default image
   DefaultImgIdNotExist = '1000',
+  DefaultImgNotExist = '1001',
   
   // Account
   AccountNotFound = '1100',
