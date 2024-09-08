@@ -418,6 +418,8 @@ export class FundingService {
   async remove(fundUuid: string, userId: number): Promise<void> {
     const funding = await this.findFundingByUuidAndUserId(fundUuid, userId);
     // 펀딩과 연관된 이미지를 unlink하고 삭제한다.
+    await this.imgService.delete(ImageType.Funding, funding.fundId);
+    // 선물과 연관된 이미지를 unlink하고 삭제한다.
     const gifts = funding.gifts;
     const deleteGiftPromises = gifts.map(async (g) =>
       this.giftService.deleteGift(g.giftId),
