@@ -14,7 +14,11 @@ import { Image } from 'src/entities/image.entity';
 import { ImageType } from 'src/enums/image-type.enum';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { ValidCheck } from 'src/util/valid-check';
-import { DefaultImageIds, getRandomDefaultImgId } from 'src/enums/default-image-id';
+import {
+  DefaultImageIds,
+  getRandomDefaultImgId,
+} from 'src/enums/default-image-id';
+import { ImageService } from '../image/image.service';
 
 @Injectable()
 export class FundingService {
@@ -22,26 +26,29 @@ export class FundingService {
     @InjectRepository(Funding)
     private fundingRepository: Repository<Funding>,
 
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
-
     @InjectRepository(Friend)
     private friendRepository: Repository<Friend>,
 
     @InjectRepository(Image)
     private imgRepository: Repository<Image>,
 
+    private imgService: ImageService,
+
     private giftService: GiftService,
 
     private readonly g2gException: GiftogetherExceptions,
 
-    private readonly validCheck: ValidCheck
+    private readonly validCheck: ValidCheck,
   ) {}
 
-  async findFundingByUuidAndUserId(fundUuid:string, userId: number): Promise<Funding> {
+  async findFundingByUuidAndUserId(
+    fundUuid: string,
+    userId: number,
+  ): Promise<Funding> {
     const funding = await this.fundingRepository.findOne({
       relations: {
         fundUser: true,
+        gifts: true,
       },
       where: { fundUuid },
     });
@@ -51,7 +58,6 @@ export class FundingService {
     await this.validCheck.verifyUserMatch(funding.fundUser.userId, userId);
     return funding;
   }
-
 
   async findAll(
     userId: number,
@@ -71,7 +77,7 @@ export class FundingService {
     let lastFundId;
     if (lastFundUuid) {
       const lastFund = await this.fundingRepository.findOne({
-        where: { fundUuid: lastFundUuid }
+        where: { fundUuid: lastFundUuid },
       });
       if (lastFund) {
         lastFundId = lastFund.fundId;
@@ -236,7 +242,7 @@ export class FundingService {
       const img = await this.imgRepository.findOne({
         where: { imgId: fund.defaultImgId },
       });
-  
+
       if (img) {
         finalImgUrls = [img.imgUrl, ...fundImgUrls]; // 펀딩 기본 이미지 + gift 이미지들
       }
@@ -245,10 +251,10 @@ export class FundingService {
       const images = await this.imgRepository.find({
         where: { imgType: ImageType.Funding, subId: fund.fundId },
       });
-  
+
       finalImgUrls = [...images.map((img) => img.imgUrl), ...fundImgUrls]; // 펀딩의 이미지 + gift 이미지들
     }
-  
+
     // FundingDto에 펀딩 이미지와 gift 이미지 URL들을 포함하여 반환
     return new FundingDto(fund, gifts, finalImgUrls);
   }
@@ -276,17 +282,23 @@ export class FundingService {
 
     const funding_save = await this.fundingRepository.save(funding);
 
-    let fundImg : string[] = [];
+    let fundImg: string[] = [];
     if (createFundingDto.fundImg) {
       // subId = fundId, imgType = "Funding" Image 객체를 만든다.
-      const image = new Image(createFundingDto.fundImg, ImageType.Funding, funding_save.fundId);
+      const image = new Image(
+        createFundingDto.fundImg,
+        ImageType.Funding,
+        funding_save.fundId,
+      );
       await this.imgRepository.save(image);
       fundImg.push(image.imgUrl);
     } else {
       const defaultImgId = getRandomDefaultImgId(DefaultImageIds.Funding);
-      await this.fundingRepository.update(funding_save.fundId, { defaultImgId });
+      await this.fundingRepository.update(funding_save.fundId, {
+        defaultImgId,
+      });
       const image = await this.imgRepository.findOne({
-        where: { imgId: defaultImgId }
+        where: { imgId: defaultImgId },
       });
       if (image) {
         fundImg.push(image.imgUrl);
@@ -304,10 +316,9 @@ export class FundingService {
   async update(
     fundUuid: string,
     updateFundingDto: UpdateFundingDto,
-    userId: number
+    userId: number,
   ): Promise<FundingDto> {
-    const { fundTitle, fundImg, fundCont, fundTheme, endAt } =
-      updateFundingDto;
+    const { fundTitle, fundImg, fundCont, fundTheme, endAt } = updateFundingDto;
     const funding = await this.findFundingByUuidAndUserId(fundUuid, userId);
     const fundId = funding.fundId;
 
@@ -343,17 +354,17 @@ export class FundingService {
         defaultImgId: funding.defaultImgId,
       },
     );
-  
+
     const { gifts, fundImgUrls } = await this.giftService.findAllGift(funding);
     const finalImgUrls = [fundingImg, ...fundImgUrls];
-  
+
     return new FundingDto(funding, gifts, finalImgUrls);
   }
 
   private async updateFundingImage(
     funding: Funding,
     fundImg: string | undefined,
-    fundId: number
+    fundId: number,
   ): Promise<string> {
     if (fundImg) {
       // 지정한 funding 이미지가 존재할 때
@@ -368,10 +379,13 @@ export class FundingService {
         const existImg = await this.imgRepository.findOne({
           where: { imgType: ImageType.Funding, subId: fundId },
         });
-  
+
         if (existImg && existImg.imgUrl !== fundImg) {
           // 기존 이미지의 URL과 다르면 업데이트
-          await this.imgRepository.delete({ imgType: ImageType.Funding, subId: fundId });
+          await this.imgRepository.delete({
+            imgType: ImageType.Funding,
+            subId: fundId,
+          });
           const image = new Image(fundImg, ImageType.Funding, fundId);
           await this.imgRepository.save(image);
         }
@@ -387,7 +401,10 @@ export class FundingService {
         return defaultImg?.imgUrl || '';
       } else {
         // 기존 지정 이미지를 사용 중이었으나 삭제 후 기본 이미지 설정
-        await this.imgRepository.delete({ imgType: ImageType.Funding, subId: fundId });
+        await this.imgRepository.delete({
+          imgType: ImageType.Funding,
+          subId: fundId,
+        });
         const randomId = getRandomDefaultImgId(DefaultImageIds.Funding);
         funding.defaultImgId = randomId;
         const defaultImg = await this.imgRepository.findOne({
@@ -400,6 +417,12 @@ export class FundingService {
 
   async remove(fundUuid: string, userId: number): Promise<void> {
     const funding = await this.findFundingByUuidAndUserId(fundUuid, userId);
+    // 펀딩과 연관된 이미지를 unlink하고 삭제한다.
+    const gifts = funding.gifts;
+    const deleteGiftPromises = gifts.map(async (g) =>
+      this.giftService.deleteGift(g.giftId),
+    );
+    await Promise.all(deleteGiftPromises);
     this.fundingRepository.remove(funding);
   }
 }

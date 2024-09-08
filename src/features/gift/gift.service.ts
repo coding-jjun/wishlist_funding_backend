@@ -8,8 +8,11 @@ import { ResponseGiftDto } from './dto/response-gift.dto';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { ImageType } from 'src/enums/image-type.enum';
 import { Image } from 'src/entities/image.entity';
-import { DefaultImageIds, getRandomDefaultImgId } from 'src/enums/default-image-id';
-import { bool } from 'sharp';
+import {
+  DefaultImageIds,
+  getRandomDefaultImgId,
+} from 'src/enums/default-image-id';
+import { ImageService } from '../image/image.service';
 
 @Injectable()
 export class GiftService {
@@ -22,15 +25,19 @@ export class GiftService {
 
     @InjectRepository(Image)
     private readonly imgRepository: Repository<Image>,
-    
+
     private readonly g2gException: GiftogetherExceptions,
+
+    private readonly imgService: ImageService,
   ) {}
 
-  async findAllGift(
-    fund: Funding,
-  ): Promise<{ gifts: ResponseGiftDto[]; fundImgUrls: string[], count: number }> {
+  async findAllGift(fund: Funding): Promise<{
+    gifts: ResponseGiftDto[];
+    fundImgUrls: string[];
+    count: number;
+  }> {
     const [gifts, count] = await this.giftRepository.findAndCount({
-      where: { funding: { fundId: fund.fundId }},
+      where: { funding: { fundId: fund.fundId } },
       relations: ['funding'],
       order: { giftOrd: 'ASC' },
     });
@@ -45,15 +52,15 @@ export class GiftService {
           fundImgUrls.push(imgUrl);
         }
         return new ResponseGiftDto(gift, imgUrl || '');
-      })
+      }),
     );
 
     return { gifts: responseGifts, fundImgUrls, count };
   }
 
   private async getGiftImageUrl(
-    gift: Gift
-  ): Promise<{ imgUrl: string | null, isDef: boolean }> {
+    gift: Gift,
+  ): Promise<{ imgUrl: string | null; isDef: boolean }> {
     let defImg = false;
     if (gift.defaultImgId) {
       defImg = true;
@@ -63,13 +70,13 @@ export class GiftService {
       return {
         imgUrl: image ? image.imgUrl : null,
         isDef: defImg,
-      }
+      };
     }
-  
+
     const image = await this.imgRepository.findOne({
       where: { imgType: ImageType.Gift, subId: gift.giftId },
     });
-  
+
     return {
       imgUrl: image ? image.imgUrl : null,
       isDef: defImg,
@@ -81,14 +88,14 @@ export class GiftService {
     gifts: RequestGiftDto[],
   ): Promise<ResponseGiftDto[]> {
     return Promise.all(
-      gifts.map(gift => 
-        gift.giftId 
-          ? this.updateGift(funding, gift) 
-          : this.createNewGift(funding, gift)
-      )
+      gifts.map((gift) =>
+        gift.giftId
+          ? this.updateGift(funding, gift)
+          : this.createNewGift(funding, gift),
+      ),
     );
   }
-  
+
   private async updateGift(
     funding: Funding,
     gift: RequestGiftDto,
@@ -96,26 +103,26 @@ export class GiftService {
     const existGift = await this.giftRepository.findOne({
       where: { giftId: gift.giftId },
     });
-  
+
     if (!existGift) {
       throw this.g2gException.GiftNotFound;
     }
-  
+
     // Update gift properties
     existGift.giftUrl = gift.giftUrl;
     existGift.giftOrd = gift.giftOrd;
     existGift.giftOpt = gift.giftOpt;
     existGift.giftCont = gift.giftCont;
     existGift.funding = funding;
-  
+
     const imgUrl = gift.giftImg
       ? await this.handleGiftImageUpdate(existGift, gift.giftImg)
       : await this.handleGiftImageRemoval(existGift);
-  
+
     const savedGift = await this.giftRepository.save(existGift);
     return new ResponseGiftDto(savedGift, imgUrl);
   }
-  
+
   private async handleGiftImageUpdate(
     existGift: Gift,
     newGiftImgUrl: string,
@@ -130,7 +137,7 @@ export class GiftService {
           subId: existGift.giftId,
         },
       });
-  
+
       // 기존 이미지가 존재하고 URL이 동일한 경우, 그대로 사용
       if (existImg) {
         if (existImg.imgUrl === newGiftImgUrl) {
@@ -139,15 +146,13 @@ export class GiftService {
         await this.imgRepository.delete(existImg.imgId);
       }
     }
-  
+
     // 새로운 이미지를 저장
     const newImage = await this.saveNewImage(newGiftImgUrl, existGift.giftId);
     return newImage.imgUrl;
   }
-  
-  private async handleGiftImageRemoval(
-    existGift: Gift,
-  ): Promise<string> {
+
+  private async handleGiftImageRemoval(existGift: Gift): Promise<string> {
     if (existGift.defaultImgId) {
       // 기본 이미지가 이미 설정되어 있는 경우
       const defaultImage = await this.imgRepository.findOne({
@@ -158,19 +163,19 @@ export class GiftService {
       // 기본 이미지가 설정되어 있지 않다면 기존 이미지를 삭제하고 기본 이미지를 설정
       await this.imgRepository.delete({
         imgType: ImageType.Gift,
-        subId: existGift.giftId
+        subId: existGift.giftId,
       });
-  
+
       return this.setDefaultGiftImage(existGift);
     }
   }
-  
+
   private async createNewGift(
     funding: Funding,
     gift: RequestGiftDto,
   ): Promise<ResponseGiftDto> {
     const newGift = new Gift();
-  
+
     newGift.giftUrl = gift.giftUrl;
     newGift.giftOrd = gift.giftOrd;
     newGift.giftOpt = gift.giftOpt;
@@ -178,11 +183,11 @@ export class GiftService {
     newGift.funding = funding;
 
     const savedGift = await this.giftRepository.save(newGift);
-  
+
     const imgUrl = gift.giftImg
-    ? (await this.saveNewImage(gift.giftImg, savedGift.giftId)).imgUrl
-    : await this.setDefaultGiftImage(savedGift);
-  
+      ? (await this.saveNewImage(gift.giftImg, savedGift.giftId)).imgUrl
+      : await this.setDefaultGiftImage(savedGift);
+
     return new ResponseGiftDto(savedGift, imgUrl);
   }
 
@@ -190,11 +195,11 @@ export class GiftService {
     const newImage = new Image(imgUrl, ImageType.Gift, giftId);
     return this.imgRepository.save(newImage);
   }
-  
+
   private async setDefaultGiftImage(gift: Gift): Promise<string> {
     const defaultImgId = getRandomDefaultImgId(DefaultImageIds.Gift);
     gift.defaultImgId = defaultImgId;
-  
+
     const defaultImage = await this.imgRepository.findOne({
       where: { imgId: defaultImgId },
     });
@@ -224,7 +229,9 @@ export class GiftService {
   // }
 
   async deleteGift(giftId: number): Promise<Gift> {
-    const gift = await this.giftRepository.findOneBy({ giftId });
+    const gift = await this.giftRepository.findOne({
+      where: { giftId },
+    });
     if (!gift) {
       throw new HttpException(
         '존재하지 않는 선물입니다.',
@@ -232,7 +239,8 @@ export class GiftService {
       );
     }
 
-    await this.giftRepository.delete(gift);
+    await this.imgService.delete(ImageType.Gift, gift.giftId);
+    await this.giftRepository.remove(gift);
 
     return gift;
   }
