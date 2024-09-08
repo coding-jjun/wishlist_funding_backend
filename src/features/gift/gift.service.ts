@@ -182,10 +182,7 @@ export class GiftService {
       return defaultImage.imgUrl;
     } else {
       // 기본 이미지가 설정되어 있지 않다면 기존 이미지를 삭제하고 기본 이미지를 설정
-      await this.imgRepository.delete({
-        imgType: ImageType.Gift,
-        subId: existGift.giftId,
-      });
+      await this.imgService.delete(ImageType.Gift, existGift.giftId);
 
       return this.setDefaultGiftImage(existGift);
     }
