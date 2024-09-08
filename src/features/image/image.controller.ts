@@ -10,17 +10,17 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { ImageService } from './image.service';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { ImageDto } from './dto/image.dto';
 import { v4 as uuidv4 } from 'uuid';
 import * as sharp from 'sharp';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth-guard';
 import { UrlDto } from './dto/url.dto';
+import { S3Service } from './s3.service';
 
 @Controller('image')
 export class ImageController {
-  constructor(private readonly imageService: ImageService) {}
+  constructor(private readonly s3Service: S3Service) {}
 
   @Post()
   @UseInterceptors(FilesInterceptor('files'))
@@ -45,7 +45,7 @@ export class ImageController {
 
       const filename = uuidv4() + '.' + extension;
 
-      const url = await this.imageService.upload(filename, buffer);
+      const url = await this.s3Service.upload(filename, buffer);
       urls.push(url);
     }
 
@@ -69,7 +69,7 @@ export class ImageController {
   async deleteFile(@Body() urlDto: UrlDto): Promise<CommonResponse> {
     const { url } = urlDto;
 
-    await this.imageService.delete(url);
+    await this.s3Service.delete(url);
 
     return {
       message: '성공적으로 파일이 삭제되었습니다.',
