@@ -17,7 +17,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       // 토큰이 유효한지 확인하기 위한 키
       secretOrKey: process.env.JWT_SECRET,
       // 클라이언트에서 오는 토큰이 어디에서 오는지 명시 해 줌
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
     });
   }
 
@@ -40,3 +40,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 }
 
+function cookieExtractor(req: any): string | null {
+  return req.cookies['access_token'] || null; // 쿠키에서 토큰을 추출
+}
