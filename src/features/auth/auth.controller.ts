@@ -199,7 +199,7 @@ export class AuthController {
     }; 
   }
 
-  @Post('/nickname')
+  @Post('/nickname/check')
   async validNickName(@Body() validDto: ValidDto): Promise<CommonResponse>{
 
     if(!validDto.userNick){
