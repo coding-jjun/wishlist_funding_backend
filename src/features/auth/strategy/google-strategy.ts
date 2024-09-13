@@ -6,6 +6,7 @@ import { AuthService } from "../auth.service";
 import { AuthType } from "src/enums/auth-type.enum";
 import { CreateUserDto } from "../dto/create-user.dto";
 import { TokenDto } from "../dto/token.dto";
+import { UserType } from "src/enums/user-type.enum";
 
 
 @Injectable()
@@ -65,7 +66,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google'){
 
     }
     const tokenDto = new TokenDto();
-    tokenDto.accessToken = await this.authService.createAccessToken(user.userId);
+    tokenDto.accessToken = await this.authService.createAccessToken(UserType.USER, user.userId);
     tokenDto.refreshToken = await this.authService.createRefreshToken(user.userId);
     done(null, {user, tokenDto, type});
     

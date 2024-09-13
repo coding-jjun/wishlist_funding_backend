@@ -25,6 +25,7 @@ import { ValidDto } from './dto/valid.dto';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { TokenDto } from './dto/token.dto';
 import { RefreshTokenDto } from './dto/refresh.token.dto';
+import { UserType } from 'src/enums/user-type.enum';
 
 @Controller('auth')
 export class AuthController {
@@ -115,7 +116,7 @@ export class AuthController {
   async login(@Body() loginDto: LoginDto, @Res() res: Response){
     const user = await this.authService.login(loginDto);
     const token = new TokenDto()
-    token.accessToken = await this.authService.createAccessToken(user.userId);
+    token.accessToken = await this.authService.createAccessToken(UserType.USER,user.userId);
     token.refreshToken = await this.authService.createRefreshToken(user.userId);
 
     Logger.debug("accessToken: " + token.accessToken); // redirect로 변경되면서 디버그 환경에서 token을 확인하기 어려워졌습니다.
@@ -136,7 +137,7 @@ export class AuthController {
   ) {
     const user = await this.authService.createUser(createUserDto)
     const token = new TokenDto();
-    token.accessToken = await this.authService.createAccessToken(user.userId);
+    token.accessToken = await this.authService.createAccessToken(UserType.USER, user.userId);
     token.refreshToken = await this.authService.createRefreshToken(user.userId);
     
     res.cookie("access_token", token.accessToken, this.cookieOptions);
@@ -150,7 +151,7 @@ export class AuthController {
     const userId = await this.authService.chkValidRefreshToken(tokenDto.refreshToken);
     return {
       message: 'Access Token 재발급 완료',
-      data: await this.authService.createAccessToken(userId),
+      data: await this.authService.createAccessToken(UserType.USER, userId),
     }; 
   }
   

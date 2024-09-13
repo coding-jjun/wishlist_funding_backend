@@ -15,6 +15,7 @@ import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { DefaultImageIds } from 'src/enums/default-image-id';
+import { UserType } from 'src/enums/user-type.enum';
 
 @Injectable()
 export class AuthService {
@@ -43,9 +44,9 @@ export class AuthService {
     return new Date(year, month, day);
   }
 
-  async createAccessToken(userId: number): Promise<string> {
+  async createAccessToken(userType: UserType, userId: number): Promise<string> {
     return this.jwtService.sign(
-      { userId, time: new Date() },
+      { userId, time: new Date(), type: userType },
       {
         secret: process.env.JWT_SECRET,
         expiresIn: '30m',
