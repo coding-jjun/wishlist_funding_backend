@@ -6,6 +6,7 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  Param,
   ParseIntPipe,
   Put,
   Query,
@@ -50,10 +51,11 @@ export class UserController {
     }
   }
 
-  @Get('/funding')
+  @Get(':userId/funding')
   @UseGuards(JwtAuthGuard)
   async findAll(
     @Req() req: Request,
+    @Param('userId', ParseIntPipe) userId: number,
     @Query('fundPublFilter', new DefaultValuePipe('both'))
     fundPublFilter: 'all' | 'friends' | 'both' | 'mine',
     @Query(
@@ -78,7 +80,7 @@ export class UserController {
       const themesArray = Array.isArray(fundThemes) ? fundThemes : [fundThemes];
       const lastEndAtDate = lastEndAt ? new Date(lastEndAt) : undefined;
       const data = await this.fundService.findAll(
-        user.userId,
+        userId,
         fundPublFilter,
         themesArray,
         status,
@@ -86,6 +88,7 @@ export class UserController {
         limit,
         lastFundUuid,
         lastEndAtDate,
+        user,
       );
 
       return { message: 'Success', data };
