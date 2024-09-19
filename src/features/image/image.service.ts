@@ -9,7 +9,6 @@ import { GiftogetherException } from 'src/filters/giftogether-exception';
 @Injectable()
 export class ImageService {
   constructor(
-    private readonly s3Service: S3Service,
     @InjectRepository(Image) private readonly imgRepo: Repository<Image>,
   ) {}
 
@@ -23,22 +22,13 @@ export class ImageService {
   }
 
   /**
-   * Image Table에서 subId가 일치하는 레코드를 제거하고 S3 delete도 같이 수행합니다.
+   * Image Table에서 subId가 일치하는 레코드를 제거한다
    * @param imgType 연관 테이블 타입
    * @param subId FK
+   * @returns 제거된 이미지 인스턴스들
    */
   async delete(imgType: ImageType, subId: number) {
     const images = await this.getInstancesBySubId(imgType, subId);
-    const removePromises = images.map(async (i) => {
-      return this.s3Service.delete(i.imgUrl);
-    });
-    await Promise.all(removePromises).catch((e) => {
-      if (e instanceof GiftogetherException) {
-        // do nothing
-        return;
-      }
-      throw e;
-    });
-    this.imgRepo.remove(images);
+    return this.imgRepo.remove(images);
   }
 }

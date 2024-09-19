@@ -63,6 +63,7 @@ export class ImageController {
    * S3에 저장된 파일을 포함하여 제거합니다.
    * @authorization JWT Bearer Token
    * @param imgUrl 제거하고자 하는 이미지의 파일 URL
+   * @todo 자신이 올린 이미지를 제외한 파일은 제거하지 못하도록 정책을 추가해야 합니다.
    */
   @Delete()
   @UseGuards(JwtAuthGuard)
