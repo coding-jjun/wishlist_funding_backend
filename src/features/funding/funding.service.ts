@@ -68,6 +68,7 @@ export class FundingService {
     limit: number,
     lastFundUuid?: string, // 마지막으로 로드된 항목의 id 값
     lastEndAtDate?: Date, // 마지막으로 로드된 항목의 endAt 값
+    user?: User,
   ): Promise<{
     fundings: FundingDto[];
     count: number;
@@ -89,6 +90,23 @@ export class FundingService {
 
     if (fundPublFilter === 'mine') {
       queryBuilder.where('funding.fundUser = :userId', { userId });
+
+      if (user.userId != userId) {
+        const friendship = await this.friendRepository
+          .createQueryBuilder('friend')
+          .where(
+            '((friend.userId = :userId AND friend.friendId = :friendId) OR (friend.userId = :friendId AND friend.friendId = :userId))',
+            { userId: user.userId, friendId: userId })
+          .andWhere('friend.status = :status', { status: FriendStatus.Friend })
+          .getOne();
+
+        if (!friendship) {
+          queryBuilder.andWhere(
+            'fund.fundPubl = :publ',
+            { publ: true }
+          )
+        }
+      }
     } else {
       queryBuilder.where('funding.fundUser != :userId', { userId });
 

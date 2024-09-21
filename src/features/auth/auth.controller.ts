@@ -25,11 +25,13 @@ import { ValidDto } from './dto/valid.dto';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { TokenDto } from './dto/token.dto';
 import { RefreshTokenDto } from './dto/refresh.token.dto';
+import { DonationService } from '../donation/donation.service';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private readonly donationService: DonationService,
     private readonly g2gException: GiftogetherExceptions,
   ) {}
 
@@ -85,7 +87,6 @@ export class AuthController {
     }else{
       return res.redirect(process.env.SIGNUP_URL);
     }
-
   }
   
   @Get('google')
@@ -126,7 +127,6 @@ export class AuthController {
     res.cookie("user", user, this.cookieOptions);
 
     return res.redirect(process.env.LOGIN_URL);
-    
   }
 
   @Post(`/signup`)
@@ -144,7 +144,7 @@ export class AuthController {
     res.cookie("user", user, this.cookieOptions);
     return res.json({ message: 'success' });
   }
-
+  
   @Post('/token')
   async reIssueAccessToken(@Body() tokenDto: RefreshTokenDto): Promise<CommonResponse>{
     const userId = await this.authService.chkValidRefreshToken(tokenDto.refreshToken);
@@ -166,7 +166,6 @@ export class AuthController {
 
   @Post('/email')
   async validUserEmail(@Body() validDto: ValidDto): Promise<CommonResponse>{
-    
     if(!validDto.userEmail){
       throw this.g2gException.NotValidEmail;
     }
@@ -183,7 +182,6 @@ export class AuthController {
 
   @Post('/phone')
   async validUserPhone(@Body() validDto: ValidDto): Promise<CommonResponse>{
-
     if(!validDto.userPhone){
       throw this.g2gException.NotValidPhone;
     }
@@ -200,7 +198,6 @@ export class AuthController {
 
   @Post('/nickname')
   async validNickName(@Body() validDto: ValidDto): Promise<CommonResponse>{
-
     if(!validDto.userNick){
       throw this.g2gException.NotValidNick;
     }
@@ -212,7 +209,14 @@ export class AuthController {
     return {
       message: '유효한 닉네임 입니다.',
       data: true
-    }; 
+    };
   }
 
+  @Post('/guest')
+  async guestLogin(@Body() orderId: string): Promise<CommonResponse> {
+    return {
+      message: 'Donation 조회 성공',
+      data: await this.donationService.getOneDonation(orderId),
+    };
+  }
 }
