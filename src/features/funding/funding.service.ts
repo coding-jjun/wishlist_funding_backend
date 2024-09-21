@@ -39,7 +39,7 @@ export class FundingService {
     private readonly g2gException: GiftogetherExceptions,
 
     private readonly validCheck: ValidCheck,
-  ) {}
+  ) { }
 
   async findFundingByUuidAndUserId(
     fundUuid: string,
@@ -421,10 +421,7 @@ export class FundingService {
     await this.imgService.delete(ImageType.Funding, funding.fundId);
     // 선물과 연관된 이미지를 unlink하고 삭제한다.
     const gifts = funding.gifts;
-    const deleteGiftPromises = gifts.map(async (g) =>
-      this.giftService.deleteGift(g.giftId),
-    );
-    await Promise.all(deleteGiftPromises);
+    await this.giftService.delete(...gifts);
     this.fundingRepository.remove(funding);
   }
 }

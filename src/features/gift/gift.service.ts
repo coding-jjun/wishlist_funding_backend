@@ -29,7 +29,7 @@ export class GiftService {
     private readonly g2gException: GiftogetherExceptions,
 
     private readonly imgService: ImageService,
-  ) {}
+  ) { }
 
   async findAllGift(fund: Funding): Promise<{
     gifts: ResponseGiftDto[];
@@ -224,6 +224,14 @@ export class GiftService {
 
     await this.giftRepository.save(gift);
     return defaultImage.imgUrl;
+  }
+
+  async delete(...gifts: Gift[]): Promise<Gift[]> {
+    const deleteImgPromises = gifts.map(async (g) =>
+      this.imgService.delete(ImageType.Gift, g.giftId),
+    );
+    Promise.all(deleteImgPromises);
+    return this.giftRepository.remove(gifts);
   }
 
   private async deleteGift(
