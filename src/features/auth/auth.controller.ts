@@ -228,4 +228,15 @@ export class AuthController {
     };
     
   }
+  
+  @Post('/guest/signup')
+  async guestSignup(
+    @Body() createUserDto: CreateUserDto
+  ) {
+    await this.authService.createUser(createUserDto);
+    return {
+      message: 'success',
+      data: true
+    }; 
+  }
 }
