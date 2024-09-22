@@ -80,13 +80,34 @@ export class GiftService {
     funding: Funding,
     gifts: RequestGiftDto[],
   ): Promise<ResponseGiftDto[]> {
-    return Promise.all(
-      gifts.map(gift => 
-        gift.giftId 
-          ? this.updateGift(funding, gift) 
-          : this.createNewGift(funding, gift)
-      )
+    // 기존 Funding에 연결된 모든 Gift 조회
+    const existingGifts = await this.giftRepository.find({
+      where: { funding: { fundId: funding.fundId } },
+    });
+
+    // 삭제할 Gift를 추적하기 위한 Set
+    const existingGiftIds = new Set(existingGifts.map(gift => gift.giftId));
+
+    // 요청된 Gift 목록을 순회하면서 업데이트하거나 새로운 Gift를 추가
+    const resultGifts = await Promise.all(
+      gifts.map(async (gift) => {
+        if (gift.giftId) {
+          // giftId가 존재하면 기존 Gift를 업데이트
+          const updatedGift = await this.updateGift(funding, gift);
+          existingGiftIds.delete(gift.giftId); // 업데이트된 Gift는 삭제 대상에서 제외
+          return updatedGift;
+        } else {
+          // giftId가 없으면 새로운 Gift 생성
+          const newGift = await this.createNewGift(funding, gift);
+          return newGift;
+        }
+      })
     );
+
+    // 삭제 로직 실행: existingGiftIds에 남아 있는 giftId는 삭제 대상
+    await this.deleteGift(existingGifts, existingGiftIds);
+
+    return resultGifts;
   }
   
   private async updateGift(
@@ -203,6 +224,21 @@ export class GiftService {
     return defaultImage.imgUrl;
   }
 
+  private async deleteGift(
+    existingGifts: Gift[],
+    existingGiftIds: Set<number>
+  ): Promise<void> {
+    // 기존 Gift 중에서 삭제 대상인 Gift 필터링
+    const giftsToDelete = existingGifts.filter(
+      existingGift => existingGiftIds.has(existingGift.giftId)
+    );
+  
+    // 삭제할 Gift 제거
+    if (giftsToDelete.length > 0) {
+      await this.giftRepository.remove(giftsToDelete);
+    }
+  }
+  
   // async updateGift(
   //   giftId: number,
   //   requestGiftDto: RequestGiftDto,
@@ -223,17 +259,17 @@ export class GiftService {
   //   return await this.giftRepository.save(gift);
   // }
 
-  async deleteGift(giftId: number): Promise<Gift> {
-    const gift = await this.giftRepository.findOneBy({ giftId });
-    if (!gift) {
-      throw new HttpException(
-        '존재하지 않는 선물입니다.',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+  // async deleteGift(giftId: number): Promise<Gift> {
+  //   const gift = await this.giftRepository.findOneBy({ giftId });
+  //   if (!gift) {
+  //     throw new HttpException(
+  //       '존재하지 않는 선물입니다.',
+  //       HttpStatus.BAD_REQUEST,
+  //     );
+  //   }
 
-    await this.giftRepository.delete(gift);
+  //   await this.giftRepository.delete(gift);
 
-    return gift;
-  }
+  //   return gift;
+  // }
 }

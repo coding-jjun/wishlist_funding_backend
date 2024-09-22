@@ -45,16 +45,16 @@ export class GiftController {
   //   }
   // }
 
-  @Delete(':giftId')
-  async deleteGift(
-    @Param('giftId', ParseIntPipe) giftId: number,
-  ): Promise<CommonResponse> {
-    try {
-      return {
-        data: await this.giftService.deleteGift(giftId),
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
+  // @Delete(':giftId')
+  // async deleteGift(
+  //   @Param('giftId', ParseIntPipe) giftId: number,
+  // ): Promise<CommonResponse> {
+  //   try {
+  //     return {
+  //       data: await this.giftService.deleteGift(giftId),
+  //     };
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // }
 }

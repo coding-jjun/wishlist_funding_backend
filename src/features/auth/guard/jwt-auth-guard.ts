@@ -22,25 +22,22 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    */
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    const cookies = request.cookies;
+    const accessToken = cookies['access_token'];
 
-    // 헤더에 토큰 존재 유무 확인
-    const { authorization } = context.switchToHttp().getRequest().headers;
-    if (!authorization) {
+    if (!accessToken) {
       throw this.jwtException.TokenMissing;
     }
-    const accessToken = authorization.split(' ')[1];
-
-    const tokenInfo = await this.authService.verifyAccessToken(accessToken);
-
-    const isInBlackList = await this.authService.isBlackListToken(tokenInfo.userId, accessToken);
-    if(isInBlackList){
-      throw this.jwtException.NotValidToken;
-    }
-
+    
     try {
-      await super.canActivate(context);
-      return true;
+      const tokenInfo = await this.authService.verifyAccessToken(accessToken);
+      const isInBlackList = await this.authService.isBlackListToken(tokenInfo.userId, accessToken);
+      if (isInBlackList) {
+        throw this.jwtException.NotValidToken;
+      }
 
+      return super.canActivate(context) as Promise<boolean>;
     } catch (error) {
       throw this.jwtException.NotValidToken;
     }
