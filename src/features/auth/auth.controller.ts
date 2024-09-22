@@ -146,12 +146,11 @@ export class AuthController {
   }
   
   @Post('/token')
-  async reIssueAccessToken(@Body() tokenDto: RefreshTokenDto): Promise<CommonResponse>{
+  async reIssueAccessToken(@Body() tokenDto: RefreshTokenDto, @Res() res: Response){
     const userId = await this.authService.chkValidRefreshToken(tokenDto.refreshToken);
-    return {
-      message: 'Access Token 재발급 완료',
-      data: await this.authService.createAccessToken(UserType.USER, userId),
-    }; 
+    const accessToken = await this.authService.createAccessToken(UserType.USER, userId)
+    res.cookie("access_token", accessToken, this.cookieOptions);
+    return res.json({ message: 'success' }); 
   }
   
   @Post('/logout')
