@@ -214,6 +214,12 @@ export class GiftogetherExceptions {
     HttpStatus.NOT_FOUND,
   );
 
+  DefaultImgNotExist = new GiftogetherException(
+    ErrorMsg.DefaultImgNotExist,
+    ErrorCode.DefaultImgNotExist,
+    HttpStatus.NOT_FOUND,
+  )
+
   // Account
   AccountNotFound = new GiftogetherException(
     ErrorMsg.AccountNotFound,

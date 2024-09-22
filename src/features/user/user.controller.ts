@@ -51,6 +51,22 @@ export class UserController {
     }
   }
 
+  @Get(':userId')
+  async getOther(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Req() req: Request,
+  ): Promise<CommonResponse> {
+    const user = req.user as { user: User } as any;
+    try {
+      return {
+        message: '사용자 정보 조회에 성공하였습니다.',
+        data: await this.userService.getOthersInfo(userId),
+      };
+    } catch (error) {
+      throw error
+    }
+  }
+
   @Get(':userId/funding')
   @UseGuards(JwtAuthGuard)
   async findAll(
