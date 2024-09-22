@@ -46,6 +46,26 @@ export class UserService {
     );
   }
 
+  async getOthersInfo(userId: number): Promise<UserDto> {
+    const user = await this.userRepository.findOne({ where: { userId } });
+
+    const where = user.defaultImgId
+      ? { imgId: user.defaultImgId }
+      : { imgType: ImageType.User, subId: user.userId };
+    const image = await this.imgRepository.findOne({ where });
+
+    return new UserDto(
+      user.userNick,
+      user.userName,
+      user.userPhone,
+      user.userBirth,
+      user.authType,
+      image.imgUrl,
+      user.userId,
+      user.userEmail
+    )
+  }
+
   async updateUser(
     user: User,
     userDto: UpdateUserDto,
