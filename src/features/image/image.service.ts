@@ -1,67 +1,34 @@
 import { Injectable } from '@nestjs/common';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { ImageDto } from './dto/image.dto';
+import { ImageType } from 'src/enums/image-type.enum';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Image } from 'src/entities/image.entity';
+import { Repository } from 'typeorm';
+import { S3Service } from './s3.service';
+import { GiftogetherException } from 'src/filters/giftogether-exception';
 
 @Injectable()
 export class ImageService {
-  private readonly s3Client = new S3Client({
-    region: process.env.AWS_S3_REGION,
-    maxAttempts: 30,
-  });
+  constructor(
+    @InjectRepository(Image) private readonly imgRepo: Repository<Image>,
+  ) {}
 
-  getObjectUrlOf(filename: string): string {
-    return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.amazonaws.com/${filename}`;
-  }
-
-  async upload(filename: string, file: Buffer): Promise<string> {
-    await this.s3Client.send(
-      new PutObjectCommand({
-        Bucket: process.env.AWS_S3_BUCKET_NAME,
-        Key: filename,
-        Body: file,
-      }),
-    );
-
-    return this.getObjectUrlOf(filename);
-  }
-}
-
-/**
- *
-constructor(
-  @InjectRepository(Image)
-  private readonly imageRepo: Repository<Image>,
-) {}
-
-async createImages(subId: number, imgType: ImageType, fileNames: string[]): Promise<Image[]>{
-  const images: Image[] = [];
-  try {
-    for (const fileName of fileNames) {
-      const image = new Image();
-      image.subId = subId;
-      image.imgType = imgType;
-      // TODO await generate S3 URL
-      image.imgUrl = fileName;
-      const savedImage = await this.imageRepo.save(image);
-      images.push(savedImage);
-    }
-  }catch(error){
-    console.error("Failed to create Images : ", error);
-  }
-  return images;
-}
-
-
-async findImages(subId: number, imgType: ImageType){
-  try {
-    const images = await this.imageRepo.find({
-      where: { subId, imgType },
+  private async getInstancesBySubId(
+    imgType: ImageType,
+    subId: number,
+  ): Promise<Image[]> {
+    return this.imgRepo.find({
+      where: { imgType, subId },
     });
-    return images;
-    
-  } catch (error) {
-    console.error('Failed to find Images : ', error);
-    throw error;
+  }
+
+  /**
+   * Image Table에서 subId가 일치하는 레코드를 제거한다
+   * @param imgType 연관 테이블 타입
+   * @param subId FK
+   * @returns 제거된 이미지 인스턴스들
+   */
+  async delete(imgType: ImageType, subId: number) {
+    const images = await this.getInstancesBySubId(imgType, subId);
+    return this.imgRepo.remove(images);
   }
 }
-*/

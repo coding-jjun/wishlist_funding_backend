@@ -18,14 +18,36 @@ import { RollingPaper } from 'src/entities/rolling-paper.entity';
 import { RollingPaperService } from '../rolling-paper/rolling-paper.service';
 import { ValidCheck } from 'src/util/valid-check';
 import { AuthModule } from '../auth/auth.module';
+import { ImageService } from '../image/image.service';
+import { S3Service } from '../image/s3.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Funding, User, Comment, Friend, Gift, Image, Notification, Donation, RollingPaper]),
-    AuthModule
+    TypeOrmModule.forFeature([
+      Funding,
+      User,
+      Comment,
+      Friend,
+      Gift,
+      Image,
+      Notification,
+      Donation,
+      RollingPaper,
+    ]),
+    AuthModule,
   ],
   controllers: [FundingController],
-  providers: [FundingService, GiftService, DonationService, RollingPaperService, GiftogetherExceptions, FundingTasksService, ValidCheck],
+  providers: [
+    FundingService,
+    GiftService,
+    DonationService,
+    RollingPaperService,
+    GiftogetherExceptions,
+    FundingTasksService,
+    ValidCheck,
+    ImageService,
+    S3Service,
+  ],
   exports: [FundingService],
 })
 export class FundingModule {}

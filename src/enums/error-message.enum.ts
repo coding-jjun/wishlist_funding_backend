@@ -21,6 +21,9 @@ export enum ErrorMsg {
 
   // Image
   IncorrectImageUrl = '이미지 URL이 유효하지 않습니다.',
+  IncorrectImageHost = '이미지 호스트가 일치하지 않습니다.',
+  ImageUriNotSpecified = '이미지 URI가 유효하지 않습니다.',
+  ImageNotFound = '이미지가 존재하지 않습니다.',
 
   // User
   UserNotFound = '사용자 정보가 없습니다.',
