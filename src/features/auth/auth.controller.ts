@@ -18,7 +18,6 @@ import { NaverAuthGuard } from './guard/naver-auth-guard';
 import { GoogleAuthGuard } from './guard/google-auth-guard';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { UserDto } from '../user/dto/user.dto';
 import { LoginDto } from './dto/login.dto';
 import { ValidDto } from './dto/valid.dto';
@@ -217,5 +216,16 @@ export class AuthController {
       message: 'Donation 조회 성공',
       data: await this.donationService.getOneDonation(orderId),
     };
+  }
+
+  
+  @Get('/nickname')
+  async createRandomNickname(): Promise<CommonResponse> {
+    const randomNickname = await this.authService.createRandomNickname();
+    return {
+      message: "랜덤 닉네임을 생성했습니다.",
+      data: randomNickname
+    };
+    
   }
 }

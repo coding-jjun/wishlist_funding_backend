@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { User } from 'src/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { AuthType } from 'src/enums/auth-type.enum';
@@ -15,10 +15,12 @@ import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { DefaultImageIds } from 'src/enums/default-image-id';
+import { Nickname } from 'src/util/nickname';
 import { UserType } from 'src/enums/user-type.enum';
 
 @Injectable()
 export class AuthService {
+  private readonly NICKNAME_ARRAY_LENGTH: number = 119;
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -33,6 +35,7 @@ export class AuthService {
     private readonly redisClient: RedisClientType,
 
     private readonly g2gException: GiftogetherExceptions,
+    private readonly nickName : Nickname,
   ) {}
 
   async parseDate(yearString: string, birthday: string): Promise<Date> {
@@ -381,5 +384,25 @@ export class AuthService {
     } catch (error) {
       throw this.jwtException.RedisServerError;
     }
+  }
+
+  async createRandomNickname(): Promise<string> {
+
+    const adjectiveIndex = Math.floor(Math.random() * this.NICKNAME_ARRAY_LENGTH);
+    const nounIndex = Math.floor(Math.random() * this.NICKNAME_ARRAY_LENGTH);
+
+    const adjective = this.nickName.adjective[adjectiveIndex];
+    const noun = this.nickName.noun[nounIndex];
+    const baseNick = `${adjective}${noun}`;
+
+    // userNick이 baseNick으로 시작하는 모든 사용자 조회
+    const duplicateNicknames = await this.userRepository.count({
+      where: { userNick: Like(`${baseNick}%`) }
+    });
+    if (duplicateNicknames > 0){
+      return adjective+noun+(duplicateNicknames+1);
+    }
+
+    return adjective+noun;
   }
 }

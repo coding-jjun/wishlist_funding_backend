@@ -18,6 +18,7 @@ import { RollingPaper } from 'src/entities/rolling-paper.entity';
 import { Funding } from 'src/entities/funding.entity';
 import { RollingPaperService } from '../rolling-paper/rolling-paper.service';
 import { ValidCheck } from 'src/util/valid-check';
+import { Nickname } from 'src/util/nickname';
 
 
 @Module({
@@ -30,7 +31,7 @@ import { ValidCheck } from 'src/util/valid-check';
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, DonationService, RollingPaperService, KakaoStrategy, JwtStrategy, NaverStrategy, GoogleStrategy, GiftogetherExceptions, ValidCheck],
+  providers: [AuthService, DonationService, RollingPaperService, KakaoStrategy, JwtStrategy, NaverStrategy, GoogleStrategy, GiftogetherExceptions, ValidCheck, Nickname],
   exports: [PassportModule, AuthService]
 })
 export class AuthModule {}
