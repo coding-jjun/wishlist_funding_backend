@@ -34,9 +34,7 @@ export class ImageController {
     files: Express.Multer.File[],
   ): Promise<CommonResponse> {
     const uploadedImages = new ImageDto();
-    const urls = [];
-
-    for (const file of files) {
+    const uploadPromises = files.map(async (file): Promise<string> => {
       const buffer = await sharp(file.buffer).resize(300).toBuffer();
 
       const regex = /\.([0-9a-z]+)(?:[\?#]|$)/i;
@@ -45,9 +43,10 @@ export class ImageController {
 
       const filename = uuidv4() + '.' + extension;
 
-      const url = await this.s3Service.upload(filename, buffer);
-      urls.push(url);
-    }
+      const url = this.s3Service.upload(filename, buffer);
+      return url;
+    });
+    const urls = await Promise.all(uploadPromises);
 
     uploadedImages.urls = urls;
 
