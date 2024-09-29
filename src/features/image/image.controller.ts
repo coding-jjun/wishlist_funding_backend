@@ -5,6 +5,7 @@ import {
   FileTypeValidator,
   ParseFilePipe,
   Post,
+  Req,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -17,10 +18,16 @@ import * as sharp from 'sharp';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth-guard';
 import { UrlDto } from './dto/url.dto';
 import { S3Service } from './s3.service';
+import { Request } from 'express';
+import { User } from 'src/entities/user.entity';
+import { ImageService } from './image.service';
 
 @Controller('image')
 export class ImageController {
-  constructor(private readonly s3Service: S3Service) {}
+  constructor(
+    private readonly s3Service: S3Service,
+    private readonly imgService: ImageService,
+  ) {}
 
   @Post()
   @UseInterceptors(FilesInterceptor('files'))
@@ -66,8 +73,14 @@ export class ImageController {
    */
   @Delete()
   @UseGuards(JwtAuthGuard)
-  async deleteFile(@Body() urlDto: UrlDto): Promise<CommonResponse> {
+  async deleteFile(
+    @Req() req: Request,
+    @Body() urlDto: UrlDto,
+  ): Promise<CommonResponse> {
+    const user = req.user as { user: User } as any;
     const { url } = urlDto;
+
+    await this.imgService.deleteByUrlAndUser(url, user);
 
     await this.s3Service.delete(url);
 

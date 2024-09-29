@@ -3,8 +3,7 @@ import { ImageType } from 'src/enums/image-type.enum';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Image } from 'src/entities/image.entity';
 import { Repository } from 'typeorm';
-import { S3Service } from './s3.service';
-import { GiftogetherException } from 'src/filters/giftogether-exception';
+import { User } from 'src/entities/user.entity';
 
 @Injectable()
 export class ImageService {
@@ -30,5 +29,17 @@ export class ImageService {
   async delete(imgType: ImageType, subId: number) {
     const images = await this.getInstancesBySubId(imgType, subId);
     return this.imgRepo.remove(images);
+  }
+
+  /**
+   * Image Table에서 URL이 일치하는 레코드를 제거한다.
+   * @note 이 메서드는 컨트롤러에서 인가 작업이 완료가 된 다음 호출해야 안전합니다.
+   */
+  async deleteByUrlAndUser(imgUrl: string, creator: User) {
+    const image = await this.imgRepo.findOneOrFail({
+      where: { imgUrl, creator },
+    });
+
+    return this.imgRepo.remove(image);
   }
 }
