@@ -4,11 +4,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Image } from 'src/entities/image.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/entities/user.entity';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 @Injectable()
 export class ImageService {
   constructor(
     @InjectRepository(Image) private readonly imgRepo: Repository<Image>,
+    private readonly g2gException: GiftogetherExceptions,
   ) {}
 
   private async getInstancesBySubId(
@@ -36,9 +38,16 @@ export class ImageService {
    * @note 이 메서드는 컨트롤러에서 인가 작업이 완료가 된 다음 호출해야 안전합니다.
    */
   async deleteByUrlAndUser(imgUrl: string, creator: User) {
-    const image = await this.imgRepo.findOneOrFail({
-      where: { imgUrl, creator },
-    });
+    const image = await this.imgRepo
+      .createQueryBuilder('image')
+      .leftJoinAndSelect('image.creator', 'user')
+      .where('image.imgUrl = :imgUrl', { imgUrl })
+      .andWhere('user.userId = :userId', { userId: creator.userId })
+      .getOne();
+
+    if (!image) {
+      throw this.g2gException.ImageNotFound;
+    }
 
     return this.imgRepo.remove(image);
   }
