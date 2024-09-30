@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ImageController } from './image.controller';
+import { ImageController } from './image2.controller';
 import { ImageService } from './image.service';
 import { AuthModule } from '../auth/auth.module';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth-guard';

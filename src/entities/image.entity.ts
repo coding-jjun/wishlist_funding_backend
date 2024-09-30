@@ -20,6 +20,7 @@ export class Image {
   @Column({
     type: 'enum',
     enum: ImageType,
+    nullable: true,
   })
   imgType: ImageType;
 
