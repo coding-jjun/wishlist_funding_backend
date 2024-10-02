@@ -94,6 +94,19 @@ export class GiftogetherExceptions {
     ErrorCode.ImageNotFound,
     HttpStatus.NOT_FOUND,
   );
+
+  ImageIntegrityError = new GiftogetherException(
+    ErrorMsg.ImageIntegrityError,
+    ErrorCode.ImageIntegrityError,
+    HttpStatus.BAD_REQUEST,
+  );
+
+  ImageAlreadyExists = new GiftogetherException(
+    ErrorMsg.ImageAlreadyExists,
+    ErrorCode.ImageAlreadyExists,
+    HttpStatus.BAD_REQUEST,
+  );
+
   // User
   UserNotFound = new GiftogetherException(
     ErrorMsg.UserNotFound,
@@ -218,7 +231,7 @@ export class GiftogetherExceptions {
     ErrorMsg.DefaultImgNotExist,
     ErrorCode.DefaultImgNotExist,
     HttpStatus.NOT_FOUND,
-  )
+  );
 
   // Account
   AccountNotFound = new GiftogetherException(

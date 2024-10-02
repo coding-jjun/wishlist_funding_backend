@@ -13,13 +13,65 @@ export class ImageService {
     private readonly g2gException: GiftogetherExceptions,
   ) {}
 
-  private async getInstancesBySubId(
+  async getInstancesBySubId(
     imgType: ImageType,
     subId: number,
   ): Promise<Image[]> {
     return this.imgRepo.find({
       where: { imgType, subId },
     });
+  }
+
+  /**
+   * 이미지를 생성하거나 업데이트합니다.
+   *
+   * 이미지를 업데이트 하는 경우: 레코드가 존재하며 type, subId가 NULL인 경우
+   * 이미지를 생성하는 경우: 레코드가 존재하지 않는 경우
+   *
+   * @param type 이미지의 타입 (NULL인 경우 S3에 업로드만 한 임시 객체임을 의미.)
+   * @param subId 참조되는 이미지의 서브 ID (NULL인 경우 S3에 업로드만 한 임시 객체임을 의미.)
+   */
+  async save(
+    imgUrl: string,
+    creator: User,
+    imgType?: ImageType,
+    subId?: number,
+  ): Promise<Image> {
+    if (
+      (imgType === null && subId !== null) ||
+      (imgType !== null && subId === null)
+    ) {
+      throw this.g2gException.ImageIntegrityError;
+    }
+
+    const foundImg = await this.imgRepo
+      .createQueryBuilder('image')
+      .leftJoinAndSelect('image.creator', 'user')
+      .where('image.imgUrl = :imgURl', { imgUrl })
+      .andWhere('user.userId = :userId', { userId: creator.userId })
+      .getOne();
+
+    if (!foundImg) {
+      const newImg = new Image(imgUrl, imgType, subId, creator);
+      return this.imgRepo.save(newImg);
+    }
+
+    // foundImg EXISTS
+
+    if (foundImg.isTemporary()) {
+      foundImg.imgType = imgType;
+      foundImg.subId = subId;
+      return this.imgRepo.save(foundImg);
+    }
+
+    // foundImg is not temporary
+
+    if (foundImg.imgType === imgType && foundImg.subId === subId) {
+      // 동일한 이미지
+      return foundImg;
+    }
+    
+    throw this.g2gException.ImageAlreadyExists;
   }
 
   /**
