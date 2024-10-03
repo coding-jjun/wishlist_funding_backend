@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Funding } from 'src/entities/funding.entity';
 import { Gift } from 'src/entities/gift.entity';
@@ -13,6 +13,7 @@ import {
   getRandomDefaultImgId,
 } from 'src/enums/default-image-id';
 import { ImageService } from '../image/image.service';
+import { User } from 'src/entities/user.entity';
 
 @Injectable()
 export class GiftService {
@@ -29,7 +30,7 @@ export class GiftService {
     private readonly g2gException: GiftogetherExceptions,
 
     private readonly imgService: ImageService,
-  ) { }
+  ) {}
 
   async findAllGift(fund: Funding): Promise<{
     gifts: ResponseGiftDto[];
@@ -86,6 +87,7 @@ export class GiftService {
   async createOrUpdateGift(
     funding: Funding,
     gifts: RequestGiftDto[],
+    creator: User,
   ): Promise<ResponseGiftDto[]> {
     // 기존 Funding에 연결된 모든 Gift 조회
     const existingGifts = await this.giftRepository.find({
@@ -100,12 +102,12 @@ export class GiftService {
       gifts.map(async (gift) => {
         if (gift.giftId) {
           // giftId가 존재하면 기존 Gift를 업데이트
-          const updatedGift = await this.updateGift(funding, gift);
+          const updatedGift = await this.updateGift(funding, gift, creator);
           existingGiftIds.delete(gift.giftId); // 업데이트된 Gift는 삭제 대상에서 제외
           return updatedGift;
         } else {
           // giftId가 없으면 새로운 Gift 생성
-          const newGift = await this.createNewGift(funding, gift);
+          const newGift = await this.createNewGift(funding, gift, creator);
           return newGift;
         }
       }),
@@ -120,6 +122,7 @@ export class GiftService {
   private async updateGift(
     funding: Funding,
     gift: RequestGiftDto,
+    creator: User,
   ): Promise<ResponseGiftDto> {
     const existGift = await this.giftRepository.findOne({
       where: { giftId: gift.giftId },
@@ -137,7 +140,7 @@ export class GiftService {
     existGift.funding = funding;
 
     const imgUrl = gift.giftImg
-      ? await this.handleGiftImageUpdate(existGift, gift.giftImg)
+      ? await this.handleGiftImageUpdate(existGift, gift.giftImg, creator)
       : await this.handleGiftImageRemoval(existGift);
 
     const savedGift = await this.giftRepository.save(existGift);
@@ -147,6 +150,7 @@ export class GiftService {
   private async handleGiftImageUpdate(
     existGift: Gift,
     newGiftImgUrl: string,
+    creator: User,
   ): Promise<string> {
     if (existGift.defaultImgId) {
       existGift.defaultImgId = null; // 기본 이미지를 제거
@@ -164,12 +168,16 @@ export class GiftService {
         if (existImg.imgUrl === newGiftImgUrl) {
           return existImg.imgUrl; // 기존 URL을 그대로 반환
         }
-        await this.imgRepository.delete(existImg.imgId);
+        await this.imgService.delete(ImageType.Gift, existGift.giftId);
       }
     }
 
     // 새로운 이미지를 저장
-    const newImage = await this.saveNewImage(newGiftImgUrl, existGift.giftId);
+    const newImage = await this.saveNewImage(
+      newGiftImgUrl,
+      existGift.giftId,
+      creator,
+    );
     return newImage.imgUrl;
   }
 
@@ -191,6 +199,7 @@ export class GiftService {
   private async createNewGift(
     funding: Funding,
     gift: RequestGiftDto,
+    creator: User,
   ): Promise<ResponseGiftDto> {
     const newGift = new Gift();
 
@@ -203,15 +212,19 @@ export class GiftService {
     const savedGift = await this.giftRepository.save(newGift);
 
     const imgUrl = gift.giftImg
-      ? (await this.saveNewImage(gift.giftImg, savedGift.giftId)).imgUrl
+      ? (await this.saveNewImage(gift.giftImg, savedGift.giftId, creator))
+          .imgUrl
       : await this.setDefaultGiftImage(savedGift);
 
     return new ResponseGiftDto(savedGift, imgUrl);
   }
 
-  private async saveNewImage(imgUrl: string, giftId: number): Promise<Image> {
-    const newImage = new Image(imgUrl, ImageType.Gift, giftId);
-    return this.imgRepository.save(newImage);
+  private async saveNewImage(
+    imgUrl: string,
+    giftId: number,
+    creator: User,
+  ): Promise<Image> {
+    return this.imgService.save(imgUrl, creator, ImageType.Gift, giftId);
   }
 
   private async setDefaultGiftImage(gift: Gift): Promise<string> {

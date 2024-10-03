@@ -325,6 +325,7 @@ export class FundingService {
     const gifts = await this.giftService.createOrUpdateGift(
       funding_save,
       createFundingDto.gifts,
+      user,
     );
 
     return new FundingDto(funding_save, gifts, fundImg);

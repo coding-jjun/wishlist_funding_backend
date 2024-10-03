@@ -62,7 +62,8 @@ export class FundingController {
         message: 'Success',
         data: await this.giftService.createOrUpdateGift(
           funding,
-          giftArray.gifts
+          giftArray.gifts,
+          user,
         ),
       };
     } catch (error) {
