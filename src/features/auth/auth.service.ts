@@ -16,7 +16,9 @@ import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { DefaultImageIds } from 'src/enums/default-image-id';
 import { Nickname } from 'src/util/nickname';
+import { GuestLoginDto } from './dto/guest-login.dto';
 import { UserType } from 'src/enums/user-type.enum';
+import { DonationService } from '../donation/donation.service';
 
 @Injectable()
 export class AuthService {
@@ -36,6 +38,8 @@ export class AuthService {
 
     private readonly g2gException: GiftogetherExceptions,
     private readonly nickName : Nickname,
+
+    private readonly donationService: DonationService
   ) {}
 
   async parseDate(yearString: string, birthday: string): Promise<Date> {
@@ -404,5 +408,13 @@ export class AuthService {
     }
 
     return adjective+noun;
+  }
+
+
+  async loginGuest(guestLoginDto: GuestLoginDto){
+    const guest = await this.donationService.getGuestInfoByOrderId(guestLoginDto.orderId);
+    await this.isValidPassword(guestLoginDto.userPw, guest.userPw);
+
+    return guest;
   }
 }

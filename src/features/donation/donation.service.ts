@@ -56,15 +56,21 @@ export class DonationService {
     return result;
   }
 
-  async getOneDonation(orderId: string) {
-    const result = await this.donationRepo
+  /**
+   * 비회원 로그인시 orderId 로 사용자 정보 조회
+   * @param orderId 
+   * @returns 
+   */
+  async getGuestInfoByOrderId(orderId: string) {
+
+    const donation = await this.donationRepo
       .createQueryBuilder('d')
-      .leftJoinAndSelect('d.funding', 'f')
-      .select(['d.orderId', 'd.donAmnt', 'd.regAt', 'f.fundId'])
+      .leftJoinAndSelect('d.user', 'u')
       .where('d.orderId = :orderId', { orderId })
       .getOne();
-    console.log(result);
-    return result;
+      
+    return donation.user;
+  }
   }
 
   async updateFundingSum(funding: Funding, donAmnt: number) {

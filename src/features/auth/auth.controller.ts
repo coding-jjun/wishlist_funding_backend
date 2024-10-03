@@ -24,13 +24,13 @@ import { ValidDto } from './dto/valid.dto';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { TokenDto } from './dto/token.dto';
 import { RefreshTokenDto } from './dto/refresh.token.dto';
-import { DonationService } from '../donation/donation.service';
+import { UserType } from 'src/enums/user-type.enum';
+import { GuestLoginDto } from './dto/guest-login.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly donationService: DonationService,
     private readonly g2gException: GiftogetherExceptions,
   ) {}
 
@@ -209,15 +209,7 @@ export class AuthController {
       data: true
     };
   }
-
-  @Post('/guest')
-  async guestLogin(@Body() orderId: string): Promise<CommonResponse> {
-    return {
-      message: 'Donation 조회 성공',
-      data: await this.donationService.getOneDonation(orderId),
-    };
-  }
-
+  
   
   @Get('/nickname')
   async createRandomNickname(): Promise<CommonResponse> {
@@ -228,4 +220,20 @@ export class AuthController {
     };
     
   }
+
+
+  @Post('/guest')
+  async guestLogin(@Body() guestLoginDto: GuestLoginDto): Promise<CommonResponse> {
+    const guest = await this.authService.loginGuest(guestLoginDto);
+    const token = await this.authService.createAccessToken(UserType.GUEST, guest.userId);
+    return {
+      message: '비회원 로그인 성공',
+      data: {
+        user : guest,
+        token : token
+      },
+    };
+  }
+
+
 }
