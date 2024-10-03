@@ -30,10 +30,23 @@ export class Image {
 
   @ManyToOne(() => User, (user) => user.createdImages)
   creator: User;
-
-  constructor(imgUrl: string, imgType?: ImageType, subId?: number) {
+  
+  constructor(
+    imgUrl: string,
+    imgType?: ImageType,
+    subId?: number,
+    creator?: User,
+  ) {
     this.imgUrl = imgUrl;
     this.imgType = imgType;
     this.subId = subId;
+    this.creator = creator;
+  }
+
+  isTemporary(): boolean {
+    if (this.imgType === null || this.subId === null) {
+      return true;
+    }
+    return false;
   }
 }

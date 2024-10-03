@@ -21,6 +21,7 @@ import { S3Service } from './s3.service';
 import { Request } from 'express';
 import { User } from 'src/entities/user.entity';
 import { ImageService } from './image.service';
+import { Image } from 'src/entities/image.entity';
 
 @Controller('image')
 export class ImageController {
@@ -39,7 +40,9 @@ export class ImageController {
       }),
     )
     files: Express.Multer.File[],
+    @Req() req: Request,
   ): Promise<CommonResponse> {
+    const user = req.user as User;
     const uploadedImages = new ImageDto();
     const uploadPromises = files.map(async (file): Promise<string> => {
       const buffer = await sharp(file.buffer).resize(300).toBuffer();
@@ -56,6 +59,12 @@ export class ImageController {
     const urls = await Promise.all(uploadPromises);
 
     uploadedImages.urls = urls;
+
+    // DB에 임시 인스턴스를 저장
+    const savePromises = urls.map(async (url): Promise<void> => {
+      this.imgService.save(url, user);
+    });
+    await Promise.all(savePromises);
 
     return {
       message: '성공적으로 파일이 업로드 되었습니다.',

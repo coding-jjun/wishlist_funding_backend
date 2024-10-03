@@ -8,9 +8,13 @@ import { Funding } from 'src/entities/funding.entity';
 import { Image } from 'src/entities/image.entity';
 import { ImageModule } from '../image/image.module';
 import { ImageService } from '../image/image.service';
+import { User } from 'src/entities/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Gift, Funding, Image]), ImageModule],
+  imports: [
+    TypeOrmModule.forFeature([Gift, Funding, Image, User]),
+    ImageModule,
+  ],
   controllers: [GiftController],
   providers: [GiftService, GiftogetherExceptions, ImageService],
   exports: [GiftService],
