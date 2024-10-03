@@ -18,6 +18,8 @@ import { ImageType } from 'src/enums/image-type.enum';
 import { MyDonationListDto } from './dto/my-donation-list.dto';
 import { DonationListDto } from './dto/other-donation-list.dto';
 import { ValidCheck } from 'src/util/valid-check';
+import { DefaultImageId } from 'src/enums/default-image-id';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class DonationService {
@@ -91,7 +93,7 @@ export class DonationService {
     return await this.createDonation(funding, createDonationDto, user);
   }
 
-  async createGuest(guest: CreateGuestDto){
+  async createGuest(guest: CreateGuestDto): Promise<User>{
     if(!guest || typeof guest === 'string'){
       throw this.g2gException.UserFailedToCreate
     }
@@ -99,13 +101,17 @@ export class DonationService {
     const user = new User();
     // TODO 주소관련 정보
     // const address = new Address();
-    user.userNick = userNick;
-    user.userPhone = userPhone;
+    user.userNick = guest.userNick;
+    user.userPhone = guest.userPhone;
+    user.userPw = await bcrypt.hash(guest.userPw, 10);
+    user.defaultImgId = DefaultImageId.User;
     // user.accId = 1;
-    return this.userRepo.save(user);
+    return await this.userRepo.save(user);
   }
 
   async createGuestDonation(fundUuid: string, createDonationDto: CreateDonationDto){
+    // TODO Donation 생성 실패시 user 객체 롤백 작업 필요
+    // TODO createGuest 로직 createUser 메소드 재사용
     const funding = await this.validFundingDate(fundUuid);
     const user = await this.createGuest(createDonationDto.guest);
     return await this.createDonation(funding, createDonationDto, user);
