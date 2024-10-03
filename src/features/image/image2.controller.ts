@@ -21,12 +21,20 @@ import { S3Service } from './s3.service';
 import { Request } from 'express';
 import { User } from 'src/entities/user.entity';
 import { ImageService } from './image.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Image } from 'src/entities/image.entity';
+import { Repository } from 'typeorm';
 
+/**
+ * 임시로 만든 컨트롤러. 업로드 시에 이미지 주인을 데이터베이스에 넣는 로직을 추가했습니다.
+ * 삭제시 imgService.deleteByUrlAndUser(user) 가 올바르게 동작하는지 확인하기 위해서 사용됩니다.
+ */
 @Controller('image')
 export class ImageController {
   constructor(
     private readonly s3Service: S3Service,
     private readonly imgService: ImageService,
+    @InjectRepository(Image) private readonly imgRepository: Repository<Image>,
   ) {}
 
   @Post()
@@ -39,7 +47,9 @@ export class ImageController {
       }),
     )
     files: Express.Multer.File[],
+    @Req() req: Request,
   ): Promise<CommonResponse> {
+    const user = req.user as User;
     const uploadedImages = new ImageDto();
     const uploadPromises = files.map(async (file): Promise<string> => {
       const buffer = await sharp(file.buffer).resize(300).toBuffer();
@@ -56,6 +66,14 @@ export class ImageController {
     const urls = await Promise.all(uploadPromises);
 
     uploadedImages.urls = urls;
+
+    // DB에 임시 인스턴스를 저장
+    const savePromises = urls.map(async (url): Promise<void> => {
+      const image = new Image(url, null, null);
+      image.creator = user;
+      await this.imgRepository.save(image);
+    });
+    await Promise.all(savePromises);
 
     return {
       message: '성공적으로 파일이 업로드 되었습니다.',

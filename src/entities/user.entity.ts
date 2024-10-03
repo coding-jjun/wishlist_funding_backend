@@ -45,7 +45,10 @@ export class User {
   @Column('date', { nullable: true })
   userBirth: Date;
 
-  @OneToOne(() => Account, (account) => account.user, { nullable: true, onDelete: 'SET NULL' })
+  @OneToOne(() => Account, (account) => account.user, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
   @JoinColumn({ name: 'userAcc' })
   account: Account;
 
@@ -71,6 +74,9 @@ export class User {
   @Column('int', { nullable: true })
   @OneToOne(() => Image, (image) => image.imgId)
   defaultImgId?: number;
+
+  @OneToMany(() => Image, (image) => image.creator)
+  createdImages: Image[];
 
   /**
    * defaultImgId가 NULL일 경우, Image.subId로 조회할 수 있습니다.
