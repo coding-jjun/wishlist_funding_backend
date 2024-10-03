@@ -80,11 +80,19 @@ export class DonationController {
   }
 
   // 비회원 후원내역 조회
-  @Get('/guest/:orderId')
-  async getOneDonation(@Param('orderId') orderId: string) {
+  /**
+   * 비회원용 토큰, 후원 내역 조히
+   * @param orderId 
+   * @returns 
+   */
+  @Get('/guest')
+  @UseGuards(JwtAuthGuard)
+  async getGuestDonation(@Req() req: Request) {
+    const user = req.user as { user: User } as any;
+
     return {
       message: 'Donation 조회 성공',
-      data: await this.donationService.getOneDonation(orderId),
+      data: await this.donationService.getDonationByUserId(user.userId),
     };
   }
 

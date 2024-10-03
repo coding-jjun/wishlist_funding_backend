@@ -71,6 +71,16 @@ export class DonationService {
       
     return donation.user;
   }
+
+  async getDonationByUserId(userId: number) {
+    const donation = await this.donationRepo
+    .createQueryBuilder('d')
+    .leftJoinAndSelect('d.funding', 'f')
+    .leftJoinAndSelect('d.user', 'u')
+    .select(['d.orderId', 'd.donAmnt', 'd.regAt', 'f.fundId'])
+    .where('u.userId = :userId', { userId })
+    .getOne();
+  return donation;
   }
 
   async updateFundingSum(funding: Funding, donAmnt: number) {
