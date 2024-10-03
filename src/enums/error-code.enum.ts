@@ -21,6 +21,9 @@ export enum ErrorCode {
 
   // Image
   IncorrectImageUrl = '0600',
+  IncorrectImageHost = '0601',
+  ImageUriNotSpecified = '0602',
+  ImageNotFound = '0603',
 
   // User
   UserNotFound = '0700',
@@ -49,6 +52,7 @@ export enum ErrorCode {
   
   // Default image
   DefaultImgIdNotExist = '1000',
+  DefaultImgNotExist = '1001',
   
   // Account
   AccountNotFound = '1100',

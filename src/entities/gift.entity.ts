@@ -31,10 +31,6 @@ export class Gift {
   @Column({ nullable: true })
   giftCont: string;
 
-  @OneToOne(() => Image, (image) => image.subId, { nullable: true })
-  // @JoinColumn({ name: 'imgId' })
-  image: Image;
-
   @Column({ nullable: true })
   @ManyToOne(() => Image, (image) => image.imgId)
   defaultImgId?: number;
