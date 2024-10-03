@@ -223,16 +223,11 @@ export class AuthController {
 
 
   @Post('/guest')
-  async guestLogin(@Body() guestLoginDto: GuestLoginDto): Promise<CommonResponse> {
+  async guestLogin(@Body() guestLoginDto: GuestLoginDto, @Res() res: Response) {
     const guest = await this.authService.loginGuest(guestLoginDto);
     const token = await this.authService.createAccessToken(UserType.GUEST, guest.userId);
-    return {
-      message: '비회원 로그인 성공',
-      data: {
-        user : guest,
-        token : token
-      },
-    };
+    res.cookie("access_token", token);
+    return res.json({ message: '비회원 로그인 성공' , user: guest});
   }
 
 
