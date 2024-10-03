@@ -47,7 +47,7 @@ export class ImageService {
     const foundImg = await this.imgRepo
       .createQueryBuilder('image')
       .leftJoinAndSelect('image.creator', 'user')
-      .where('image.imgUrl = :imgURl', { imgUrl })
+      .where('image.imgUrl = :imgUrl', { imgUrl })
       .andWhere('user.userId = :userId', { userId: creator.userId })
       .getOne();
 

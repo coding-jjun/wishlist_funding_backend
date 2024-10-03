@@ -303,13 +303,12 @@ export class FundingService {
     let fundImg: string[] = [];
     if (createFundingDto.fundImg) {
       // subId = fundId, imgType = "Funding" Image 객체를 만든다.
-      const image = new Image(
-        createFundingDto.fundImg,
-        ImageType.Funding,
-        funding_save.fundId,
+      const fundImgUrls = [createFundingDto.fundImg]; // TODO - CreateFundingDto.fundImg -> fundImgUrls 로 변경하기
+      const fundImgPromises = fundImgUrls.map((url) =>
+        this.imgService.save(url, user, ImageType.Funding, funding_save.fundId),
       );
-      await this.imgRepository.save(image);
-      fundImg.push(image.imgUrl);
+      const images = await Promise.all(fundImgPromises);
+      fundImg.push(...images.map((i) => i.imgUrl));
     } else {
       const defaultImgId = getRandomDefaultImgId(DefaultImageIds.Funding);
       await this.fundingRepository.update(funding_save.fundId, {
