@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { User } from 'src/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { AuthType } from 'src/enums/auth-type.enum';
@@ -15,9 +15,14 @@ import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { DefaultImageIds } from 'src/enums/default-image-id';
+import { Nickname } from 'src/util/nickname';
+import { GuestLoginDto } from './dto/guest-login.dto';
+import { UserType } from 'src/enums/user-type.enum';
+import { DonationService } from '../donation/donation.service';
 
 @Injectable()
 export class AuthService {
+  private readonly NICKNAME_ARRAY_LENGTH: number = 119;
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -32,6 +37,9 @@ export class AuthService {
     private readonly redisClient: RedisClientType,
 
     private readonly g2gException: GiftogetherExceptions,
+    private readonly nickName : Nickname,
+
+    private readonly donationService: DonationService
   ) {}
 
   async parseDate(yearString: string, birthday: string): Promise<Date> {
@@ -43,9 +51,9 @@ export class AuthService {
     return new Date(year, month, day);
   }
 
-  async createAccessToken(userId: number): Promise<string> {
+  async createAccessToken(userType: UserType, userId: number): Promise<string> {
     return this.jwtService.sign(
-      { userId, time: new Date() },
+      { userId, time: new Date(), type: userType },
       {
         secret: process.env.JWT_SECRET,
         expiresIn: '30m',
@@ -380,5 +388,33 @@ export class AuthService {
     } catch (error) {
       throw this.jwtException.RedisServerError;
     }
+  }
+
+  async createRandomNickname(): Promise<string> {
+
+    const adjectiveIndex = Math.floor(Math.random() * this.NICKNAME_ARRAY_LENGTH);
+    const nounIndex = Math.floor(Math.random() * this.NICKNAME_ARRAY_LENGTH);
+
+    const adjective = this.nickName.adjective[adjectiveIndex];
+    const noun = this.nickName.noun[nounIndex];
+    const baseNick = `${adjective}${noun}`;
+
+    // userNick이 baseNick으로 시작하는 모든 사용자 조회
+    const duplicateNicknames = await this.userRepository.count({
+      where: { userNick: Like(`${baseNick}%`) }
+    });
+    if (duplicateNicknames > 0){
+      return adjective+noun+(duplicateNicknames+1);
+    }
+
+    return adjective+noun;
+  }
+
+
+  async loginGuest(guestLoginDto: GuestLoginDto){
+    const guest = await this.donationService.getGuestInfoByOrderId(guestLoginDto.orderId);
+    await this.isValidPassword(guestLoginDto.userPw, guest.userPw);
+
+    return guest;
   }
 }

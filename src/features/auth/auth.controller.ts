@@ -18,20 +18,19 @@ import { NaverAuthGuard } from './guard/naver-auth-guard';
 import { GoogleAuthGuard } from './guard/google-auth-guard';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { UserDto } from '../user/dto/user.dto';
 import { LoginDto } from './dto/login.dto';
 import { ValidDto } from './dto/valid.dto';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { TokenDto } from './dto/token.dto';
 import { RefreshTokenDto } from './dto/refresh.token.dto';
-import { DonationService } from '../donation/donation.service';
+import { UserType } from 'src/enums/user-type.enum';
+import { GuestLoginDto } from './dto/guest-login.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly donationService: DonationService,
     private readonly g2gException: GiftogetherExceptions,
   ) {}
 
@@ -116,7 +115,7 @@ export class AuthController {
   async login(@Body() loginDto: LoginDto, @Res() res: Response){
     const user = await this.authService.login(loginDto);
     const token = new TokenDto()
-    token.accessToken = await this.authService.createAccessToken(user.userId);
+    token.accessToken = await this.authService.createAccessToken(UserType.USER,user.userId);
     token.refreshToken = await this.authService.createRefreshToken(user.userId);
 
     Logger.debug("accessToken: " + token.accessToken); // redirect로 변경되면서 디버그 환경에서 token을 확인하기 어려워졌습니다.
@@ -136,7 +135,7 @@ export class AuthController {
   ) {
     const user = await this.authService.createUser(createUserDto)
     const token = new TokenDto();
-    token.accessToken = await this.authService.createAccessToken(user.userId);
+    token.accessToken = await this.authService.createAccessToken(UserType.USER, user.userId);
     token.refreshToken = await this.authService.createRefreshToken(user.userId);
     
     res.cookie("access_token", token.accessToken, this.cookieOptions);
@@ -146,12 +145,11 @@ export class AuthController {
   }
   
   @Post('/token')
-  async reIssueAccessToken(@Body() tokenDto: RefreshTokenDto): Promise<CommonResponse>{
+  async reIssueAccessToken(@Body() tokenDto: RefreshTokenDto, @Res() res: Response){
     const userId = await this.authService.chkValidRefreshToken(tokenDto.refreshToken);
-    return {
-      message: 'Access Token 재발급 완료',
-      data: await this.authService.createAccessToken(userId),
-    }; 
+    const accessToken = await this.authService.createAccessToken(UserType.USER, userId)
+    res.cookie("access_token", accessToken, this.cookieOptions);
+    return res.json({ message: 'success' }); 
   }
   
   @Post('/logout')
@@ -196,7 +194,7 @@ export class AuthController {
     }; 
   }
 
-  @Post('/nickname')
+  @Post('/nickname/check')
   async validNickName(@Body() validDto: ValidDto): Promise<CommonResponse>{
     if(!validDto.userNick){
       throw this.g2gException.NotValidNick;
@@ -211,12 +209,26 @@ export class AuthController {
       data: true
     };
   }
+  
+  
+  @Get('/nickname')
+  async createRandomNickname(): Promise<CommonResponse> {
+    const randomNickname = await this.authService.createRandomNickname();
+    return {
+      message: "랜덤 닉네임을 생성했습니다.",
+      data: randomNickname
+    };
+    
+  }
+
 
   @Post('/guest')
-  async guestLogin(@Body() orderId: string): Promise<CommonResponse> {
-    return {
-      message: 'Donation 조회 성공',
-      data: await this.donationService.getOneDonation(orderId),
-    };
+  async guestLogin(@Body() guestLoginDto: GuestLoginDto, @Res() res: Response) {
+    const guest = await this.authService.loginGuest(guestLoginDto);
+    const token = await this.authService.createAccessToken(UserType.GUEST, guest.userId);
+    res.cookie("access_token", token);
+    return res.json({ message: '비회원 로그인 성공' , user: guest});
   }
+
+
 }

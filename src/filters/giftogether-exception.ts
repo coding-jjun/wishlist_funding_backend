@@ -219,6 +219,11 @@ export class GiftogetherExceptions {
     ErrorCode.RedisServerError,
     HttpStatus.CONFLICT,
   );
+  InvalidUserType = new GiftogetherException(
+    ErrorMsg.InvalidUserType,
+    ErrorCode.InvalidUserType,
+    HttpStatus.BAD_REQUEST,
+  )
 
   // Default images
   DefaultImgIdNotExist = new GiftogetherException(

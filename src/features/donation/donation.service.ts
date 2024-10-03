@@ -18,6 +18,8 @@ import { ImageType } from 'src/enums/image-type.enum';
 import { MyDonationListDto } from './dto/my-donation-list.dto';
 import { DonationListDto } from './dto/other-donation-list.dto';
 import { ValidCheck } from 'src/util/valid-check';
+import { DefaultImageId } from 'src/enums/default-image-id';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class DonationService {
@@ -54,15 +56,31 @@ export class DonationService {
     return result;
   }
 
-  async getOneDonation(orderId: string) {
-    const result = await this.donationRepo
+  /**
+   * 비회원 로그인시 orderId 로 사용자 정보 조회
+   * @param orderId 
+   * @returns 
+   */
+  async getGuestInfoByOrderId(orderId: string) {
+
+    const donation = await this.donationRepo
       .createQueryBuilder('d')
-      .leftJoinAndSelect('d.funding', 'f')
-      .select(['d.orderId', 'd.donAmnt', 'd.regAt', 'f.fundId'])
+      .leftJoinAndSelect('d.user', 'u')
       .where('d.orderId = :orderId', { orderId })
       .getOne();
-    console.log(result);
-    return result;
+      
+    return donation.user;
+  }
+
+  async getDonationByUserId(userId: number) {
+    const donation = await this.donationRepo
+    .createQueryBuilder('d')
+    .leftJoinAndSelect('d.funding', 'f')
+    .leftJoinAndSelect('d.user', 'u')
+    .select(['d.orderId', 'd.donAmnt', 'd.regAt', 'f.fundId'])
+    .where('u.userId = :userId', { userId })
+    .getOne();
+  return donation;
   }
 
   async updateFundingSum(funding: Funding, donAmnt: number) {
@@ -91,7 +109,7 @@ export class DonationService {
     return await this.createDonation(funding, createDonationDto, user);
   }
 
-  async createGuest(guest: CreateGuestDto){
+  async createGuest(guest: CreateGuestDto): Promise<User>{
     if(!guest || typeof guest === 'string'){
       throw this.g2gException.UserFailedToCreate
     }
@@ -99,13 +117,17 @@ export class DonationService {
     const user = new User();
     // TODO 주소관련 정보
     // const address = new Address();
-    user.userNick = userNick;
-    user.userPhone = userPhone;
+    user.userNick = guest.userNick;
+    user.userPhone = guest.userPhone;
+    user.userPw = await bcrypt.hash(guest.userPw, 10);
+    user.defaultImgId = DefaultImageId.User;
     // user.accId = 1;
-    return this.userRepo.save(user);
+    return await this.userRepo.save(user);
   }
 
   async createGuestDonation(fundUuid: string, createDonationDto: CreateDonationDto){
+    // TODO Donation 생성 실패시 user 객체 롤백 작업 필요
+    // TODO createGuest 로직 createUser 메소드 재사용
     const funding = await this.validFundingDate(fundUuid);
     const user = await this.createGuest(createDonationDto.guest);
     return await this.createDonation(funding, createDonationDto, user);
