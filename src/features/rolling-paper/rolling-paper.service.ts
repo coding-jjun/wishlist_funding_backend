@@ -12,6 +12,7 @@ import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { ValidCheck } from 'src/util/valid-check';
 import { User } from 'src/entities/user.entity';
 import { DefaultImageIds } from 'src/enums/default-image-id';
+import { ImageService } from '../image/image.service';
 
 @Injectable()
 export class RollingPaperService {
@@ -28,6 +29,8 @@ export class RollingPaperService {
     private readonly g2gException: GiftogetherExceptions,
 
     private readonly validChecker: ValidCheck,
+
+    private readonly imgService: ImageService,
   ) {}
 
   async getAllRollingPapers(
@@ -88,6 +91,7 @@ export class RollingPaperService {
     fundId: number,
     donation: Donation,
     crpDto: CreateRollingPaperDto,
+    user: User,
   ): Promise<RollingPaper> {
     const rollingPaper = new RollingPaper();
     rollingPaper.rollId = donation.donId;
@@ -99,13 +103,12 @@ export class RollingPaperService {
 
     if (crpDto.rollImg) {
       // 사용자 정의 이미지
-      const image = new Image(
+      this.imgService.save(
         crpDto.rollImg,
+        user,
         ImageType.RollingPaper,
         rollingPaper.rollId,
       );
-
-      this.imgRepo.insert(image);
     } else {
       // 기본값 이미지
       if (

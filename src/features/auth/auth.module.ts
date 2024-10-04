@@ -19,6 +19,7 @@ import { Funding } from 'src/entities/funding.entity';
 import { RollingPaperService } from '../rolling-paper/rolling-paper.service';
 import { ValidCheck } from 'src/util/valid-check';
 import { Nickname } from 'src/util/nickname';
+import { ImageService } from '../image/image.service';
 
 
 @Module({
@@ -31,7 +32,7 @@ import { Nickname } from 'src/util/nickname';
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, DonationService, RollingPaperService, KakaoStrategy, JwtStrategy, NaverStrategy, GoogleStrategy, GiftogetherExceptions, ValidCheck, Nickname],
+  providers: [AuthService, DonationService, RollingPaperService, KakaoStrategy, JwtStrategy, NaverStrategy, GoogleStrategy, GiftogetherExceptions, ValidCheck, Nickname, ImageService],
   exports: [PassportModule, AuthService]
 })
 export class AuthModule {}

@@ -156,6 +156,7 @@ export class DonationService {
         createDonationDto.rollImg,
         createDonationDto.defaultImgId,
       ),
+      user,
     );
 
     if (updateFunding.fundSum >= updateFunding.fundGoal) {

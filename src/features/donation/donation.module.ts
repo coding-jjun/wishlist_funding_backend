@@ -11,13 +11,15 @@ import { Image } from 'src/entities/image.entity';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { AuthModule } from '../auth/auth.module';
 import { ValidCheck } from 'src/util/valid-check';
+import { ImageService } from '../image/image.service';
+import { ImageModule } from '../image/image.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Donation, RollingPaper, Funding, User, Image]),
-    AuthModule
+    AuthModule,
   ],
   controllers: [DonationController],
-  providers: [DonationService, RollingPaperService, GiftogetherExceptions, ValidCheck],
+  providers: [DonationService, RollingPaperService, GiftogetherExceptions, ValidCheck, ImageService],
 })
 export class DonationModule {}
