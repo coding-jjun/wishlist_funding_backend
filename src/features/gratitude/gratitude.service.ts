@@ -23,9 +23,6 @@ export class GratitudeService {
     @InjectRepository(Funding)
     private readonly fundingRepo: Repository<Funding>,
 
-    @InjectRepository(Image)
-    private readonly imgRepo: Repository<Image>,
-
     private readonly g2gException: GiftogetherExceptions,
 
     private eventEmitter: EventEmitter2,
@@ -47,14 +44,13 @@ export class GratitudeService {
     let returnImgUrl: string[] = [];
 
     if (grat.defaultImgId) {
-      const img = await this.imgRepo.findOne({
-        where: { imgId: grat.defaultImgId },
-      });
+      const img = await this.imgService.getInstanceByPK(grat.defaultImgId);
       returnImgUrl.push(img.imgUrl);
     } else {
-      const images = await this.imgRepo.find({
-        where: { imgType: ImageType.Gratitude, subId: grat.gratId },
-      });
+      const images = await this.imgService.getInstancesBySubId(
+        ImageType.Gratitude,
+        grat.gratId,
+      );
       returnImgUrl.push(...images.map((i) => i.imgUrl));
     }
 
@@ -108,11 +104,7 @@ export class GratitudeService {
       if (!DefaultImageIds.Gratitude.includes(gratitudeDto.defaultImgId))
         throw this.g2gException.DefaultImgIdNotExist;
 
-      const image = await this.imgRepo.findOne({
-        where: {
-          imgId: gratitudeDto.defaultImgId,
-        },
-      });
+      const image = await this.imgService.getInstanceByPK(grat.defaultImgId);
       returnImgUrl.push(image.imgUrl);
     }
 
@@ -186,9 +178,7 @@ export class GratitudeService {
       this.imgService.delete(ImageType.Gratitude, gratId);
 
       // 3.
-      const image = await this.imgRepo.findOne({
-        where: { imgId: defaultImgId },
-      });
+      const image = await this.imgService.getInstanceByPK(grat.defaultImgId);
       imgUrl = [image.imgUrl];
     }
     return new GetGratitudeDto(funding.fundUuid, gratTitle, gratCont, imgUrl);
