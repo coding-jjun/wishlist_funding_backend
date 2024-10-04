@@ -29,9 +29,6 @@ export class FundingService {
     @InjectRepository(Friend)
     private friendRepository: Repository<Friend>,
 
-    @InjectRepository(Image)
-    private imgRepository: Repository<Image>,
-
     private imgService: ImageService,
 
     private giftService: GiftService,
@@ -257,18 +254,17 @@ export class FundingService {
 
     if (fund.defaultImgId) {
       // 펀딩의 기본 이미지가 있을 경우, 그 이미지를 추가
-      const img = await this.imgRepository.findOne({
-        where: { imgId: fund.defaultImgId },
-      });
+      const img = await this.imgService.getInstanceByPK(fund.defaultImgId);
 
       if (img) {
         finalImgUrls = [img.imgUrl, ...fundImgUrls]; // 펀딩 기본 이미지 + gift 이미지들
       }
     } else {
       // 펀딩의 기본 이미지가 없을 경우, 펀딩과 연결된 다른 이미지들을 추가
-      const images = await this.imgRepository.find({
-        where: { imgType: ImageType.Funding, subId: fund.fundId },
-      });
+      const images = await this.imgService.getInstancesBySubId(
+        ImageType.Funding,
+        fund.fundId,
+      );
 
       finalImgUrls = [...images.map((img) => img.imgUrl), ...fundImgUrls]; // 펀딩의 이미지 + gift 이미지들
     }
@@ -314,9 +310,7 @@ export class FundingService {
       await this.fundingRepository.update(funding_save.fundId, {
         defaultImgId,
       });
-      const image = await this.imgRepository.findOne({
-        where: { imgId: defaultImgId },
-      });
+      const image = await this.imgService.getInstanceByPK(defaultImgId);
       if (image) {
         fundImg.push(image.imgUrl);
       }
@@ -394,9 +388,9 @@ export class FundingService {
         return fundImg;
       } else {
         // 기존 지정 이미지가 존재하는 경우
-        const existImg = await this.imgRepository.findOne({
-          where: { imgType: ImageType.Funding, subId: fundId },
-        });
+        const existImg = (
+          await this.imgService.getInstancesBySubId(ImageType.Funding, fundId)
+        )[0];
 
         if (existImg && existImg.imgUrl !== fundImg) {
           // 기존 이미지의 URL과 다르면 업데이트
@@ -409,18 +403,16 @@ export class FundingService {
       // 지정한 funding 이미지가 없을 때
       if (funding.defaultImgId) {
         // 기본 이미지가 설정된 경우 기본 이미지를 반환
-        const defaultImg = await this.imgRepository.findOne({
-          where: { imgId: funding.defaultImgId },
-        });
+        const defaultImg = await this.imgService.getInstanceByPK(
+          funding.defaultImgId,
+        );
         return defaultImg?.imgUrl || '';
       } else {
         // 기존 지정 이미지를 사용 중이었으나 삭제 후 기본 이미지 설정
         await this.imgService.delete(ImageType.Funding, fundId);
         const randomId = getRandomDefaultImgId(DefaultImageIds.Funding);
         funding.defaultImgId = randomId;
-        const defaultImg = await this.imgRepository.findOne({
-          where: { imgId: randomId },
-        });
+        const defaultImg = await this.imgService.getInstanceByPK(randomId);
         return defaultImg?.imgUrl || '';
       }
     }
