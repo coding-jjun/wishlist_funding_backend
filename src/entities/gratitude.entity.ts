@@ -34,9 +34,15 @@ export class Gratitude {
   @JoinColumn({ name: 'defaultImgId' })
   defaultImgId: number;
 
-  constructor(gratId: number, gratTitle: string, gratCont: string) {
+  constructor(
+    gratId: number,
+    gratTitle: string,
+    gratCont: string,
+    defaultImageId?: number,
+  ) {
     this.gratId = gratId;
     this.gratTitle = gratTitle;
     this.gratCont = gratCont;
+    this.defaultImgId = defaultImageId;
   }
 }
