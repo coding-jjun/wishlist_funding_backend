@@ -10,6 +10,7 @@ import { ImageType } from 'src/enums/image-type.enum';
 import { UserDto } from './dto/user.dto';
 import * as bcrypt from 'bcrypt';
 import { DefaultImageIds } from 'src/enums/default-image-id';
+import { ImageService } from '../image/image.service';
 
 @Injectable()
 export class UserService {
@@ -22,6 +23,8 @@ export class UserService {
     private readonly imgRepository: Repository<Image>,
 
     private readonly g2gException: GiftogetherExceptions,
+    
+    private readonly imgService: ImageService,
   ) {}
 
   // 사용자 정보 조회
@@ -82,15 +85,16 @@ export class UserService {
     if (userImg) { // 사용자 지정 이미지가 제공된 경우
       // 기존 사용자 지정 프로필 이미지가 있는 경우 삭제
       if (!user.defaultImgId) {
-        await this.imgRepository.delete({
-          imgType: ImageType.User,
-          subId: userId,
-        });
+        await this.imgService.delete(ImageType.User, userId);
       }
   
       // 새로운 이미지 생성 및 저장
-      const newImage = new Image(userImg, ImageType.User, userId);
-      const savedImage = await this.imgRepository.save(newImage);
+      const savedImage = await this.imgService.save(
+        userImg,
+        user,
+        ImageType.User,
+        userId,
+      );
 
       user.defaultImgId = null;  // 기본 이미지 ID를 null로 설정
       imageUrl = savedImage.imgUrl;  // 이미지 URL 설정
@@ -102,10 +106,7 @@ export class UserService {
   
       // 기존 사용자 지정 프로필 이미지가 있는 경우 삭제
       if (!user.defaultImgId) {
-        await this.imgRepository.delete({
-          imgType: ImageType.User,
-          subId: userId,
-        });
+        await this.imgService.delete(ImageType.User, userId);
       }
   
       const defaultImage = await this.imgRepository.findOne({
