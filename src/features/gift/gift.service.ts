@@ -21,12 +21,6 @@ export class GiftService {
     @InjectRepository(Gift)
     private readonly giftRepository: Repository<Gift>,
 
-    @InjectRepository(Funding)
-    private readonly fundRepository: Repository<Funding>,
-
-    @InjectRepository(Image)
-    private readonly imgRepository: Repository<Image>,
-
     private readonly g2gException: GiftogetherExceptions,
 
     private readonly imgService: ImageService,
@@ -65,18 +59,16 @@ export class GiftService {
     let defImg = false;
     if (gift.defaultImgId) {
       defImg = true;
-      const image = await this.imgRepository.findOne({
-        where: { imgId: gift.defaultImgId },
-      });
+      const image = await this.imgService.getInstanceByPK(gift.defaultImgId);
       return {
         imgUrl: image ? image.imgUrl : null,
         isDef: defImg,
       };
     }
 
-    const image = await this.imgRepository.findOne({
-      where: { imgType: ImageType.Gift, subId: gift.giftId },
-    });
+    const image = (
+      await this.imgService.getInstancesBySubId(ImageType.Gift, gift.giftId)
+    )[0];
 
     return {
       imgUrl: image ? image.imgUrl : null,
@@ -156,12 +148,10 @@ export class GiftService {
       existGift.defaultImgId = null; // 기본 이미지를 제거
     } else {
       // 기존 이미지를 조회
-      const existImg = await this.imgRepository.findOne({
-        where: {
-          imgType: ImageType.Gift,
-          subId: existGift.giftId,
-        },
-      });
+      const existImg = await this.imgService.getInstancesBySubId(
+        ImageType.Gift,
+        existGift.giftId,
+      )[0];
 
       // 기존 이미지가 존재하고 URL이 동일한 경우, 그대로 사용
       if (existImg) {
@@ -184,9 +174,9 @@ export class GiftService {
   private async handleGiftImageRemoval(existGift: Gift): Promise<string> {
     if (existGift.defaultImgId) {
       // 기본 이미지가 이미 설정되어 있는 경우
-      const defaultImage = await this.imgRepository.findOne({
-        where: { imgId: existGift.defaultImgId },
-      });
+      const defaultImage = await this.imgService.getInstanceByPK(
+        existGift.defaultImgId,
+      );
       return defaultImage.imgUrl;
     } else {
       // 기본 이미지가 설정되어 있지 않다면 기존 이미지를 삭제하고 기본 이미지를 설정
@@ -231,9 +221,7 @@ export class GiftService {
     const defaultImgId = getRandomDefaultImgId(DefaultImageIds.Gift);
     gift.defaultImgId = defaultImgId;
 
-    const defaultImage = await this.imgRepository.findOne({
-      where: { imgId: defaultImgId },
-    });
+    const defaultImage = await this.imgService.getInstanceByPK(defaultImgId);
 
     await this.giftRepository.save(gift);
     return defaultImage.imgUrl;
