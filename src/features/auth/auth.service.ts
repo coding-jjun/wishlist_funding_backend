@@ -19,6 +19,7 @@ import { Nickname } from 'src/util/nickname';
 import { GuestLoginDto } from './dto/guest-login.dto';
 import { UserType } from 'src/enums/user-type.enum';
 import { DonationService } from '../donation/donation.service';
+import { ImageService } from '../image/image.service';
 
 @Injectable()
 export class AuthService {
@@ -39,7 +40,9 @@ export class AuthService {
     private readonly g2gException: GiftogetherExceptions,
     private readonly nickName : Nickname,
 
-    private readonly donationService: DonationService
+    private readonly donationService: DonationService,
+
+    private readonly imgService: ImageService,
   ) {}
 
   async parseDate(yearString: string, birthday: string): Promise<Date> {
@@ -157,8 +160,7 @@ export class AuthService {
         // 사용자 정의 이미지 제공시,
         // 1. userId를 subid로 갖는 새 image 생성 및 저장
         // 2. user의 defaultImgId 컬럼을 null로 초기화
-        const image = new Image(userImg, ImageType.User, userId);
-        const imgSaved = await this.imgRepository.save(image);
+        const imgSaved = await this.imgService.save(userImg, user, ImageType.User, userId);
 
         imgUrl = imgSaved.imgUrl;
         user.defaultImgId = null;
@@ -204,7 +206,7 @@ export class AuthService {
     Object.assign(user, userInfo);
 
     // 0. image 테이블에 등록된 사용자 프로필 이미지 삭제
-    this.imgRepository.delete({ imgType: ImageType.User, imgId: userId });
+    await this.imgService.delete(ImageType.User, userId);
 
     let imgUrl = null;
     if (userImg) {
@@ -212,8 +214,12 @@ export class AuthService {
       // 1. userId를 subid로 갖는 새 image 생성 및 저장
       // 2. user의 defaultImgId 컬럼을 null로 초기화
 
-      const image = new Image(userImg, ImageType.User, userId);
-      const imgSaved = await this.imgRepository.save(image);
+      const imgSaved = await this.imgService.save(
+        userImg,
+        user,
+        ImageType.User,
+        userId,
+      );
 
       imgUrl = imgSaved.imgUrl;
       user.defaultImgId = null;

@@ -334,10 +334,10 @@ export class FundingService {
   async update(
     fundUuid: string,
     updateFundingDto: UpdateFundingDto,
-    userId: number,
+    user: User,
   ): Promise<FundingDto> {
     const { fundTitle, fundImg, fundCont, fundTheme, endAt } = updateFundingDto;
-    const funding = await this.findFundingByUuidAndUserId(fundUuid, userId);
+    const funding = await this.findFundingByUuidAndUserId(fundUuid, user.userId);
     const fundId = funding.fundId;
 
     funding.fundTitle = fundTitle;
@@ -359,7 +359,7 @@ export class FundingService {
     funding.endAt = endAt;
 
     // 이미지 업데이트
-    const fundingImg = await this.updateFundingImage(funding, fundImg, fundId);
+    const fundingImg = await this.updateFundingImage(funding, fundImg, fundId, user);
 
     // Funding 업데이트
     await this.fundingRepository.update(
@@ -383,13 +383,13 @@ export class FundingService {
     funding: Funding,
     fundImg: string | undefined,
     fundId: number,
+    user: User,
   ): Promise<string> {
     if (fundImg) {
       // 지정한 funding 이미지가 존재할 때
       if (funding.defaultImgId) {
         // 기본 이미지를 사용 중이었을 경우 새로운 이미지로 교체
-        const image = new Image(fundImg, ImageType.Funding, fundId);
-        await this.imgRepository.save(image);
+        await this.imgService.save(fundImg, user, ImageType.Funding, fundId);
         funding.defaultImgId = null; // 기본 이미지를 해제
         return fundImg;
       } else {
@@ -400,12 +400,8 @@ export class FundingService {
 
         if (existImg && existImg.imgUrl !== fundImg) {
           // 기존 이미지의 URL과 다르면 업데이트
-          await this.imgRepository.delete({
-            imgType: ImageType.Funding,
-            subId: fundId,
-          });
-          const image = new Image(fundImg, ImageType.Funding, fundId);
-          await this.imgRepository.save(image);
+          await this.imgService.delete(ImageType.Funding, fundId);
+          await this.imgService.save(fundImg, user, ImageType.Funding, fundId);
         }
         return fundImg;
       }
@@ -419,10 +415,7 @@ export class FundingService {
         return defaultImg?.imgUrl || '';
       } else {
         // 기존 지정 이미지를 사용 중이었으나 삭제 후 기본 이미지 설정
-        await this.imgRepository.delete({
-          imgType: ImageType.Funding,
-          subId: fundId,
-        });
+        await this.imgService.delete(ImageType.Funding, fundId);
         const randomId = getRandomDefaultImgId(DefaultImageIds.Funding);
         funding.defaultImgId = randomId;
         const defaultImg = await this.imgRepository.findOne({
