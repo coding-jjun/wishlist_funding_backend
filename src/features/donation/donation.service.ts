@@ -77,7 +77,7 @@ export class DonationService {
     .createQueryBuilder('d')
     .leftJoinAndSelect('d.funding', 'f')
     .leftJoinAndSelect('d.user', 'u')
-    .select(['d.orderId', 'd.donAmnt', 'd.regAt', 'f.fundId'])
+    .select(['d.orderId', 'd.donAmnt', 'd.regAt', 'f.fundUuid'])
     .where('u.userId = :userId', { userId })
     .getOne();
   return donation;
