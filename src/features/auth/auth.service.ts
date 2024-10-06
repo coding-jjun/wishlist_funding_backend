@@ -5,11 +5,9 @@ import { User } from 'src/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { AuthType } from 'src/enums/auth-type.enum';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
-import { Image } from 'src/entities/image.entity';
 import { ImageType } from 'src/enums/image-type.enum';
 import { RedisClientType } from '@redis/client';
 import { UserDto } from '../user/dto/user.dto';
-import { Account } from 'src/entities/account.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { LoginDto } from './dto/login.dto';
@@ -27,10 +25,6 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Image)
-    private readonly imgRepository: Repository<Image>,
-    @InjectRepository(Account)
-    private readonly accRepository: Repository<Account>,
 
     private jwtService: JwtService,
     private readonly jwtException: GiftogetherExceptions,
@@ -115,15 +109,13 @@ export class AuthService {
 
     let imgUrl = null;
     if (user.defaultImgId) {
-      const image = await this.imgRepository.findOne({
-        where: { imgId: user.defaultImgId },
-      });
+      const image = await this.imgService.getInstanceByPK(user.defaultImgId);
       imgUrl = image.imgUrl;
     } else {
       // TODO 사용자 이미지 저장 기록이 여러개 일때,
-      const image = await this.imgRepository.findOne({
-        where: { subId: user.userId, imgType: ImageType.User },
-      });
+      const image = (
+        await this.imgService.getInstancesBySubId(ImageType.User, user.userId)
+      )[0];
       imgUrl = image.imgUrl;
     }
 
@@ -171,9 +163,9 @@ export class AuthService {
         if (!defaultImgId || !DefaultImageIds.User.includes(defaultImgId))
           throw this.g2gException.DefaultImgIdNotExist;
 
-        const defaultImage = await this.imgRepository.findOne({
-          where: { imgId: userDto.defaultImgId },
-        });
+        const defaultImage = await this.imgService.getInstanceByPK(
+          userDto.defaultImgId,
+        );
         user.defaultImgId = defaultImage.imgId;
 
         imgUrl = defaultImage.imgUrl;
@@ -231,9 +223,7 @@ export class AuthService {
       if (!defaultImgId || !DefaultImageIds.User.includes(defaultImgId))
         throw this.g2gException.DefaultImgIdNotExist;
 
-      const defaultImage = await this.imgRepository.findOne({
-        where: { imgId: defaultImgId },
-      });
+      const defaultImage = await this.imgService.getInstanceByPK(defaultImgId);
       user.defaultImgId = defaultImage.imgId;
 
       imgUrl = defaultImage.imgUrl;
@@ -271,12 +261,10 @@ export class AuthService {
     }
 
     const image = user.defaultImgId
-      ? await this.imgRepository.findOne({
-          where: { imgId: user.defaultImgId },
-        })
-      : await this.imgRepository.findOne({
-          where: { imgType: ImageType.User, subId: user.userId },
-        });
+      ? await this.imgService.getInstanceByPK(user.defaultImgId)
+      : (
+          await this.imgService.getInstancesBySubId(ImageType.User, user.userId)
+        )[0];
 
     return new UserDto(
       user.userNick,

@@ -22,6 +22,10 @@ export class ImageService {
     });
   }
 
+  async getInstanceByPK(imgId: number): Promise<Image> {
+    return this.imgRepo.findOne({ where: { imgId } });
+  }
+
   /**
    * 이미지를 생성하거나 업데이트합니다.
    *
@@ -70,7 +74,7 @@ export class ImageService {
       // 동일한 이미지
       return foundImg;
     }
-    
+
     throw this.g2gException.ImageAlreadyExists;
   }
 
