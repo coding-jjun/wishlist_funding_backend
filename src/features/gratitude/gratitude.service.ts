@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Gratitude } from 'src/entities/gratitude.entity';
 import { Repository } from 'typeorm';
@@ -7,10 +7,12 @@ import { Funding } from 'src/entities/funding.entity';
 import { Image } from 'src/entities/image.entity';
 import { ImageType } from 'src/enums/image-type.enum';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
-import assert from 'node:assert';
 import { GetGratitudeDto } from './dto/get-gratitude.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { DefaultImageIds } from 'src/enums/default-image-id';
+import { ImageService } from '../image/image.service';
+import { User } from 'src/entities/user.entity';
+import { FundingService } from '../funding/funding.service';
 
 @Injectable()
 export class GratitudeService {
@@ -21,12 +23,13 @@ export class GratitudeService {
     @InjectRepository(Funding)
     private readonly fundingRepo: Repository<Funding>,
 
-    @InjectRepository(Image)
-    private readonly imgRepo: Repository<Image>,
-
     private readonly g2gException: GiftogetherExceptions,
 
     private eventEmitter: EventEmitter2,
+
+    private readonly imgService: ImageService,
+
+    private readonly fundingService: FundingService,
   ) {}
 
   async getGratitude(fundUuid: string): Promise<GetGratitudeDto> {
@@ -41,14 +44,13 @@ export class GratitudeService {
     let returnImgUrl: string[] = [];
 
     if (grat.defaultImgId) {
-      const img = await this.imgRepo.findOne({
-        where: { imgId: grat.defaultImgId },
-      });
+      const img = await this.imgService.getInstanceByPK(grat.defaultImgId);
       returnImgUrl.push(img.imgUrl);
     } else {
-      const images = await this.imgRepo.find({
-        where: { imgType: ImageType.Gratitude, subId: grat.gratId },
-      });
+      const images = await this.imgService.getInstancesBySubId(
+        ImageType.Gratitude,
+        grat.gratId,
+      );
       returnImgUrl.push(...images.map((i) => i.imgUrl));
     }
 
@@ -63,6 +65,7 @@ export class GratitudeService {
   async createGratitude(
     fundUuid: string,
     gratitudeDto: GratitudeDto,
+    user: User,
   ): Promise<GetGratitudeDto> {
     const funding = await this.fundingRepo.findOne({
       where: { fundUuid },
@@ -78,7 +81,10 @@ export class GratitudeService {
       funding.fundId,
       gratitudeDto.gratTitle,
       gratitudeDto.gratCont,
+      gratitudeDto.defaultImgId,
     );
+
+    grat = await this.gratitudeRepo.save(grat);
 
     const returnImgUrl = gratitudeDto.gratImg;
 
@@ -86,31 +92,19 @@ export class GratitudeService {
       // 사용자 정의 이미지 제공시,
       // 1. 새 grat 생성 및 저장.
       // 2. gratId(=fundId)를 subId로 갖는 새 image 생성 및 저장.
-      this.gratitudeRepo.insert(grat);
 
-      this.imgRepo.insert(
-        gratitudeDto.gratImg.map(
-          (url) => new Image(url, ImageType.Gratitude, grat.gratId),
-        ),
+      const imgPromises = gratitudeDto.gratImg.map(
+        (url): Promise<Image> =>
+          this.imgService.save(url, user, ImageType.Gratitude),
       );
+      await Promise.all(imgPromises);
     } else {
       if (!gratitudeDto.defaultImgId)
         throw this.g2gException.DefaultImgIdNotExist;
       if (!DefaultImageIds.Gratitude.includes(gratitudeDto.defaultImgId))
         throw this.g2gException.DefaultImgIdNotExist;
-      // 기본 이미지 제공시,
-      // 1. defaultImgId를 갖는 새 grat 생성 및 저장.
 
-      grat.defaultImgId = gratitudeDto.defaultImgId!;
-
-      this.gratitudeRepo.insert(grat);
-
-      const image = await this.imgRepo.findOne({
-        where: {
-          imgType: ImageType.Gratitude,
-          subId: grat.gratId,
-        },
-      });
+      const image = await this.imgService.getInstanceByPK(grat.defaultImgId);
       returnImgUrl.push(image.imgUrl);
     }
 
@@ -127,6 +121,7 @@ export class GratitudeService {
   async updateGratitude(
     fundUuid: string,
     gratitudeDto: GratitudeDto,
+    user: User,
   ): Promise<GetGratitudeDto> {
     const funding = await this.fundingRepo.findOne({ where: { fundUuid } });
     if (!funding) throw this.g2gException.FundingNotExists;
@@ -146,12 +141,14 @@ export class GratitudeService {
       // 2. grat update
 
       // 0.
-      this.imgRepo.delete({ imgType: ImageType.Gratitude, subId: gratId });
+      this.imgService.delete(ImageType.Gratitude, gratId);
 
       // 1.
-      this.imgRepo.save(
-        gratImg.map((url) => new Image(url, ImageType.Gratitude, gratId)),
+      const imgPromises = gratImg.map(
+        async (url): Promise<Image> =>
+          this.imgService.save(url, user, ImageType.Gratitude, gratId),
       );
+      Promise.all(imgPromises);
 
       // 2.
       this.gratitudeRepo.update(gratId, {
@@ -178,12 +175,10 @@ export class GratitudeService {
       });
 
       // 2.
-      this.imgRepo.delete({ imgType: ImageType.Gratitude, subId: gratId });
+      this.imgService.delete(ImageType.Gratitude, gratId);
 
       // 3.
-      const image = await this.imgRepo.findOne({
-        where: { imgId: defaultImgId },
-      });
+      const image = await this.imgService.getInstanceByPK(grat.defaultImgId);
       imgUrl = [image.imgUrl];
     }
     return new GetGratitudeDto(funding.fundUuid, gratTitle, gratCont, imgUrl);
@@ -194,12 +189,16 @@ export class GratitudeService {
    * @param fundUuid fundId를 찾기 위해 한 번 쿼리를 날려야 함
    * @returns boolean
    */
-  async deleteGratitude(fundUuid: string): Promise<boolean> {
-    const fund = await this.fundingRepo.findOne({ where: { fundUuid } });
+  async deleteGratitude(fundUuid: string, user: User): Promise<boolean> {
+    const fund = await this.fundingService.findFundingByUuidAndUserId(
+      fundUuid,
+      user.userId,
+    );
     const gratitude = await this.gratitudeRepo.findOne({
       where: { gratId: fund.fundId },
     });
     if (gratitude) {
+      this.imgService.delete(ImageType.Gratitude, gratitude.gratId);
       await this.gratitudeRepo.delete({ gratId: gratitude.gratId });
       return true;
     }

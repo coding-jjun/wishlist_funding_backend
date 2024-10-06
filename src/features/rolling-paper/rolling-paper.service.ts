@@ -4,7 +4,6 @@ import { RollingPaper } from 'src/entities/rolling-paper.entity';
 import { Repository } from 'typeorm';
 import { RollingPaperDto } from './dto/rolling-paper.dto';
 import { Funding } from 'src/entities/funding.entity';
-import { Image } from 'src/entities/image.entity';
 import { ImageType } from 'src/enums/image-type.enum';
 import { Donation } from 'src/entities/donation.entity';
 import { CreateRollingPaperDto } from './dto/create-rolling-paper.dto';
@@ -12,6 +11,7 @@ import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { ValidCheck } from 'src/util/valid-check';
 import { User } from 'src/entities/user.entity';
 import { DefaultImageIds } from 'src/enums/default-image-id';
+import { ImageService } from '../image/image.service';
 
 @Injectable()
 export class RollingPaperService {
@@ -22,12 +22,11 @@ export class RollingPaperService {
     @InjectRepository(Funding)
     private readonly fundingRepo: Repository<Funding>,
 
-    @InjectRepository(Image)
-    private readonly imgRepo: Repository<Image>,
-
     private readonly g2gException: GiftogetherExceptions,
 
     private readonly validChecker: ValidCheck,
+
+    private readonly imgService: ImageService,
   ) {}
 
   async getAllRollingPapers(
@@ -55,20 +54,18 @@ export class RollingPaperService {
 
     const getImageUrl = async (roll: RollingPaper): Promise<string> => {
       if (roll.defaultImgId) {
-        return (
-          await this.imgRepo.findOne({
-            where: { imgId: roll.defaultImgId },
-          })
-        )?.imgUrl;
+        return (await this.imgService.getInstanceByPK(roll.defaultImgId))
+          ?.imgUrl;
       }
 
       // not a default
       Logger.log(`롤링페이퍼 ID: ${roll.rollId}`);
       return (
-        await this.imgRepo.findOne({
-          where: { imgType: ImageType.RollingPaper, subId: roll.rollId },
-        })
-      )?.imgUrl;
+        await this.imgService.getInstancesBySubId(
+          ImageType.RollingPaper,
+          roll.rollId,
+        )
+      )[0]?.imgUrl;
     };
 
     const resolvedRolls = await Promise.all(rolls);
@@ -88,6 +85,7 @@ export class RollingPaperService {
     fundId: number,
     donation: Donation,
     crpDto: CreateRollingPaperDto,
+    user: User,
   ): Promise<RollingPaper> {
     const rollingPaper = new RollingPaper();
     rollingPaper.rollId = donation.donId;
@@ -99,13 +97,12 @@ export class RollingPaperService {
 
     if (crpDto.rollImg) {
       // 사용자 정의 이미지
-      const image = new Image(
+      this.imgService.save(
         crpDto.rollImg,
+        user,
         ImageType.RollingPaper,
         rollingPaper.rollId,
       );
-
-      this.imgRepo.insert(image);
     } else {
       // 기본값 이미지
       if (

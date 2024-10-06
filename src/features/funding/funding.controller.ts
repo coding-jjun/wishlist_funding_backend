@@ -142,7 +142,7 @@ export class FundingController {
     const user = req.user as { user: User } as any;
     return {
       message: 'success',
-      data: await this.fundingService.update(fundUuid, updateFunidngDto, user.userId),
+      data: await this.fundingService.update(fundUuid, updateFunidngDto, user),
     };
   }
 
