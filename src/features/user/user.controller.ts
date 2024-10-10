@@ -50,8 +50,43 @@ export class UserController {
       throw this.g2gExceptions.UserNotFound;
     }
   }
+  
+  @Get('/address')
+  @UseGuards(JwtAuthGuard)
+  async getUserAddress(
+    @Req() req: Request,
+  ): Promise<CommonResponse> {
+    console.log('들어는 왔다')
+    const user = req.user as { user: User } as any;
+    try {
+      return {
+        message: 'success',
+        data: await this.addrService.findAll(user.userId),
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
 
-  @Get(':userId')
+  @Get('/donation')
+  @UseGuards(JwtAuthGuard)
+  async getUserDonation(
+    @Req() req: Request,
+    @Query('status', new DefaultValuePipe('ongoing')) status: 'ongoing' | 'ended',
+    @Query('lastId', new DefaultValuePipe(null)) lastId?: number,
+  ): Promise<CommonResponse> {
+    const user = req.user as { user: User } as any;
+    try {
+      return {
+        message: 'Success',
+        data: await this.donaService.findMineAll(user.userId, status, lastId)
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get('/:userId')
   async getOther(
     @Param('userId', ParseIntPipe) userId: number,
     @Req() req: Request,
@@ -110,40 +145,6 @@ export class UserController {
       return { message: 'Success', data };
     } catch (error) {
       throw new HttpException('Failed to get fundings', HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  @Get('/donation')
-  @UseGuards(JwtAuthGuard)
-  async getUserDonation(
-    @Req() req: Request,
-    @Query('status', new DefaultValuePipe('ongoing')) status: 'ongoing' | 'ended',
-    @Query('lastId', new DefaultValuePipe(null)) lastId?: number,
-  ): Promise<CommonResponse> {
-    const user = req.user as { user: User } as any;
-    try {
-      return {
-        message: 'Success',
-        data: await this.donaService.findMineAll(user.userId, status, lastId)
-      }
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  @Get('/address')
-  @UseGuards(JwtAuthGuard)
-  async getUserAddress(
-    @Req() req: Request
-  ): Promise<CommonResponse> {
-    const user = req.user as { user: User } as any;
-    try {
-      return {
-        message: 'success',
-        data: await this.addrService.findAll(user.userId),
-      };
-    } catch (error) {
-      throw error;
     }
   }
 
