@@ -6,6 +6,7 @@ import {
   IsUrl,
 } from 'class-validator';
 import { CreateGuestDto } from './create-guest.dto';
+import { ValidatorConfig } from 'src/config/validator.config';
 
 export class CreateDonationDto {
   @IsOptional()
@@ -22,7 +23,7 @@ export class CreateDonationDto {
    * fundImg와 defaultImgId 둘 중에 하나만 null이어야 함
    */
   @IsOptional()
-  @IsUrl()
+  @IsUrl(ValidatorConfig.IsUrlOptions)
   rollImg: string;
 
   /*

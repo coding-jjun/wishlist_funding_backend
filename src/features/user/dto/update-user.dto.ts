@@ -1,4 +1,5 @@
 import { IsNumber, IsOptional, IsUrl } from 'class-validator';
+import { ValidatorConfig } from 'src/config/validator.config';
 
 export class UpdateUserDto {
   @IsOptional()
@@ -20,7 +21,7 @@ export class UpdateUserDto {
    * fundImg와 defaultImgId 둘 중에 하나만 null이어야 함
    */
   @IsOptional()
-  @IsUrl()
+  @IsUrl(ValidatorConfig.IsUrlOptions)
   userImg?: string;
 
   @IsOptional()

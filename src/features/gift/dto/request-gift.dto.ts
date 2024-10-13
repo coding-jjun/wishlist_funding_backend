@@ -7,6 +7,7 @@ import {
   IsUrl,
   ValidateNested,
 } from 'class-validator';
+import { ValidatorConfig } from 'src/config/validator.config';
 
 export class RequestGiftDto {
   @IsOptional()
@@ -28,7 +29,7 @@ export class RequestGiftDto {
   giftCont?: string;
 
   @IsOptional()
-  @IsUrl()
+  @IsUrl(ValidatorConfig.IsUrlOptions)
   giftImg?: string;
 }
 

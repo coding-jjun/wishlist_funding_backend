@@ -8,6 +8,7 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
+import { ValidatorConfig } from 'src/config/validator.config';
 import { FundTheme } from 'src/enums/fund-theme.enum';
 import { RequestGiftDto } from 'src/features/gift/dto/request-gift.dto';
 
@@ -19,7 +20,7 @@ export class CreateFundingDto {
   fundCont: string;
 
   @IsOptional()
-  @IsUrl()
+  @IsUrl(ValidatorConfig.IsUrlOptions)
   fundImg?: string;
 
   @IsNotEmpty()
