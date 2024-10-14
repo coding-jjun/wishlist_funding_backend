@@ -41,15 +41,17 @@ import { TransformInterceptor } from './transform/transform.interceptor';
 import { Gift } from './entities/gift.entity';
 import { GiftogetherError } from './entities/error.entity';
 import { GiftogetherMiddleware } from './interfaces/giftogether.middleware';
+import { isUrlOptions } from './config/validator.config';
 @Module({
   imports: [
-    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
       // cache: true,
       expandVariables: true,
+      load: [isUrlOptions],
     }),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
@@ -114,7 +116,7 @@ import { GiftogetherMiddleware } from './interfaces/giftogether.middleware';
     },
   ],
 })
-export class AppModule implements NestModule {  
+export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): any {
     consumer.apply(GiftogetherMiddleware).forRoutes('');
   }

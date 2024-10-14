@@ -1,7 +1,7 @@
-import { IsUrl } from 'class-validator';
-import { ValidatorConfig } from 'src/config/validator.config';
+import { Validate } from 'class-validator';
+import { CustomUrlValidator } from 'src/util/custom-url-validator';
 
 export class ImageDto {
-  @IsUrl(ValidatorConfig.IsUrlOptions, { each: true })
+  @Validate(CustomUrlValidator)
   urls: string[];
 }

@@ -66,4 +66,6 @@ export enum ErrorCode {
   // Address
   AddressNotFound = '1300',
 
+  // Validators
+  InvalidUrl = '1400',
 }

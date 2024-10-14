@@ -2,15 +2,14 @@ import { Type } from 'class-transformer';
 import {
   IsDateString,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
-  IsUrl,
   Min,
+  Validate,
   ValidateNested,
 } from 'class-validator';
-import { ValidatorConfig } from 'src/config/validator.config';
 import { FundTheme } from 'src/enums/fund-theme.enum';
 import { RequestGiftDto } from 'src/features/gift/dto/request-gift.dto';
+import { CustomUrlValidator } from 'src/util/custom-url-validator';
 
 export class CreateFundingDto {
   @IsNotEmpty()
@@ -20,7 +19,7 @@ export class CreateFundingDto {
   fundCont: string;
 
   @IsOptional()
-  @IsUrl(ValidatorConfig.IsUrlOptions)
+  @Validate(CustomUrlValidator)
   fundImg?: string;
 
   @IsNotEmpty()

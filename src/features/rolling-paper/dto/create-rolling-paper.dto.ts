@@ -1,5 +1,5 @@
-import { IsNumber, IsOptional, IsString, IsUrl } from 'class-validator';
-import { ValidatorConfig } from 'src/config/validator.config';
+import { IsNumber, IsOptional, IsString, Validate } from 'class-validator';
+import { CustomUrlValidator } from 'src/util/custom-url-validator';
 
 export class CreateRollingPaperDto {
   @IsNumber()
@@ -13,7 +13,7 @@ export class CreateRollingPaperDto {
    * fundImg와 defaultImgId 둘 중에 하나만 null이어야 함
    */
   @IsOptional()
-  @IsUrl(ValidatorConfig.IsUrlOptions)
+  @Validate(CustomUrlValidator)
   rollImg?: string;
 
   /*

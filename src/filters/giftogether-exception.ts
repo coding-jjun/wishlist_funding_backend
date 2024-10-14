@@ -223,7 +223,7 @@ export class GiftogetherExceptions {
     ErrorMsg.InvalidUserType,
     ErrorCode.InvalidUserType,
     HttpStatus.BAD_REQUEST,
-  )
+  );
 
   // Default images
   DefaultImgIdNotExist = new GiftogetherException(
@@ -250,5 +250,12 @@ export class GiftogetherExceptions {
     ErrorMsg.AddressNotFound,
     ErrorCode.AddressNotFound,
     HttpStatus.NOT_FOUND,
+  );
+
+  // Validators
+  InvalidUrl = new GiftogetherException(
+    ErrorMsg.InvalidUrl,
+    ErrorCode.InvalidUrl,
+    HttpStatus.BAD_REQUEST,
   );
 }
