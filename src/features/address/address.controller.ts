@@ -73,6 +73,7 @@ export class AddressController {
   }
 
   @Delete(':addrId')
+  @UseGuards(JwtAuthGuard)
   async remove(
     @Param('addrId', ParseIntPipe) addrId: number,
     @Req() req: Request
