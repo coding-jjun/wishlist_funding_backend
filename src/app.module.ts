@@ -114,7 +114,7 @@ import { GiftogetherMiddleware } from './interfaces/giftogether.middleware';
     },
   ],
 })
-export class AppModule implements NestModule {  
+export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): any {
     consumer.apply(GiftogetherMiddleware).forRoutes('');
   }

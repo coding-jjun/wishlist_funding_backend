@@ -1,13 +1,14 @@
 import { RollingPaper } from 'src/entities/rolling-paper.entity';
-import { IsUrl } from 'class-validator';
+import { Validate } from 'class-validator';
+import { CustomUrlValidator } from 'src/util/custom-url-validator';
 export class RollingPaperDto {
   rollId: number;
   rollMsg: string;
   regAt: Date;
   donAmnt: number;
   userNick: string;
-  
-  @IsUrl()
+
+  @Validate(CustomUrlValidator)
   rollImg: string;
 
   constructor(rollingPaper: RollingPaper, rollImg: string) {

@@ -1,6 +1,7 @@
-import { IsUrl } from 'class-validator';
+import { Validate } from 'class-validator';
+import { CustomUrlValidator } from 'src/util/custom-url-validator';
 
 export class ImageDto {
-  @IsUrl({}, { each: true })
+  @Validate(CustomUrlValidator)
   urls: string[];
 }

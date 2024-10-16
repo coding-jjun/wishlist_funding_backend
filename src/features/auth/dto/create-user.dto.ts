@@ -1,5 +1,6 @@
-import { IsNumber, IsOptional, IsUrl } from 'class-validator';
+import { IsNumber, IsOptional, Validate } from 'class-validator';
 import { AuthType } from 'src/enums/auth-type.enum';
+import { CustomUrlValidator } from 'src/util/custom-url-validator';
 
 export class CreateUserDto {
   @IsOptional()
@@ -30,7 +31,7 @@ export class CreateUserDto {
    * fundImg와 defaultImgId 둘 중에 하나만 null이어야 함
    */
   @IsOptional()
-  @IsUrl()
+  @Validate(CustomUrlValidator)
   userImg?: string;
 
   /**

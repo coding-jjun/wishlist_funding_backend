@@ -65,4 +65,6 @@ export enum ErrorMsg {
   // Address
   AddressNotFound = '배송지 정보가 없습니다.',
 
+  // Validators
+  InvalidUrl = '유효한 URL이 아닙니다.',
 }

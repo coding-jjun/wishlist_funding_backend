@@ -27,6 +27,9 @@ export class RequestGiftDto {
   @IsOptional()
   giftCont?: string;
 
+  /**
+   * giftImg는 썸네일 URL도 가능하기 때문에 커스텀 Validator 미적용
+   */
   @IsOptional()
   @IsUrl()
   giftImg?: string;

@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsUrl } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, Validate } from 'class-validator';
+import { CustomUrlValidator } from 'src/util/custom-url-validator';
 
 export class GratitudeDto {
   @IsNotEmpty()
@@ -11,7 +12,7 @@ export class GratitudeDto {
    * fundImg와 defaultImgId 둘 중에 하나만 null이어야 함
    */
   @IsNotEmpty()
-  @IsUrl({}, { each: true })
+  @Validate(CustomUrlValidator)
   gratImg: string[];
 
   /*
