@@ -28,7 +28,7 @@ export class Gift {
   @Column({ nullable: true })
   giftOpt: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, length: 20 })
   giftCont: string;
 
   @Column({ nullable: true })
