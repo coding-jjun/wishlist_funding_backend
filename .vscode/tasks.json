@@ -1,0 +1,53 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "docker-build",
+            "label": "docker-build",
+            "platform": "node",
+            "dockerBuild": {
+                "dockerfile": "${workspaceFolder}/Dockerfile",
+                "context": "${workspaceFolder}",
+                "pull": true
+            }
+        },
+        {
+            "type": "docker-run",
+            "label": "docker-run: release",
+            "dependsOn": [
+                "docker-build"
+            ],
+            "platform": "node"
+        },
+        {
+            "type": "docker-run",
+            "label": "docker-run: debug",
+            "dependsOn": [
+                "docker-build"
+            ],
+            "dockerRun": {
+                "env": {
+                    "DEBUG": "*",
+                    "NODE_ENV": "development"
+                }
+            },
+            "node": {
+                "enableDebugging": true
+            }
+        },
+        {
+            "label": "Docker Compose: Up",
+            "type": "shell",
+            "command": "docker-compose -f docker-compose.development.yml up --build",
+            "problemMatcher": [],
+            "detail": "Run docker-compose up with development settings"
+        },
+        {
+            "label": "Docker Compose: Down",
+            "type": "shell",
+            "command": "docker-compose -f docker-compose.development.yml down",
+            "problemMatcher": [],
+            "detail": "Run docker-compose down"
+        }
+    ]
+}
