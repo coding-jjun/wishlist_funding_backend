@@ -5,13 +5,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Docker Node.js Launch",
-            "type": "docker",
-            "request": "launch",
-            "preLaunchTask": "docker-run: debug",
-            "platform": "node"
-        },
-        {
             "type": "node",
             "request": "attach",
             "name": "Attach to Node in Docker",
@@ -21,6 +14,8 @@
             "localRoot": "${workspaceFolder}",
             "remoteRoot": "/usr/src/app",
             "protocol": "inspector",
+            "preLaunchTask": "Docker Compose: Up",
+            "postDebugTask": "Docker Compose: Down",
             "skipFiles": [
                 "<node_internals>/**"
             ]
