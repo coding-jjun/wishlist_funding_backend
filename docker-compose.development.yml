@@ -1,0 +1,38 @@
+services:
+  giftogether:
+    build:
+      context: .
+      dockerfile: Dockerfile.development
+    image: giftogether-dev:WISH-317
+    container_name: giftogether
+    ports:
+      - "3000:3000" # app port
+      - "9229:9229" # Debugging port
+    networks:
+      - g2gnet
+    volumes:
+      - .:/usr/src/app # 라이브 리로딩 기능을 위한 마운트
+      - /usr/src/app/node_modules # prevents node_modules conflicts
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development
+    command: |
+      node --inspect=0.0.0.0:9229 -r ts-node/register -r tsconfig-paths/register src/main.ts
+
+  redis:
+    image: redis:7.4.1
+    container_name: g2gredis
+    ports:
+      - "6379:6379"
+    networks:
+      - g2gnet
+    volumes:
+      - ./docker/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+
+networks:
+  g2gnet:
+    driver: bridge
