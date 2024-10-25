@@ -14,8 +14,6 @@
             "localRoot": "${workspaceFolder}",
             "remoteRoot": "/usr/src/app",
             "protocol": "inspector",
-            "preLaunchTask": "Docker Compose: Up",
-            "postDebugTask": "Docker Compose: Down",
             "skipFiles": [
                 "<node_internals>/**"
             ]
