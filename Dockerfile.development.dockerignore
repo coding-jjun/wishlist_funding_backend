@@ -4,4 +4,6 @@ Dockerfile
 .dockerignore
 .git
 .gitignore
+.env
+docker
 dist
