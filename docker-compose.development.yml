@@ -11,8 +11,7 @@ services:
     networks:
       - g2gnet
     volumes:
-      - .:/usr/src/app # 라이브 리로딩 기능을 위한 마운트
-      - /usr/src/app/node_modules # prevents node_modules conflicts
+      - ./src:/usr/src/app/src # 라이브 리로딩 기능을 위한 마운트
     depends_on:
       - redis
     env_file:
