@@ -20,7 +20,7 @@
 2. [`.env` 설정](#env-설정)
 3. [`docker/redis.conf` 설정](#dockerredisconf-설정)
 4. [`global-bundle.pem`키 설정](#globalbundlepem-키-설정) -> S3를 위해 받아놓아야 합니다.
-5. 실행 (debug 모드) with `docker-compose up`
+5. 실행 (debug 모드) with `docker-compose -f docker-compose.development.yml up`
 
 **지원하는 기능**:
 
