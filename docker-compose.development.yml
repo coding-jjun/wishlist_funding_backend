@@ -11,16 +11,14 @@ services:
     networks:
       - g2gnet
     volumes:
-      - .:/usr/src/app # 라이브 리로딩 기능을 위한 마운트
-      - /usr/src/app/node_modules # prevents node_modules conflicts
+      - "./src:/usr/src/app/src:ro" # 라이브 리로딩 기능을 위한 마운트
     depends_on:
       - redis
     env_file:
       - .env
     environment:
       NODE_ENV: development
-    command: |
-      node --inspect=0.0.0.0:9229 -r ts-node/register -r tsconfig-paths/register src/main.ts
+    command: npm run start:debug
 
   redis:
     image: redis:7.4.1

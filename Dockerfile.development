@@ -6,10 +6,8 @@ WORKDIR /usr/src/app
 
 # Port number
 EXPOSE 3000
-COPY . .
 
-# Install app dependencies
-COPY package*.json ./
+COPY . .
 RUN npm install
 
 # Start the server
