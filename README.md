@@ -59,24 +59,6 @@ DB_PROD_1_USERNAME=
 DB_PROD_1_PASSWORD=
 
 # Auth
-# =============[ KAKAO ]=============
-KAKAO_CLIENT_ID=
-KAKAO_CLIENT_SECRET=
-KAKAO_CALLBACK_URI=
-
-# =============[ JWT ]=============
-JWT_SECRET=
-JWT_REFRESH_SECRET=
-
-# =============[ NAVER ]=============
-NAVER_CLIENT_ID=
-NAVER_CLIENT_SECRET=
-NAVER_CALLBACK_URI=
-
-# =============[ GOOGLE ]=============
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-GOOGLE_CALLBACK_URI=
 
 # Redis
 REDIS_HOST=redis # 혹시 안되면 127.0.0.1로도 시도해보세요
