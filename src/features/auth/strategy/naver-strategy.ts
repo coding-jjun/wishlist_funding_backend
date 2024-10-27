@@ -49,6 +49,8 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
       const isValidNick = await this.authService.validUserInfo("userNick",naverAccount.nickname);
       if(isValidNick){
         createUserDto.userNick = naverAccount.nickname;
+      }else {
+        createUserDto.userNick = await this.authService.createRandomNickname();
       }
 
       // 핸드폰 번호 유효성 검증

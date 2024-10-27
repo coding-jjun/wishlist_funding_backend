@@ -51,7 +51,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
       if(isValidNick){
         createUserDto.userNick = kakaoAccount.profile.nickname;
       }else{
-        // TODO 기본 닉네임 생성
+        createUserDto.userNick = await this.authService.createRandomNickname();
       }
     
       // 핸드폰 번호 유효성 검증
