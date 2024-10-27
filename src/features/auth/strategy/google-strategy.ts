@@ -52,6 +52,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google'){
       const isValidNick = await this.authService.validUserInfo("userNick", googleAccount.given_name);
       if(isValidNick){
         createUserDto.userNick = googleAccount.given_name;
+      }else {
+        createUserDto.userNick = await this.authService.createRandomNickname();
       }
 
       if(googleAccount.picture){
