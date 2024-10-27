@@ -61,5 +61,4 @@ global-bundle.pem
 *.tar.gz
 
 # Docker
-docker-compose.yml
 docker/*

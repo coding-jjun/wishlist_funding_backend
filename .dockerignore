@@ -4,6 +4,6 @@ Dockerfile
 .dockerignore
 .git
 .gitignore
-# .env # See env_file in docker-compose.yml
+.env # See env_file in docker-compose.yml
 dist
-# docker/
+docker/
