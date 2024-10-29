@@ -20,6 +20,9 @@ export class Gift {
   funding: Funding;
 
   @Column()
+  giftTitle: string;
+
+  @Column()
   giftUrl: string;
 
   @Column()
