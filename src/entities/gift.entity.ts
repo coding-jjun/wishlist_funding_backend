@@ -19,7 +19,7 @@ export class Gift {
   @JoinColumn({ name: 'fundId' })
   funding: Funding;
 
-  @Column()
+  @Column({ nullable: false })
   giftTitle: string;
 
   @Column()
