@@ -1,0 +1,36 @@
+services:
+  redis:
+    image: redis
+    container_name: giftogether-redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - backup-redis:/data
+      - ./docker/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - g2gnet
+
+  app:
+    image: giftogether:35
+    container_name: giftogether-app
+    ports:
+      - '443:3000'
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    restart: on-failure
+    volumes:
+      - /etc/letsencrypt/live/api.giftogether.co.kr/privkey.pem:/etc/letsencrypt/live/api.giftogether.co.kr/privkey.pem
+      - /etc/letsencrypt/live/api.giftogether.co.kr/fullchain.pem:/etc/letsencrypt/live/api.giftogether.co.kr/fullchain.pem
+    networks:
+      - g2gnet
+
+volumes:
+  backup-redis:
+    external: true
+
+networks:
+  g2gnet:
+    driver: bridge
