@@ -14,6 +14,9 @@ export class RequestGiftDto {
   giftId?: number;
 
   @IsNotEmpty()
+  giftTitle: string;
+
+  @IsNotEmpty()
   @IsUrl()
   giftUrl: string;
 

@@ -19,6 +19,9 @@ export class Gift {
   @JoinColumn({ name: 'fundId' })
   funding: Funding;
 
+  @Column({ nullable: false })
+  giftTitle: string;
+
   @Column()
   giftUrl: string;
 

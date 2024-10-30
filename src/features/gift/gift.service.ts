@@ -194,6 +194,7 @@ export class GiftService {
     const newGift = new Gift();
 
     newGift.giftUrl = gift.giftUrl;
+    newGift.giftTitle = gift.giftTitle;
     newGift.giftOrd = gift.giftOrd;
     newGift.giftOpt = gift.giftOpt;
     newGift.giftCont = gift.giftCont;
