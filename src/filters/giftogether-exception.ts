@@ -24,6 +24,12 @@ export class GiftogetherExceptions {
     HttpStatus.NOT_FOUND,
   );
 
+  EndDatePast = new GiftogetherException(
+    ErrorMsg.EndDatePast,
+    ErrorCode.EndDatePast,
+    HttpStatus.BAD_REQUEST,
+  );
+
   // Donation
   FundingClosed = new GiftogetherException(
     ErrorMsg.FundingClosed,
