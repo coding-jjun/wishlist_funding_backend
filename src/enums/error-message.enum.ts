@@ -1,7 +1,7 @@
 export enum ErrorMsg {
   // Funding
   FundingNotExists = '펀딩이 존재하지 않습니다.',
-
+  EndDatePast = '현재 시간 이전으로 마감기한을 변경할 수 없습니다.',
   // Donation
   FundingClosed = '이미 마감된 펀딩입니다.',
   FundingNotClosed = '아직 마감되지 않은 펀딩입니다.',

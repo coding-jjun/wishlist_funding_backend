@@ -1,6 +1,7 @@
 export enum ErrorCode {
   // Funding
   FundingNotExists = '0000',
+  EndDatePast = '0001',
 
   // Donation
   FundingClosed = '0100',

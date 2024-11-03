@@ -338,10 +338,7 @@ export class FundingService {
       Logger.log(
         `funding.endAt: ${JSON.stringify(JSON.stringify(funding.endAt))}, endAt: ${JSON.stringify(updateFundingDto.endAt)}`,
       );
-      throw new HttpException(
-        'endAt property should not go backward!!',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw this.g2gException.EndDatePast;
     }
 
     // 이미지 업데이트
