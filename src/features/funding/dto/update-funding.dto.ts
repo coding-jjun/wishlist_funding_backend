@@ -7,4 +7,6 @@ export class UpdateFundingDto extends PickType(CreateFundingDto, [
   'fundImg',
   'fundTitle',
   'fundTheme',
+  'fundGoal',
+  'fundPubl'
 ] as const) {}

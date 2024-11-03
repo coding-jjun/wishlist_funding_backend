@@ -330,13 +330,15 @@ export class FundingService {
     updateFundingDto: UpdateFundingDto,
     user: User,
   ): Promise<FundingDto> {
-    const { fundTitle, fundImg, fundCont, fundTheme, endAt } = updateFundingDto;
+    const { fundTitle, fundImg, fundCont, fundTheme, endAt, fundGoal, fundPubl } = updateFundingDto;
     const funding = await this.findFundingByUuidAndUserId(fundUuid, user.userId);
     const fundId = funding.fundId;
 
     funding.fundTitle = fundTitle;
     funding.fundCont = fundCont;
     funding.fundTheme = fundTheme;
+    funding.fundGoal = fundGoal;
+    funding.fundPubl = fundPubl;
 
     let defaultImgId = null;
 
@@ -363,6 +365,8 @@ export class FundingService {
         fundCont,
         fundTheme,
         endAt,
+        fundGoal,
+        fundPubl,
         defaultImgId: funding.defaultImgId,
       },
     );
