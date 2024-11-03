@@ -330,43 +330,28 @@ export class FundingService {
     updateFundingDto: UpdateFundingDto,
     user: User,
   ): Promise<FundingDto> {
-    const { fundTitle, fundImg, fundCont, fundTheme, endAt, fundGoal, fundPubl } = updateFundingDto;
     const funding = await this.findFundingByUuidAndUserId(fundUuid, user.userId);
     const fundId = funding.fundId;
 
-    funding.fundTitle = fundTitle;
-    funding.fundCont = fundCont;
-    funding.fundTheme = fundTheme;
-    funding.fundGoal = fundGoal;
-    funding.fundPubl = fundPubl;
-
-    let defaultImgId = null;
-
     // endAt이 앞당겨지면 안된다.
-    if (funding.endAt > endAt) {
+    if (funding.endAt > updateFundingDto.endAt) {
       Logger.log(
-        `funding.endAt: ${JSON.stringify(JSON.stringify(funding.endAt))}, endAt: ${JSON.stringify(endAt)}`,
+        `funding.endAt: ${JSON.stringify(JSON.stringify(funding.endAt))}, endAt: ${JSON.stringify(updateFundingDto.endAt)}`,
       );
       throw new HttpException(
         'endAt property should not go backward!!',
         HttpStatus.BAD_REQUEST,
       );
     }
-    funding.endAt = endAt;
 
     // 이미지 업데이트
-    const fundingImg = await this.updateFundingImage(funding, fundImg, fundId, user);
+    const fundingImg = await this.updateFundingImage(funding, updateFundingDto.fundImg, fundId, user);
 
     // Funding 업데이트
     await this.fundingRepository.update(
       { fundId },
       {
-        fundTitle,
-        fundCont,
-        fundTheme,
-        endAt,
-        fundGoal,
-        fundPubl,
+        ...updateFundingDto,
         defaultImgId: funding.defaultImgId,
       },
     );
