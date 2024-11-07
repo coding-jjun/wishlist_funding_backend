@@ -37,9 +37,9 @@ jobs:
       - name: Tag Docker image
         run: |
           # Tag the image with the ECR repository URI
-          docker tag giftogether ${{ secrets.REGISTRY }}:${{ github.sha }}
+          docker tag giftogether ${{ secrets.REGISTRY }}/coding-jjun/giftogether:${{ github.sha }}
 
       - name: Push Docker image to ECR
         run: |
           # Push the Docker image to your ECR repository
-          docker push ${{ secrets.REGISTRY }}:${{ github.sha }}
+          docker push ${{ secrets.REGISTRY }}/coding-jjun/giftogether:${{ github.sha }}
