@@ -4,8 +4,17 @@ on:
   push:
     branches:
       - main # Change this to your target branch if needed
-
 jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print debug information
+        run: |
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}"
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          echo "AWS_REGION=${{ vars.AWS_REGION }}"
+          # These should print as `***` for secrets if they’re correctly loaded.
+
   build-and-push-image-to-ecr:
     runs-on: ubuntu-latest
 
