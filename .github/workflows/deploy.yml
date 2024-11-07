@@ -4,8 +4,15 @@ on:
   push:
     branches:
       - main # Change this to your target branch if needed
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
 jobs:
   build-and-push-image-to-ecr:
+    if: ${{ github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
 
     steps:
