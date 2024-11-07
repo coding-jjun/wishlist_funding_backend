@@ -28,7 +28,6 @@ WORKDIR /usr/src/app
 
 # Bundle app source
 COPY --from=builder /dist ./dist/
-COPY --from=builder global-bundle.pem ./
 
 # Install production dependencies
 COPY --from=builder /package*.json ./
