@@ -5,16 +5,6 @@ on:
     branches:
       - main # Change this to your target branch if needed
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Print debug information
-        run: |
-          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}"
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-          echo "AWS_REGION=${{ vars.AWS_REGION }}"
-          # These should print as `***` for secrets if they’re correctly loaded.
-
   build-and-push-image-to-ecr:
     runs-on: ubuntu-latest
 
@@ -27,7 +17,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.AWS_REGION }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Log in to Amazon ECR
         id: login-ecr
@@ -40,9 +30,9 @@ jobs:
       - name: Tag Docker image
         run: |
           # Tag the image with the ECR repository URI
-          docker tag giftogether ${{ vars.REGISTRY }}:${{ github.sha }}
+          docker tag giftogether ${{ secrets.REGISTRY }}:${{ github.sha }}
 
       - name: Push Docker image to ECR
         run: |
           # Push the Docker image to your ECR repository
-          docker push ${{ vars.REGISTRY }}:${{ github.sha }}
+          docker push ${{ secrets.REGISTRY }}:${{ github.sha }}
