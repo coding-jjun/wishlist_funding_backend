@@ -25,7 +25,7 @@ jobs:
         with:
           images: coding-jjun/giftogether
           tags: |
-            type=sha
+            type=schedule,pattern={{date 'YYYYMMDD'}}
       
       - name: test metatags
         run: |
