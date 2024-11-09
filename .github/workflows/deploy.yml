@@ -19,6 +19,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5.5.1
+        with:
+          images: coding-jjun/giftogether
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+      
+      - name: test metatags
+        run: |
+            echo "steps.meta.outputs.tags=${{ steps.meta.outputs.tags }}"
+            echo "steps.meta.outputs.labels=${{ steps.meta.outputs.labels }}"
+
       - name: Set up AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
@@ -28,7 +44,7 @@ jobs:
 
       - name: Log in to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build Docker image
         run: |
