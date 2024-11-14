@@ -52,6 +52,10 @@ export class AuthController {
   @UseGuards(KakaoAuthGuard)
   async kakaoCallback(@Req() req: Request, @Res() res: Response){
     const data = req.user as { user: UserDto, tokenDto: TokenDto, type: string };
+    if(data.type === "fail"){
+      const errCode = this.g2gException.UserAlreadyExists.getErrCode();
+      return res.redirect(`${process.env.LOGIN_URL}?error=${errCode}`);
+    }
 
     res.cookie('access_token', data.tokenDto.accessToken, this.cookieOptions);
     res.cookie('refresh_token', data.tokenDto.refreshToken, this.cookieOptions);
@@ -76,6 +80,10 @@ export class AuthController {
   @UseGuards(NaverAuthGuard)
   async naverCallback(@Req() req: Request, @Res() res:Response){
     const data = req.user as { user: UserDto, tokenDto: TokenDto, type: string };
+    if(data.type === "fail"){
+      const errCode = this.g2gException.UserAlreadyExists.getErrCode();
+      return res.redirect(`${process.env.LOGIN_URL}?error=${errCode}`);
+    }
     res.cookie('access_token', data.tokenDto.accessToken, this.cookieOptions);
     res.cookie('refresh_token', data.tokenDto.refreshToken, this.cookieOptions);
     res.cookie('user', JSON.stringify(data.user), this.cookieOptions);
@@ -98,7 +106,10 @@ export class AuthController {
   @UseGuards(GoogleAuthGuard)
   async googleCallback(@Req() req: Request, @Res() res:Response){
     const data = req.user as { user: UserDto, tokenDto: TokenDto, type: string };
-
+    if(data.type === "fail"){
+      const errCode = this.g2gException.UserAlreadyExists.getErrCode();
+      return res.redirect(`${process.env.LOGIN_URL}?error=${errCode}`);
+    }
     res.cookie('access_token', data.tokenDto.accessToken, this.cookieOptions);
     res.cookie('refresh_token', data.tokenDto.refreshToken, this.cookieOptions);
     res.cookie('user', JSON.stringify(data.user), this.cookieOptions);
