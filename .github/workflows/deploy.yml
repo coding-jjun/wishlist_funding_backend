@@ -22,7 +22,8 @@ jobs:
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5.5.1
-        flavor: latest=true
+        flavor: |
+          latest=true
         with:
           images: coding-jjun/giftogether
           tags: |
