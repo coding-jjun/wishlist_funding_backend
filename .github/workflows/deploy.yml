@@ -57,5 +57,5 @@ jobs:
       - name: Push Docker image to ECR
         run: |
           # Push the Docker image to your ECR repository
-          docker push ${{secrets.REGISTRY}}${{ steps.meta.outputs.tags }}
-          docker push ${{secrets.REGISTRY}}coding-jjun/giftogether:latest
+          docker push ${{secrets.REGISTRY}}/${{ steps.meta.outputs.tags }}
+          docker push ${{secrets.REGISTRY}}/coding-jjun/giftogether:latest
