@@ -28,11 +28,14 @@ jobs:
             type=semver,pattern={{version}}
             type=sha,format=short
             type=raw,value=latest,enable={{is_default_branch}}
+          flavor: |
+            latest=true
       
       - name: test metatags
         run: |
             echo "steps.meta.outputs.tags=${{ steps.meta.outputs.tags }}"
             echo "steps.meta.outputs.labels=${{ steps.meta.outputs.labels }}"
+            echo "DOCKER_METADATA_OUTPUT_JSON=${{DOCKER_METADATA_OUTPUT_JSON}}"
 
       - name: Set up AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -45,16 +48,8 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build Docker image
-        uses: docker/bake-action@v5.10.0
-        with:
-          files: |
-            ./docker-bake.hcl
-            ${{ steps.meta.outputs.bake-file }}
-          targets: build
-
       - name: Push Docker image to ECR
         uses: docker/build-push-action@v6.9.0
         with:
           build-args: |
-            DOCKER_METADATA_OUTPUT_JSON
+            ${{DOCKER_METADATA_OUTPUT_JSON}}
