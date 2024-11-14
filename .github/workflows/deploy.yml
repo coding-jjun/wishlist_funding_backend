@@ -46,7 +46,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build Docker image
-        uses: docker/bake-action@5.10.0
+        uses: docker/bake-action@v5.10.0
         with:
           files: |
             ./docker-bake.hcl
