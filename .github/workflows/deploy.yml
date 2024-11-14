@@ -22,10 +22,12 @@ jobs:
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5.5.1
+        flavor: latest=true
         with:
           images: coding-jjun/giftogether
           tags: |
-            type=schedule,pattern={{date 'YYYYMMDD'}}
+            type=sha,format=short
+            type=raw,value=latest,enable=${{is_default_branch}}
       
       - name: test metatags
         run: |
@@ -50,7 +52,7 @@ jobs:
       - name: Tag Docker image
         run: |
           # Tag the image with the ECR repository URI
-          docker tag giftogether ${{ secrets.REGISTRY }}/coding-jjun/giftogether:${{ github.sha }}
+          docker tag giftogether ${{ secrets.REGISTRY }}/coding-jjun/giftogether:${{steps.meta.outputs.tags}}
 
       - name: Push Docker image to ECR
         run: |
