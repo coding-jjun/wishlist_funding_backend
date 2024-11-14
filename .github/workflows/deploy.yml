@@ -22,18 +22,20 @@ jobs:
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5.5.1
-        flavor: |
-          latest=true
         with:
-          images: coding-jjun/giftogether
+          images: ${{secrets.REGISTRY}}/coding-jjun/giftogether
           tags: |
+            type=semver,pattern={{version}}
             type=sha,format=short
-            type=raw,value=latest,enable=${{is_default_branch}}
+            type=raw,value=latest,enable={{is_default_branch}}
+          flavor: |
+            latest=true
       
       - name: test metatags
         run: |
             echo "steps.meta.outputs.tags=${{ steps.meta.outputs.tags }}"
             echo "steps.meta.outputs.labels=${{ steps.meta.outputs.labels }}"
+            echo "bake-file: ${{steps.meta.outputs.bake-file}}"
 
       - name: Set up AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -46,16 +48,11 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build Docker image
-        run: |
-          docker build -t giftogether -f Dockerfile .
-
-      - name: Tag Docker image
-        run: |
-          # Tag the image with the ECR repository URI
-          docker tag giftogether ${{ secrets.REGISTRY }}/coding-jjun/giftogether:${{steps.meta.outputs.tags}}
-
-      - name: Push Docker image to ECR
-        run: |
-          # Push the Docker image to your ECR repository
-          docker push ${{ secrets.REGISTRY }}/coding-jjun/giftogether:${{ github.sha }}
+      - name: Build and Push
+        uses: docker/bake-action@v5
+        with:
+          files: |
+            ./docker-bake.hcl
+            ${{ steps.meta.outputs.bake-file }}
+          targets: build
+          push: true
