@@ -12,7 +12,7 @@ on:
 
 jobs:
   build-and-push-image-to-ecr:
-    if: ${{ github.event.pull_request.merged == true }}
+    # if: ${{ github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
 
     steps:
@@ -22,8 +22,6 @@ jobs:
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5.5.1
-        flavor: |
-          latest=true
         with:
           images: coding-jjun/giftogether
           tags: |
