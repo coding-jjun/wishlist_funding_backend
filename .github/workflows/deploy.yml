@@ -23,8 +23,9 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5.5.1
         with:
-          images: coding-jjun/giftogether
+          images: ${{secrets.REGISTRY}}/coding-jjun/giftogether
           tags: |
+            type=semver,pattern={{version}}
             type=sha,format=short
             type=raw,value=latest,enable={{is_default_branch}}
       
@@ -45,17 +46,15 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build Docker image
-        run: |
-          docker build -t giftogether -f Dockerfile .
-
-      - name: Tag Docker image
-        run: |
-          # Tag the image with the ECR repository URI
-          docker tag giftogether ${{steps.meta.outputs.tags}}
-          docker tag giftogether coding-jjun/giftogether:latest
+        uses: docker/bake-action@5.10.0
+        with:
+          files: |
+            ./docker-bake.hcl
+            ${{ steps.meta.outputs.bake-file }}
+        targets: build
 
       - name: Push Docker image to ECR
-        run: |
-          # Push the Docker image to your ECR repository
-          docker push ${{secrets.REGISTRY}}/${{ steps.meta.outputs.tags }}
-          docker push ${{secrets.REGISTRY}}/coding-jjun/giftogether:latest
+        uses: docker/build-push-action@v6.9.0
+        with:
+          build-args: |
+            DOCKER_METADATA_OUTPUT_JSON
