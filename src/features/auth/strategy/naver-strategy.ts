@@ -39,9 +39,20 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
     createUserDto.userName = naverAccount.name || null;
 
     // user == 로그인
-    let user = await this.authService.validateUser(naverAccount.email, AuthType.Naver);
-
+    let user = null;
     let type = null;
+
+    try {
+      user = await this.authService.validateUser(naverAccount.email, AuthType.Naver);
+    }
+    // 이미 가입한 계정 (중복 가입)
+    catch (error) {
+      // console.log("error->",error.message);
+      type = "fail"
+      return done(null, { type: "fail" });
+      // done(null, {user, tokenDto, type});
+    }
+    
     // ! user == 회원 가입
     if (! user) {
 

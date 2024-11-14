@@ -40,9 +40,20 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
     createUserDto.userName = kakaoAccount.name;
 
     // user == 로그인
-    let user = await this.authService.validateUser(kakaoAccount.email, AuthType.Kakao);
-    
+    let user = null;
     let type = null;
+
+    try {
+      user = await this.authService.validateUser(kakaoAccount.email, AuthType.Kakao);
+    }
+    // 이미 가입한 계정 (중복 가입)
+    catch (error) {
+      // console.log("error->",error.message);
+      type = "fail"
+      return done(null, { type: "fail" });
+      // done(null, {user, tokenDto, type});
+    }
+    
 
     // ! user == 회원 가입
     if(! user){
