@@ -26,7 +26,7 @@ jobs:
           images: coding-jjun/giftogether
           tags: |
             type=sha,format=short
-            type=raw,value=latest,enable=${{is_default_branch}}
+            type=raw,value=latest,enable={{is_default_branch}}
       
       - name: test metatags
         run: |
