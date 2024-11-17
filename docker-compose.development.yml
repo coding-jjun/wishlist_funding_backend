@@ -28,7 +28,6 @@ services:
     networks:
       - g2gnet
     volumes:
-      - ./global-bundle.pem:/usr/src/app/global-bundle.pem
       - ./docker/redis.conf:/usr/local/etc/redis/redis.conf
     command: redis-server /usr/local/etc/redis/redis.conf
 
