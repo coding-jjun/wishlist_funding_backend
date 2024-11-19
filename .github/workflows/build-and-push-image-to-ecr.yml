@@ -1,9 +1,6 @@
 name: Build and Push Docker Image to ECR
 
 on:
-  push:
-    branches:
-      - main # Change this to your target branch if needed
   pull_request:
     branches:
       - main
