@@ -6,8 +6,6 @@ on:
       - Build and Push Docker Image to ECR
     types:
       - completed
-    branches:
-      - main
 
 jobs:
   deploy-to-ec2:
