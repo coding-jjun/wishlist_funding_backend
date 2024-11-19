@@ -18,6 +18,7 @@ echo "🎁🎁🎁 Pull the latest image"
 docker-compose pull
 
 echo "🎁🎁🎁 Restart containers"
-docker-compose restart
+docker-compose down && \
+docker-compose up -d
 
 echo "🎁🎁🎁 Deployment Completed"
