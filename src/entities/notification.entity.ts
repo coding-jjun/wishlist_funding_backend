@@ -31,4 +31,7 @@ export class Notification {
 
   @CreateDateColumn()
   notiTime: Date;
+
+  @Column({ default: false })
+  isRead: boolean;
 }
