@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Put,
   Query,
@@ -40,6 +41,23 @@ export class NotificationController {
 
       return {
         data: await this.notiService.getAllNoti(user.userId, notiFilter, lastId),
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Patch('/read')
+  @UseGuards(JwtAuthGuard)
+  async readNoti(
+    @Req() req: Request,
+    @Body('lastTime') lastTime: Date,
+  ): Promise<CommonResponse> {
+    try {
+      const user = req.user as { user: User } as any;
+      
+      return {
+        data: await this.notiService.readNoti(lastTime, user.userId)
       };
     } catch (error) {
       throw error;

@@ -354,4 +354,17 @@ export class NotificationService {
       }
     }
   }
+
+  async readNoti(
+    lastTime: Date,
+    userId: number,
+  ): Promise<void> {
+    await this.notiRepository.createQueryBuilder()
+    .update(Notification)
+    .set({ isRead: true })
+    .where('recvId = :userId', { userId })
+    .andWhere('notiTime <= :lastTime', { lastTime })
+    .andWhere('isRead = false')
+    .execute();
+  }
 }
