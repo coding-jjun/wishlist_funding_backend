@@ -1,0 +1,38 @@
+name: Deploy to EC2
+
+on:
+  workflow_run: # 워크플로우 의존성 세팅
+    workflows:
+      - Build and Push Docker Image to ECR
+    types:
+      - completed
+
+jobs:
+  deploy-to-ec2:
+    runs-on: ubuntu-latest
+
+    steps:
+      -
+        name: Checkout the repository
+        uses: actions/checkout@v4
+      -
+        name: Set up AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      -
+        name: Add SSH Key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+      -
+        name: Deploy application
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+
+          cd ~/wishlist_funding_backend/
+          ./auto-deploy.sh
+          EOF
+
