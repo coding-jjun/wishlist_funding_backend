@@ -11,6 +11,7 @@ services:
     networks:
       - g2gnet
     volumes:
+      - ./global-bundle.pem:/usr/src/app/global-bundle.pem
       - "./src:/usr/src/app/src:ro" # 라이브 리로딩 기능을 위한 마운트
     depends_on:
       - redis
