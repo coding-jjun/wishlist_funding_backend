@@ -64,6 +64,22 @@ export class NotificationController {
     }
   }
 
+  @Get('/read')
+  @UseGuards(JwtAuthGuard)
+  async checkUnread(
+    @Req() req: Request
+  ): Promise<CommonResponse> {
+    try {
+      const user = req.user as { user: User } as any;
+
+      return {
+        data: await this.notiService.checkUnread(user.userId)
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
   // @Post('')
   // @UseGuards(JwtAuthGuard)
   // async create(

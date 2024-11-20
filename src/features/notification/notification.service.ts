@@ -367,4 +367,16 @@ export class NotificationService {
     .andWhere('isRead = false')
     .execute();
   }
+
+  async checkUnread(
+    userId: number,
+  ): Promise<boolean> {
+    const lastNotification = await this.notiRepository
+    .createQueryBuilder('notification')
+    .where('notification.recvId = :userId', { userId })
+    .orderBy('notification.notiTime', 'DESC')
+    .getOne();
+
+    return lastNotification ? !lastNotification.isRead : false;
+  }
 }
