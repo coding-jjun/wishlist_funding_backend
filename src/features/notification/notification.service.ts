@@ -354,4 +354,32 @@ export class NotificationService {
       }
     }
   }
+
+  async readNoti(
+    lastTime: Date,
+    userId: number,
+  ): Promise<void> {
+    const newTime = new Date(lastTime);
+    const utcLastTime = new Date(newTime.getTime() - newTime.getTimezoneOffset() * 60000);
+    
+    await this.notiRepository.createQueryBuilder()
+    .update(Notification)
+    .set({ isRead: true })
+    .where('recvId = :userId', { userId })
+    .andWhere('notiTime <= :utcLastTime', { utcLastTime })
+    .andWhere('isRead = false')
+    .execute();
+  }
+
+  async checkUnread(
+    userId: number,
+  ): Promise<boolean> {
+    const lastNotification = await this.notiRepository
+    .createQueryBuilder('notification')
+    .where('notification.recvId = :userId', { userId })
+    .orderBy('notification.notiTime', 'DESC')
+    .getOne();
+
+    return lastNotification ? !lastNotification.isRead : false;
+  }
 }

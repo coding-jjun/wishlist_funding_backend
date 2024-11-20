@@ -10,6 +10,7 @@ export class NotiDto {
   notiType: NotiType;
   subId: string;
   notiTime: Date;
+  isRead: boolean;
   fundTitle?: string;
 
   constructor(notification: Notification) {
@@ -21,6 +22,7 @@ export class NotiDto {
     this.notiType = notification.notiType;
     this.subId = notification.subId;
     this.notiTime = notification.notiTime;
+    this.isRead = notification.isRead;
     this.fundTitle = undefined;
   }
 }
