@@ -11,7 +11,7 @@ export class ImageService {
   constructor(
     @InjectRepository(Image) private readonly imgRepo: Repository<Image>,
     private readonly g2gException: GiftogetherExceptions,
-  ) {}
+  ) { }
 
   async getInstancesBySubId(
     imgType: ImageType,
@@ -75,7 +75,9 @@ export class ImageService {
       return foundImg;
     }
 
-    throw this.g2gException.ImageAlreadyExists;
+    // OK if foundImg duplicates, just make sure subId related into another instance
+    const duplicatedImg = new Image(imgUrl, imgType, subId, creator);
+    return this.imgRepo.save(duplicatedImg);
   }
 
   /**
