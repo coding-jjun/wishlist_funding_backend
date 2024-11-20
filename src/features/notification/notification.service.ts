@@ -359,11 +359,14 @@ export class NotificationService {
     lastTime: Date,
     userId: number,
   ): Promise<void> {
+    const newTime = new Date(lastTime);
+    const utcLastTime = new Date(newTime.getTime() - newTime.getTimezoneOffset() * 60000);
+    
     await this.notiRepository.createQueryBuilder()
     .update(Notification)
     .set({ isRead: true })
     .where('recvId = :userId', { userId })
-    .andWhere('notiTime <= :lastTime', { lastTime })
+    .andWhere('notiTime <= :utcLastTime', { utcLastTime })
     .andWhere('isRead = false')
     .execute();
   }
