@@ -19,6 +19,7 @@ import {
   getRandomDefaultImgId,
 } from 'src/enums/default-image-id';
 import { ImageService } from '../image/image.service';
+import { FundingDtoBuilder } from './funding.dto.builder';
 
 @Injectable()
 export class FundingService {
@@ -36,7 +37,9 @@ export class FundingService {
     private readonly g2gException: GiftogetherExceptions,
 
     private readonly validCheck: ValidCheck,
-  ) { }
+
+    private readonly fundingDtoBuilder: FundingDtoBuilder,
+  ) {}
 
   async findFundingByUuidAndUserId(
     fundUuid: string,
@@ -93,15 +96,13 @@ export class FundingService {
           .createQueryBuilder('friend')
           .where(
             '((friend.userId = :userId AND friend.friendId = :friendId) OR (friend.userId = :friendId AND friend.friendId = :userId))',
-            { userId: user.userId, friendId: userId })
+            { userId: user.userId, friendId: userId },
+          )
           .andWhere('friend.status = :status', { status: FriendStatus.Friend })
           .getOne();
 
         if (!friendship) {
-          queryBuilder.andWhere(
-            'fund.fundPubl = :publ',
-            { publ: true }
-          )
+          queryBuilder.andWhere('fund.fundPubl = :publ', { publ: true });
         }
       }
     } else {
@@ -223,9 +224,11 @@ export class FundingService {
     queryBuilder.leftJoinAndSelect('funding.fundUser', 'user');
     // .leftJoinAndSelect('user.image', 'img');
 
-    const fundings = (await queryBuilder.getMany()).map(
-      (funding) => new FundingDto(funding),
-    );
+    const fundings = await queryBuilder
+      .getMany()
+      .then((v) =>
+        v.map(async (funding) => await this.fundingDtoBuilder.build(funding)),
+      );
 
     return {
       fundings: fundings,
@@ -248,29 +251,10 @@ export class FundingService {
       throw this.g2gException.FundingNotExists;
     }
 
-    const { gifts, fundImgUrls } = await this.giftService.findAllGift(fund);
-
-    let finalImgUrls: string[] = [];
-
-    if (fund.defaultImgId) {
-      // 펀딩의 기본 이미지가 있을 경우, 그 이미지를 추가
-      const img = await this.imgService.getInstanceByPK(fund.defaultImgId);
-
-      if (img) {
-        finalImgUrls = [img.imgUrl, ...fundImgUrls]; // 펀딩 기본 이미지 + gift 이미지들
-      }
-    } else {
-      // 펀딩의 기본 이미지가 없을 경우, 펀딩과 연결된 다른 이미지들을 추가
-      const images = await this.imgService.getInstancesBySubId(
-        ImageType.Funding,
-        fund.fundId,
-      );
-
-      finalImgUrls = [...images.map((img) => img.imgUrl), ...fundImgUrls]; // 펀딩의 이미지 + gift 이미지들
-    }
+    const { gifts } = await this.giftService.findAllGift(fund);
 
     // FundingDto에 펀딩 이미지와 gift 이미지 URL들을 포함하여 반환
-    return new FundingDto(fund, gifts, finalImgUrls);
+    return this.fundingDtoBuilder.build(fund, gifts);
   }
 
   async create(
@@ -322,7 +306,7 @@ export class FundingService {
       user,
     );
 
-    return new FundingDto(funding_save, gifts, fundImg);
+    return this.fundingDtoBuilder.build(funding, gifts);
   }
 
   async update(
@@ -330,7 +314,10 @@ export class FundingService {
     updateFundingDto: UpdateFundingDto,
     user: User,
   ): Promise<FundingDto> {
-    const funding = await this.findFundingByUuidAndUserId(fundUuid, user.userId);
+    const funding = await this.findFundingByUuidAndUserId(
+      fundUuid,
+      user.userId,
+    );
     const fundId = funding.fundId;
 
     // endAt이 앞당겨지면 안된다.
@@ -342,7 +329,12 @@ export class FundingService {
     }
 
     // 이미지 업데이트
-    const fundingImg = await this.updateFundingImage(funding, updateFundingDto.fundImg, fundId, user);
+    const fundingImg = await this.updateFundingImage(
+      funding,
+      updateFundingDto.fundImg,
+      fundId,
+      user,
+    );
 
     // Funding 업데이트
     await this.fundingRepository.update(
@@ -354,9 +346,9 @@ export class FundingService {
     );
 
     const { gifts, fundImgUrls } = await this.giftService.findAllGift(funding);
-    const finalImgUrls = [fundingImg, ...fundImgUrls];
+    const finalImgUrls = [fundingImg, ...fundImgUrls]; // !FIXME - fundImgUrls랑 함께 안써도 될지도?
 
-    return new FundingDto(funding, gifts, finalImgUrls);
+    return this.fundingDtoBuilder.build(funding, gifts);
   }
 
   private async updateFundingImage(
