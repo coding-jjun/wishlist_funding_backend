@@ -6,6 +6,9 @@ import { ImageService } from '../image/image.service';
 import { ImageType } from 'src/enums/image-type.enum';
 import { Image } from 'src/entities/image.entity';
 
+/**
+ * Controller에서 복잡한 FundingDto 생성 로직을 추상화하기 위해 만들었습니다.
+ */
 @Injectable()
 export class FundingDtoBuilder {
   constructor(private imgService: ImageService) {}
@@ -34,7 +37,7 @@ export class FundingDtoBuilder {
 
     // giftImgUrls
 
-    const giftImgUrls: string[] = gifts.map((g) => g.giftUrl);
+    const giftImgUrls: string[] = gifts ? gifts.map((g) => g.giftUrl) : [];
 
     const f = funding;
     return new FundingDto(
