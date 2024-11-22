@@ -21,6 +21,7 @@ import { ValidCheck } from 'src/util/valid-check';
 import { AuthModule } from '../auth/auth.module';
 import { ImageService } from '../image/image.service';
 import { S3Service } from '../image/s3.service';
+import { FundingModule } from '../funding/funding.module';
 
 @Module({
   imports: [
@@ -36,12 +37,12 @@ import { S3Service } from '../image/s3.service';
       RollingPaper,
     ]),
     AuthModule,
+    FundingModule,
   ],
   controllers: [UserController],
   providers: [
     UserService,
     AddressService,
-    FundingService,
     GiftService,
     DonationService,
     RollingPaperService,
