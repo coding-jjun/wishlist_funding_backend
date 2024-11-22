@@ -224,14 +224,13 @@ export class FundingService {
     queryBuilder.leftJoinAndSelect('funding.fundUser', 'user');
     // .leftJoinAndSelect('user.image', 'img');
 
-    const fundings = await queryBuilder
-      .getMany()
-      .then((v) =>
-        v.map(async (funding) => await this.fundingDtoBuilder.build(funding)),
-      );
+    const fundings = await queryBuilder.getMany();
+    const fundingDtos = await Promise.all(
+      fundings.map(async (funding) => this.fundingDtoBuilder.build(funding)),
+    );
 
     return {
-      fundings: fundings,
+      fundings: fundingDtos,
       count: fundings.length,
       lastFundUuid: fundings[fundings.length - 1]?.fundUuid,
       lastEndAt:
