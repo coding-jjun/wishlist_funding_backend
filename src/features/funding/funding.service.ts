@@ -226,7 +226,10 @@ export class FundingService {
 
     const fundings = await queryBuilder.getMany();
     const fundingDtos = await Promise.all(
-      fundings.map(async (funding) => this.fundingDtoBuilder.build(funding)),
+      fundings.map(async (funding) => {
+        const { gifts } = await this.giftService.findAllGift(funding);
+        return this.fundingDtoBuilder.build(funding, gifts);
+      }),
     );
 
     return {

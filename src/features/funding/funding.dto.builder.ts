@@ -13,10 +13,7 @@ import { Image } from 'src/entities/image.entity';
 export class FundingDtoBuilder {
   constructor(private imgService: ImageService) {}
 
-  async build(
-    funding: Funding,
-    gifts?: ResponseGiftDto[],
-  ): Promise<FundingDto> {
+  async build(funding: Funding, gifts: ResponseGiftDto[]): Promise<FundingDto> {
     // fundUserImg
 
     const user = funding.fundUser;
@@ -37,8 +34,7 @@ export class FundingDtoBuilder {
 
     // giftImgUrls
 
-    const giftImgUrls: string[] =
-      gifts && gifts.length > 0 ? gifts.map((gift) => gift.giftImg) : [];
+    const giftImgUrls: string[] = gifts.map((gift) => gift.giftImg);
 
     const f = funding;
     return new FundingDto(
