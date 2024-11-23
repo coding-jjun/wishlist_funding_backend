@@ -37,7 +37,8 @@ export class FundingDtoBuilder {
 
     // giftImgUrls
 
-    const giftImgUrls: string[] = gifts ? gifts.map((g) => g.giftUrl) : [];
+    const giftImgUrls: string[] =
+      gifts && gifts.length > 0 ? gifts.map((gift) => gift.giftImg) : [];
 
     const f = funding;
     return new FundingDto(
