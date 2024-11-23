@@ -20,6 +20,7 @@ import { ValidCheck } from 'src/util/valid-check';
 import { AuthModule } from '../auth/auth.module';
 import { ImageService } from '../image/image.service';
 import { S3Service } from '../image/s3.service';
+import { ImageInstanceFinder } from '../image/image-instance-finder';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { S3Service } from '../image/s3.service';
     ValidCheck,
     ImageService,
     S3Service,
+    ImageInstanceFinder,
   ],
   exports: [FundingService],
 })

@@ -19,6 +19,7 @@ import {
   getRandomDefaultImgId,
 } from 'src/enums/default-image-id';
 import { ImageService } from '../image/image.service';
+import { ImageInstanceFinder } from '../image/image-instance-finder';
 
 @Injectable()
 export class FundingService {
@@ -36,7 +37,9 @@ export class FundingService {
     private readonly g2gException: GiftogetherExceptions,
 
     private readonly validCheck: ValidCheck,
-  ) { }
+
+    private readonly fundingImgFinder: ImageInstanceFinder<Funding>,
+  ) {}
 
   async findFundingByUuidAndUserId(
     fundUuid: string,
