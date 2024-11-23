@@ -9,9 +9,17 @@ import {
 } from 'typeorm';
 import { Funding } from './funding.entity';
 import { Image } from './image.entity';
+import { IImageId } from 'src/interfaces/image-id.interface';
+import { ImageType } from 'src/enums/image-type.enum';
 
 @Entity()
-export class Gift {
+export class Gift implements IImageId {
+  get id(): number {
+    return this.giftId;
+  }
+
+  imageType: ImageType = ImageType.Gift;
+
   @PrimaryGeneratedColumn()
   giftId: number;
 
