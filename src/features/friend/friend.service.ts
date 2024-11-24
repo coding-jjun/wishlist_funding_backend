@@ -76,7 +76,9 @@ export class FriendService {
     };
   }
 
-  async friendStatus(userId: number, friendId: number): Promise<{ message; }> {
+  async friendStatus(tokenId: number, userId: number, friendId: number): Promise<{ message; }> {
+    await this.validCheck.verifyUserMatch(tokenId, userId);
+
     const friendship = await this.friendRepository
       .createQueryBuilder('friend')
       .where(

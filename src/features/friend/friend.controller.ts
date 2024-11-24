@@ -40,9 +40,10 @@ export class FriendController {
     }
   }
 
-  @Get('/:friendId')
+  @Get('/:userId/:friendId')
   @UseGuards(JwtAuthGuard)
   async friendStatus(
+    @Param('userId') userId: number,
     @Param('friendId') friendId: number,
     @Req() req: Request
   ): Promise<CommonResponse> {
@@ -51,7 +52,7 @@ export class FriendController {
 
       return {
         message: '친구 관계 조회에 성공하였습니다.',
-        data: await this.friendService.friendStatus(user.userId, friendId)
+        data: await this.friendService.friendStatus(user.userId, userId, friendId)
       }
     } catch (error) {
 
