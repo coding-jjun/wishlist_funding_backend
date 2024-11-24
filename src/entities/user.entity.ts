@@ -83,4 +83,9 @@ export class User {
    */
   @OneToOne(() => Image, (image) => image.subId)
   image: Image;
+
+  
+  @Column({ default:false })
+  isAdmin: boolean;
+
 }
