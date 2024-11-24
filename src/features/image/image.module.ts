@@ -7,7 +7,7 @@ import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Image } from 'src/entities/image.entity';
 import { S3Service } from './s3.service';
-import { ImageInstanceFinder } from './image-instance-finder';
+import { ImageInstanceManager } from './image-instance-manager';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Image]), AuthModule],
@@ -17,8 +17,8 @@ import { ImageInstanceFinder } from './image-instance-finder';
     JwtAuthGuard,
     GiftogetherExceptions,
     S3Service,
-    ImageInstanceFinder,
+    ImageInstanceManager,
   ],
-  exports: [ImageService, S3Service, ImageInstanceFinder],
+  exports: [ImageService, S3Service, ImageInstanceManager],
 })
 export class ImageModule {}

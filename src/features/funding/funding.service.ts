@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Funding } from 'src/entities/funding.entity';
 import { Repository, Brackets } from 'typeorm';
@@ -10,7 +10,6 @@ import { Friend } from 'src/entities/friend.entity';
 import { GiftService } from '../gift/gift.service';
 import { FundingDto } from './dto/funding.dto';
 import { UpdateFundingDto } from './dto/update-funding.dto';
-import { Image } from 'src/entities/image.entity';
 import { ImageType } from 'src/enums/image-type.enum';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { ValidCheck } from 'src/util/valid-check';
@@ -19,7 +18,7 @@ import {
   getRandomDefaultImgId,
 } from 'src/enums/default-image-id';
 import { ImageService } from '../image/image.service';
-import { ImageInstanceFinder } from '../image/image-instance-finder';
+import { ImageInstanceManager } from '../image/image-instance-manager';
 
 @Injectable()
 export class FundingService {
@@ -38,7 +37,7 @@ export class FundingService {
 
     private readonly validCheck: ValidCheck,
 
-    private readonly fundingImgFinder: ImageInstanceFinder<Funding>,
+    private readonly imageManager: ImageInstanceManager,
   ) {}
 
   async findFundingByUuidAndUserId(

@@ -28,7 +28,7 @@ export class ImageInstanceManager {
    * TODO - Implement
    * @param newImageUrls not default image URL
    */
-  async overwrite(entity: T, newImageUrls: string[]): Promise<string[]> {
+  async overwrite<T extends IImageId>(entity: T, newImageUrls: string[]): Promise<string[]> {
     throw new Error('Not Implemented');
   }
 
@@ -39,7 +39,7 @@ export class ImageInstanceManager {
    * TODO - Implement
    * @param defaultImgId 여기에선 이 id가 기본 이미지인지 여부를 검사하지 않습니다.
    */
-  async resetToDefault(entity: T, defaultImgId: number): Promise<string> {
+  async resetToDefault<T extends IImageId>(entity: T, defaultImgId: number): Promise<string> {
     throw new Error('Not Implemented');
   }
 }

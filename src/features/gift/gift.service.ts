@@ -26,7 +26,7 @@ export class GiftService {
 
     private readonly imgService: ImageService,
 
-    private readonly giftImgMgr: ImageInstanceManager<Gift>,
+    private readonly imageManager: ImageInstanceManager,
   ) {}
 
   async findAllGift(fund: Funding): Promise<{
@@ -59,7 +59,7 @@ export class GiftService {
   private async getGiftImageUrl(
     gift: Gift,
   ): Promise<{ imgUrl: string | null; isDef: boolean }> {
-    const image: Image = await this.giftImgMgr
+    const image: Image = await this.imageManager
       .getImages(gift)
       .then((v) => v[0]);
     return { imgUrl: image?.imgUrl, isDef: !!gift.defaultImgId };

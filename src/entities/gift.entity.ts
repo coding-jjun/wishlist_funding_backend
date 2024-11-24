@@ -3,8 +3,6 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Funding } from './funding.entity';
@@ -14,7 +12,7 @@ import { ImageType } from 'src/enums/image-type.enum';
 
 @Entity()
 export class Gift implements IImageId {
-  get id(): number {
+  get imgSubId(): number {
     return this.giftId;
   }
 
