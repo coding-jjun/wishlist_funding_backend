@@ -10,6 +10,7 @@ export class UserDto {
     public authType: AuthType,
     public userImg: string,
     public userId: number,
+    public isAdmin: boolean,
     public userEmail?: string,
     public authId?: string,
     public bank?: BankType,

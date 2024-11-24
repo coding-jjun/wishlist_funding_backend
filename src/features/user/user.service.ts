@@ -37,6 +37,7 @@ export class UserService {
       user.authType,
       image.imgUrl,
       user.userId,
+      user.isAdmin,
       user.userEmail,
       user.authId,
       user.account?.bank,
@@ -62,8 +63,9 @@ export class UserService {
       user.authType,
       image.imgUrl,
       user.userId,
-      user.userEmail,
-    );
+      user.isAdmin,
+      user.userEmail
+    )
   }
 
   async updateUser(
@@ -143,6 +145,7 @@ export class UserService {
       user.authType,
       imageUrl,
       user.userId,
+      user.isAdmin,
       user.userEmail,
       user.authId,
       user.account?.bank,
@@ -165,6 +168,7 @@ export class UserService {
       user.authType,
       image.imgUrl,
       user.userId,
+      user.isAdmin,
       user.userEmail,
       user.authId,
     );
