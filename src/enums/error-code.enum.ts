@@ -38,6 +38,8 @@ export enum ErrorCode {
   PasswordIncorrect = '0706',
   UserFailedToCreate = '0707',
   UserAccessDenied = '0708',
+  // Admin
+  SnsLoginBlocked = "0710",
 
   // Friend
   AlreadySendRequest = '0800',

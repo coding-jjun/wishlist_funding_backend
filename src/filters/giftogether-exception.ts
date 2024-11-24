@@ -164,6 +164,13 @@ export class GiftogetherExceptions {
     ErrorCode.UserAccessDenied,
     HttpStatus.NOT_FOUND,
   );
+  // Admin
+  
+  SnsLoginBlocked = new GiftogetherException(
+    ErrorMsg.SnsLoginBlocked,
+    ErrorCode.SnsLoginBlocked,
+    HttpStatus.BAD_REQUEST,
+  );
 
   // Friend
   AlreadySendRequest = new GiftogetherException(
