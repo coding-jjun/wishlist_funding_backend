@@ -8,6 +8,6 @@ import { ImageType } from 'src/enums/image-type.enum';
  */
 export interface IImageId {
   defaultImgId?: number;
-  get id(): number;
+  get imgSubId(): number;
   imageType: ImageType;
 }

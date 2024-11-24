@@ -51,7 +51,7 @@ export class Funding implements IImageId {
     this.fundRecvPhone = fundRecvPhone;
     this.fundRecvReq = fundRecvReq;
   }
-  get id(): number {
+  get imgSubId(): number {
     return this.fundId;
   }
   imageType: ImageType = ImageType.Funding;
