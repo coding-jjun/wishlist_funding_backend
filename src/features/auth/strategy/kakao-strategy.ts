@@ -50,8 +50,13 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
     catch (error) {
       // console.log("error->",error.message);
       type = "fail"
-      return done(null, { type: "fail" });
+      return done(null, { type: "fail", errCode: this.g2gException.UserAlreadyExists.getErrCode() });
       // done(null, {user, tokenDto, type});
+    }
+
+    // 관리자 접근 제한
+    if(user.isAdmin) {
+      return done(null, { type: "fail", errCode : this.g2gException.SnsLoginBlocked.getErrCode() })
     }
     
 

@@ -7,6 +7,7 @@ import { AuthType } from "src/enums/auth-type.enum";
 import { CreateUserDto } from "../dto/create-user.dto";
 import { TokenDto } from "../dto/token.dto";
 import { UserType } from "src/enums/user-type.enum";
+import { GiftogetherExceptions } from "src/filters/giftogether-exception";
 
 
 @Injectable()
@@ -14,6 +15,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google'){
   constructor(
     private readonly configService: ConfigService,
     private readonly authService: AuthService,
+    private readonly g2gException: GiftogetherExceptions,
+
   ){
     super({
       clientID: configService.get<string>('GOOGLE_CLIENT_ID'),
@@ -54,8 +57,13 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google'){
     catch (error) {
       // console.log("error->",error.message);
       type = "fail"
-      return done(null, { type: "fail" });
+      return done(null, { type: "fail", errCode: this.g2gException.UserAlreadyExists.getErrCode() });
       // done(null, {user, tokenDto, type});
+    }
+
+    // 관리자 접근 제한
+    if(user.isAdmin) {
+      return done(null, { type: "fail", errCode : this.g2gException.SnsLoginBlocked.getErrCode() })
     }
 
 

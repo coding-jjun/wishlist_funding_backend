@@ -52,10 +52,9 @@ export class AuthController {
   @Get('kakao/callback')
   @UseGuards(KakaoAuthGuard)
   async kakaoCallback(@Req() req: Request, @Res() res: Response){
-    const data = req.user as { user: UserDto, tokenDto: TokenDto, type: string };
+    const data = req.user as { user: UserDto, tokenDto: TokenDto, type: string, errCode: string };
     if(data.type === "fail"){
-      const errCode = this.g2gException.UserAlreadyExists.getErrCode();
-      return res.redirect(`${process.env.LOGIN_URL}?error=${errCode}`);
+      return res.redirect(`${process.env.LOGIN_URL}?error=${data.errCode}`);
     }
 
     res.cookie('access_token', data.tokenDto.accessToken, this.cookieOptions);
@@ -80,10 +79,9 @@ export class AuthController {
   @Get('naver/callback')
   @UseGuards(NaverAuthGuard)
   async naverCallback(@Req() req: Request, @Res() res:Response){
-    const data = req.user as { user: UserDto, tokenDto: TokenDto, type: string };
+    const data = req.user as { user: UserDto, tokenDto: TokenDto, type: string, errCode: string };
     if(data.type === "fail"){
-      const errCode = this.g2gException.UserAlreadyExists.getErrCode();
-      return res.redirect(`${process.env.LOGIN_URL}?error=${errCode}`);
+      return res.redirect(`${process.env.LOGIN_URL}?error=${data.errCode}`);
     }
     res.cookie('access_token', data.tokenDto.accessToken, this.cookieOptions);
     res.cookie('refresh_token', data.tokenDto.refreshToken, this.cookieOptions);
@@ -106,10 +104,9 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   async googleCallback(@Req() req: Request, @Res() res:Response){
-    const data = req.user as { user: UserDto, tokenDto: TokenDto, type: string };
+    const data = req.user as { user: UserDto, tokenDto: TokenDto, type: string, errCode: string };
     if(data.type === "fail"){
-      const errCode = this.g2gException.UserAlreadyExists.getErrCode();
-      return res.redirect(`${process.env.LOGIN_URL}?error=${errCode}`);
+      return res.redirect(`${process.env.LOGIN_URL}?error=${data.errCode}`);
     }
     res.cookie('access_token', data.tokenDto.accessToken, this.cookieOptions);
     res.cookie('refresh_token', data.tokenDto.refreshToken, this.cookieOptions);
