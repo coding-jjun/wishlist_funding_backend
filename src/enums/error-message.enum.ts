@@ -37,6 +37,8 @@ export enum ErrorMsg {
   PasswordIncorrect = "비밀번호가 틀렸습니다. 다시 시도해주세요.",
   UserFailedToCreate = '사용자 생성에 실패했습니다',
   UserAccessDenied = "접근 권한이 없는 요청입니다.",
+  // Admin
+  SnsLoginBlocked = "관리자 계정은 SNS 로그인을 사용할 수 없습니다.",
   
   // Friend
   AlreadySendRequest = '이미 친구 요청을 보냈습니다.',
