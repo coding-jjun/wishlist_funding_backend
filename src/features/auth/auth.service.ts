@@ -127,6 +127,7 @@ export class AuthService {
       user.authType,
       imgUrl,
       user.userId,
+      user.isAdmin,
       user.userEmail,
       user.authId,
     );
@@ -180,6 +181,7 @@ export class AuthService {
         userSaved.authType,
         imgUrl,
         userSaved.userId,
+        user.isAdmin,
         userSaved.userEmail,
         userSaved.authId,
       );
@@ -238,6 +240,7 @@ export class AuthService {
       user.authType,
       imgUrl,
       user.userId,
+      user.isAdmin,
       user.userEmail,
       user.authId,
     );
@@ -274,6 +277,7 @@ export class AuthService {
       user.authType,
       image.imgUrl,
       user.userId,
+      user.isAdmin,
       user.userEmail,
       user.authId,
     );
