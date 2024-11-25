@@ -31,7 +31,7 @@ export class GiftService {
 
   async findAllGift(fund: Funding): Promise<{
     gifts: ResponseGiftDto[];
-    fundImgUrls: string[];
+    giftImgUrls: string[];
     count: number;
   }> {
     const [gifts, count] = await this.giftRepository.findAndCount({
@@ -53,7 +53,7 @@ export class GiftService {
       }),
     );
 
-    return { gifts: responseGifts, fundImgUrls, count };
+    return { gifts: responseGifts, giftImgUrls: fundImgUrls, count };
   }
 
   private async getGiftImageUrl(

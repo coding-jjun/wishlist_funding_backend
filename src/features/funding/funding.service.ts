@@ -95,15 +95,13 @@ export class FundingService {
           .createQueryBuilder('friend')
           .where(
             '((friend.userId = :userId AND friend.friendId = :friendId) OR (friend.userId = :friendId AND friend.friendId = :userId))',
-            { userId: user.userId, friendId: userId })
+            { userId: user.userId, friendId: userId },
+          )
           .andWhere('friend.status = :status', { status: FriendStatus.Friend })
           .getOne();
 
         if (!friendship) {
-          queryBuilder.andWhere(
-            'fund.fundPubl = :publ',
-            { publ: true }
-          )
+          queryBuilder.andWhere('fund.fundPubl = :publ', { publ: true });
         }
       }
     } else {
@@ -250,26 +248,15 @@ export class FundingService {
       throw this.g2gException.FundingNotExists;
     }
 
-    const { gifts, fundImgUrls } = await this.giftService.findAllGift(fund);
+    const { gifts, giftImgUrls } = await this.giftService.findAllGift(fund);
 
-    let finalImgUrls: string[] = [];
+    /**
+     * 이 메서드의 `fundImgUrls`는 gift Image Url도 같이 포함합니다
+     */
+    const fundImgs = await this.imageManager.getImages(fund);
+    const fundImgUrls = fundImgs.map((img) => img.imgUrl);
 
-    if (fund.defaultImgId) {
-      // 펀딩의 기본 이미지가 있을 경우, 그 이미지를 추가
-      const img = await this.imgService.getInstanceByPK(fund.defaultImgId);
-
-      if (img) {
-        finalImgUrls = [img.imgUrl, ...fundImgUrls]; // 펀딩 기본 이미지 + gift 이미지들
-      }
-    } else {
-      // 펀딩의 기본 이미지가 없을 경우, 펀딩과 연결된 다른 이미지들을 추가
-      const images = await this.imgService.getInstancesBySubId(
-        ImageType.Funding,
-        fund.fundId,
-      );
-
-      finalImgUrls = [...images.map((img) => img.imgUrl), ...fundImgUrls]; // 펀딩의 이미지 + gift 이미지들
-    }
+    const finalImgUrls = [...fundImgUrls, ...giftImgUrls]; // 펀딩의 이미지 + gift 이미지들
 
     // FundingDto에 펀딩 이미지와 gift 이미지 URL들을 포함하여 반환
     return new FundingDto(fund, gifts, finalImgUrls);
@@ -332,7 +319,10 @@ export class FundingService {
     updateFundingDto: UpdateFundingDto,
     user: User,
   ): Promise<FundingDto> {
-    const funding = await this.findFundingByUuidAndUserId(fundUuid, user.userId);
+    const funding = await this.findFundingByUuidAndUserId(
+      fundUuid,
+      user.userId,
+    );
     const fundId = funding.fundId;
 
     // endAt이 앞당겨지면 안된다.
@@ -344,7 +334,12 @@ export class FundingService {
     }
 
     // 이미지 업데이트
-    const fundingImg = await this.updateFundingImage(funding, updateFundingDto.fundImg, fundId, user);
+    const fundingImg = await this.updateFundingImage(
+      funding,
+      updateFundingDto.fundImg,
+      fundId,
+      user,
+    );
 
     // Funding 업데이트
     await this.fundingRepository.update(
@@ -355,7 +350,8 @@ export class FundingService {
       },
     );
 
-    const { gifts, fundImgUrls } = await this.giftService.findAllGift(funding);
+    const { gifts, giftImgUrls: fundImgUrls } =
+      await this.giftService.findAllGift(funding);
     const finalImgUrls = [fundingImg, ...fundImgUrls];
 
     return new FundingDto(funding, gifts, finalImgUrls);
