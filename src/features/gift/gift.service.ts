@@ -40,20 +40,20 @@ export class GiftService {
       order: { giftOrd: 'ASC' },
     });
 
-    const fundImgUrls: string[] = [];
+    const giftImgUrls: string[] = [];
 
     // Gift 배열을 ResponseGiftDto 배열로 변환
     const responseGifts = await Promise.all(
       gifts.map(async (gift) => {
         const { imgUrl, isDef } = await this.getGiftImageUrl(gift);
         if (imgUrl && !isDef) {
-          fundImgUrls.push(imgUrl);
+          giftImgUrls.push(imgUrl);
         }
         return new ResponseGiftDto(gift, imgUrl || '');
       }),
     );
 
-    return { gifts: responseGifts, giftImgUrls: fundImgUrls, count };
+    return { gifts: responseGifts, giftImgUrls, count };
   }
 
   private async getGiftImageUrl(
