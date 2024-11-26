@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { ImageController } from './image.controller';
 import { ImageService } from './image.service';
 import { AuthModule } from '../auth/auth.module';
-import { JwtAuthGuard } from '../auth/guard/jwt-auth-guard';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Image } from 'src/entities/image.entity';
@@ -14,7 +13,6 @@ import { ImageInstanceManager } from './image-instance-manager';
   controllers: [ImageController],
   providers: [
     ImageService,
-    JwtAuthGuard,
     GiftogetherExceptions,
     S3Service,
     ImageInstanceManager,
