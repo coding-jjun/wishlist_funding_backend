@@ -3,14 +3,15 @@ import {
   Entity,
   CreateDateColumn,
   PrimaryColumn,
-  OneToOne,
   JoinColumn,
   ManyToOne,
 } from 'typeorm';
 import { Image } from './image.entity';
+import { IImageId } from 'src/interfaces/image-id.interface';
+import { ImageType } from 'src/enums/image-type.enum';
 
 @Entity()
-export class Gratitude {
+export class Gratitude implements IImageId {
   /**
    * fundId와 동일한 값을 가지고 있습니다.
    */
@@ -45,4 +46,8 @@ export class Gratitude {
     this.gratCont = gratCont;
     this.defaultImgId = defaultImageId;
   }
+  get imgSubId(): number {
+    return this.gratId;
+  }
+  imageType: ImageType = ImageType.Gratitude;
 }
