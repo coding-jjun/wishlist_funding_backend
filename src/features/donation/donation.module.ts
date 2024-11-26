@@ -13,13 +13,20 @@ import { AuthModule } from '../auth/auth.module';
 import { ValidCheck } from 'src/util/valid-check';
 import { ImageService } from '../image/image.service';
 import { ImageModule } from '../image/image.module';
+import { ImageInstanceManager } from '../image/image-instance-manager';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Donation, RollingPaper, Funding, User, Image]),
     AuthModule,
+    ImageModule,
   ],
   controllers: [DonationController],
-  providers: [DonationService, RollingPaperService, GiftogetherExceptions, ValidCheck, ImageService],
+  providers: [
+    DonationService,
+    RollingPaperService,
+    GiftogetherExceptions,
+    ValidCheck,
+  ],
 })
 export class DonationModule {}
