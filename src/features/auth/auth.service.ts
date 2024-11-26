@@ -18,6 +18,7 @@ import { GuestLoginDto } from './dto/guest-login.dto';
 import { UserType } from 'src/enums/user-type.enum';
 import { DonationService } from '../donation/donation.service';
 import { ImageService } from '../image/image.service';
+import { ImageInstanceManager } from '../image/image-instance-manager';
 
 @Injectable()
 export class AuthService {
@@ -32,11 +33,13 @@ export class AuthService {
     private readonly redisClient: RedisClientType,
 
     private readonly g2gException: GiftogetherExceptions,
-    private readonly nickName : Nickname,
+    private readonly nickName: Nickname,
 
     private readonly donationService: DonationService,
 
     private readonly imgService: ImageService,
+
+    private readonly imageManager: ImageInstanceManager,
   ) {}
 
   async parseDate(yearString: string, birthday: string): Promise<Date> {
@@ -107,17 +110,9 @@ export class AuthService {
 
     await this.isValidPassword(loginDto.userPw, user.userPw);
 
-    let imgUrl = null;
-    if (user.defaultImgId) {
-      const image = await this.imgService.getInstanceByPK(user.defaultImgId);
-      imgUrl = image.imgUrl;
-    } else {
-      // TODO 사용자 이미지 저장 기록이 여러개 일때,
-      const image = (
-        await this.imgService.getInstancesBySubId(ImageType.User, user.userId)
-      )[0];
-      imgUrl = image.imgUrl;
-    }
+    const imgUrl = await this.imageManager
+      .getImages(user)
+      .then((imgs) => imgs[0].imgUrl);
 
     return new UserDto(
       user.userNick,
@@ -260,11 +255,9 @@ export class AuthService {
       throw this.jwtException.UserAlreadyExists;
     }
 
-    const image = user.defaultImgId
-      ? await this.imgService.getInstanceByPK(user.defaultImgId)
-      : (
-          await this.imgService.getInstancesBySubId(ImageType.User, user.userId)
-        )[0];
+    const image = await this.imageManager
+      .getImages(user)
+      .then((images) => images[0]);
 
     return new UserDto(
       user.userNick,
