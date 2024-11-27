@@ -88,7 +88,7 @@ export class FriendService {
     };
   }
 
-  async getFriendCount(userId: number): Promise<number> {
+  async getFriendCount(userId: number): Promise<{ count: number }> {
     const friendIds = await this.friendRepository
       .createQueryBuilder('friend')
       .where('friend.status = :status', { status: FriendStatus.Friend })
