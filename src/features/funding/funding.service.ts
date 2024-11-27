@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Funding } from 'src/entities/funding.entity';
 import { Repository, Brackets } from 'typeorm';
@@ -10,7 +10,6 @@ import { Friend } from 'src/entities/friend.entity';
 import { GiftService } from '../gift/gift.service';
 import { FundingDto } from './dto/funding.dto';
 import { UpdateFundingDto } from './dto/update-funding.dto';
-import { Image } from 'src/entities/image.entity';
 import { ImageType } from 'src/enums/image-type.enum';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { ValidCheck } from 'src/util/valid-check';
@@ -19,6 +18,7 @@ import {
   getRandomDefaultImgId,
 } from 'src/enums/default-image-id';
 import { ImageService } from '../image/image.service';
+import { ImageInstanceManager } from '../image/image-instance-manager';
 
 @Injectable()
 export class FundingService {
@@ -36,7 +36,9 @@ export class FundingService {
     private readonly g2gException: GiftogetherExceptions,
 
     private readonly validCheck: ValidCheck,
-  ) { }
+
+    private readonly imageManager: ImageInstanceManager,
+  ) {}
 
   async findFundingByUuidAndUserId(
     fundUuid: string,
@@ -248,26 +250,15 @@ export class FundingService {
       throw this.g2gException.FundingNotExists;
     }
 
-    const { gifts, fundImgUrls } = await this.giftService.findAllGift(fund);
+    const { gifts, giftImgUrls } = await this.giftService.findAllGift(fund);
 
-    let finalImgUrls: string[] = [];
+    /**
+     * 이 메서드의 `fundImgUrls`는 gift Image Url도 같이 포함합니다
+     */
+    const fundImgs = await this.imageManager.getImages(fund);
+    const fundImgUrls = fundImgs.map((img) => img.imgUrl);
 
-    if (fund.defaultImgId) {
-      // 펀딩의 기본 이미지가 있을 경우, 그 이미지를 추가
-      const img = await this.imgService.getInstanceByPK(fund.defaultImgId);
-
-      if (img) {
-        finalImgUrls = [img.imgUrl, ...fundImgUrls]; // 펀딩 기본 이미지 + gift 이미지들
-      }
-    } else {
-      // 펀딩의 기본 이미지가 없을 경우, 펀딩과 연결된 다른 이미지들을 추가
-      const images = await this.imgService.getInstancesBySubId(
-        ImageType.Funding,
-        fund.fundId,
-      );
-
-      finalImgUrls = [...images.map((img) => img.imgUrl), ...fundImgUrls]; // 펀딩의 이미지 + gift 이미지들
-    }
+    const finalImgUrls = [...fundImgUrls, ...giftImgUrls]; // 펀딩의 이미지 + gift 이미지들
 
     // FundingDto에 펀딩 이미지와 gift 이미지 URL들을 포함하여 반환
     return new FundingDto(fund, gifts, finalImgUrls);
@@ -353,8 +344,8 @@ export class FundingService {
       },
     );
 
-    const { gifts, fundImgUrls } = await this.giftService.findAllGift(funding);
-    const finalImgUrls = [fundingImg, ...fundImgUrls];
+    const { gifts, giftImgUrls } = await this.giftService.findAllGift(funding);
+    const finalImgUrls = [fundingImg, ...giftImgUrls];
 
     return new FundingDto(funding, gifts, finalImgUrls);
   }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -9,6 +9,7 @@ import { UserDto } from './dto/user.dto';
 import * as bcrypt from 'bcrypt';
 import { DefaultImageIds } from 'src/enums/default-image-id';
 import { ImageService } from '../image/image.service';
+import { ImageInstanceManager } from '../image/image-instance-manager';
 
 @Injectable()
 export class UserService {
@@ -18,15 +19,15 @@ export class UserService {
     private readonly g2gException: GiftogetherExceptions,
 
     private readonly imgService: ImageService,
+
+    private readonly imageManager: ImageInstanceManager,
   ) {}
 
   // 사용자 정보 조회
   async getUserInfo(user: User): Promise<UserDto> {
-    const image = user.defaultImgId
-      ? await this.imgService.getInstanceByPK(user.defaultImgId)
-      : (
-          await this.imgService.getInstancesBySubId(ImageType.User, user.userId)
-        )[0];
+    const image = await this.imageManager
+      .getImages(user)
+      .then((images) => images[0]);
 
     return new UserDto(
       user.userNick,
@@ -39,18 +40,19 @@ export class UserService {
       user.userEmail,
       user.authId,
       user.account?.bank,
-      user.account?.accNum
+      user.account?.accNum,
     );
   }
 
   async getOthersInfo(userId: number): Promise<UserDto> {
     const user = await this.userRepository.findOne({ where: { userId } });
+    if (!user) {
+      throw this.g2gException.UserNotFound;
+    }
 
-    const image = user.defaultImgId
-      ? await this.imgService.getInstanceByPK(user.defaultImgId)
-      : (
-          await this.imgService.getInstancesBySubId(ImageType.User, user.userId)
-        )[0];
+    const image = await this.imageManager
+      .getImages(user)
+      .then((images) => images[0]);
 
     return new UserDto(
       user.userNick,
@@ -60,8 +62,8 @@ export class UserService {
       user.authType,
       image.imgUrl,
       user.userId,
-      user.userEmail
-    )
+      user.userEmail,
+    );
   }
 
   async updateUser(
@@ -70,7 +72,7 @@ export class UserService {
   ): Promise<UserDto> {
     const userId = user.userId;
     const { userImg, defaultImgId, ...userInfo } = userDto;
-  
+    
     // 1. userInfo를 user 객체에 병합
     Object.assign(user, userInfo);
   
@@ -113,18 +115,16 @@ export class UserService {
       } else {
         throw this.g2gException.DefaultImgIdNotExist;
       }
-    } else { // 기본 이미지나 사용자 지정 이미지가 제공되지 않은 경우
-      const image = user.defaultImgId
-        ? await this.imgService.getInstanceByPK(user.defaultImgId)
-        : (
-            await this.imgService.getInstancesBySubId(
-              ImageType.User,
-              user.userId,
-            )
-          )[0];
+    } else {
+      // 기본 이미지나 사용자 지정 이미지가 제공되지 않은 경우
+      // 기존에 사용하던 이미지를 가져옵니다.
+      const image = await this.imageManager
+        .getImages(user)
+        .then((images) => images[0]);
+
       imageUrl = image ? image.imgUrl : null;
     }
-  
+
     // 3. 비밀번호 해시 처리
     if (userDto.userPw) {
       const hashPw = await bcrypt.hash(userDto.userPw, 10);
@@ -153,11 +153,9 @@ export class UserService {
   async deleteUser(user: User): Promise<UserDto> {
     await this.userRepository.softDelete(user.userId);
 
-    const image = user.defaultImgId
-      ? await this.imgService.getInstanceByPK(user.defaultImgId)
-      : (
-          await this.imgService.getInstancesBySubId(ImageType.User, user.userId)
-        )[0];
+    const image = await this.imageManager
+      .getImages(user)
+      .then((images) => images[0]);
 
     return new UserDto(
       user.userNick,

@@ -20,7 +20,7 @@ import { RollingPaperService } from '../rolling-paper/rolling-paper.service';
 import { ValidCheck } from 'src/util/valid-check';
 import { Nickname } from 'src/util/nickname';
 import { ImageService } from '../image/image.service';
-
+import { ImageInstanceManager } from '../image/image-instance-manager';
 
 @Module({
   imports: [
@@ -28,11 +28,31 @@ import { ImageService } from '../image/image.service';
       secret: process.env.JWT_SECRET,
     }),
 
-    TypeOrmModule.forFeature([User, Image, Account, Donation, RollingPaper, Funding]),
+    TypeOrmModule.forFeature([
+      User,
+      Image,
+      Account,
+      Donation,
+      RollingPaper,
+      Funding,
+    ]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, DonationService, RollingPaperService, KakaoStrategy, JwtStrategy, NaverStrategy, GoogleStrategy, GiftogetherExceptions, ValidCheck, Nickname, ImageService],
-  exports: [PassportModule, AuthService]
+  providers: [
+    AuthService,
+    DonationService,
+    RollingPaperService,
+    KakaoStrategy,
+    JwtStrategy,
+    NaverStrategy,
+    GoogleStrategy,
+    GiftogetherExceptions,
+    ValidCheck,
+    Nickname,
+    ImageService,
+    ImageInstanceManager,
+  ],
+  exports: [PassportModule, AuthService],
 })
 export class AuthModule {}

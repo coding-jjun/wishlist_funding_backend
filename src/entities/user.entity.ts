@@ -15,9 +15,19 @@ import { Account } from './account.entity';
 import { Image } from './image.entity';
 import { Address } from './address.entity';
 import { AuthType } from 'src/enums/auth-type.enum';
+import { IImageId } from 'src/interfaces/image-id.interface';
+import { ImageType } from 'src/enums/image-type.enum';
 
 @Entity()
-export class User {
+export class User implements IImageId {
+  get imgSubId(): number {
+    return this.userId;
+  }
+
+  get imageType(): ImageType {
+    return ImageType.User;
+  }
+
   @PrimaryGeneratedColumn()
   userId: number;
 

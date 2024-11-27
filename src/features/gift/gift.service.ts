@@ -14,6 +14,7 @@ import {
 } from 'src/enums/default-image-id';
 import { ImageService } from '../image/image.service';
 import { User } from 'src/entities/user.entity';
+import { ImageInstanceManager } from '../image/image-instance-manager';
 
 @Injectable()
 export class GiftService {
@@ -24,11 +25,13 @@ export class GiftService {
     private readonly g2gException: GiftogetherExceptions,
 
     private readonly imgService: ImageService,
+
+    private readonly imageManager: ImageInstanceManager,
   ) {}
 
   async findAllGift(fund: Funding): Promise<{
     gifts: ResponseGiftDto[];
-    fundImgUrls: string[];
+    giftImgUrls: string[];
     count: number;
   }> {
     const [gifts, count] = await this.giftRepository.findAndCount({
@@ -37,43 +40,29 @@ export class GiftService {
       order: { giftOrd: 'ASC' },
     });
 
-    const fundImgUrls: string[] = [];
+    const giftImgUrls: string[] = [];
 
     // Gift 배열을 ResponseGiftDto 배열로 변환
     const responseGifts = await Promise.all(
       gifts.map(async (gift) => {
         const { imgUrl, isDef } = await this.getGiftImageUrl(gift);
         if (imgUrl && !isDef) {
-          fundImgUrls.push(imgUrl);
+          giftImgUrls.push(imgUrl);
         }
         return new ResponseGiftDto(gift, imgUrl || '');
       }),
     );
 
-    return { gifts: responseGifts, fundImgUrls, count };
+    return { gifts: responseGifts, giftImgUrls, count };
   }
 
   private async getGiftImageUrl(
     gift: Gift,
   ): Promise<{ imgUrl: string | null; isDef: boolean }> {
-    let defImg = false;
-    if (gift.defaultImgId) {
-      defImg = true;
-      const image = await this.imgService.getInstanceByPK(gift.defaultImgId);
-      return {
-        imgUrl: image ? image.imgUrl : null,
-        isDef: defImg,
-      };
-    }
-
-    const image = (
-      await this.imgService.getInstancesBySubId(ImageType.Gift, gift.giftId)
-    )[0];
-
-    return {
-      imgUrl: image ? image.imgUrl : null,
-      isDef: defImg,
-    };
+    const image: Image = await this.imageManager
+      .getImages(gift)
+      .then((v) => v[0]);
+    return { imgUrl: image?.imgUrl, isDef: !!gift.defaultImgId };
   }
 
   async createOrUpdateGift(

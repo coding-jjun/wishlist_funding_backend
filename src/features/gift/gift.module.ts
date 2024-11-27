@@ -9,6 +9,7 @@ import { Image } from 'src/entities/image.entity';
 import { ImageModule } from '../image/image.module';
 import { ImageService } from '../image/image.service';
 import { User } from 'src/entities/user.entity';
+import { ImageInstanceManager } from '../image/image-instance-manager';
 
 @Module({
   imports: [
@@ -16,7 +17,12 @@ import { User } from 'src/entities/user.entity';
     ImageModule,
   ],
   controllers: [GiftController],
-  providers: [GiftService, GiftogetherExceptions, ImageService],
+  providers: [
+    GiftService,
+    GiftogetherExceptions,
+    ImageService,
+    ImageInstanceManager,
+  ],
   exports: [GiftService],
 })
 export class GiftModule {}
