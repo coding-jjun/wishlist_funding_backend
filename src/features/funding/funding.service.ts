@@ -233,7 +233,10 @@ export class FundingService {
             .getImages(funding.fundUser)
             .then((images) => images[0].imgUrl);
 
-          return new FundingDto(funding, fundUserImgUrl);
+          const { gifts, giftImgUrls } =
+            await this.giftService.findAllGift(funding);
+
+          return new FundingDto(funding, fundUserImgUrl, gifts, giftImgUrls);
         }),
       );
 
