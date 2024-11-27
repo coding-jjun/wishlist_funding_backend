@@ -114,7 +114,7 @@ export class FriendService {
       })
       .getCount();
     
-    return count;
+    return { count: count };
   }
 
   async friendStatus(tokenId: number, userId: number, friendId: number): Promise<{ message; }> {
