@@ -75,8 +75,6 @@ export class UserService {
     
     // 1. userInfo를 user 객체에 병합
     Object.assign(user, userInfo);
-    
-    Logger.log(`user: ${JSON.stringify(user)}`);
   
     let imageUrl = '';
   
