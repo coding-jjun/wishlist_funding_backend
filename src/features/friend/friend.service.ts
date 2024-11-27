@@ -13,6 +13,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NotiType } from 'src/enums/noti-type.enum';
 import { Notification } from 'src/entities/notification.entity';
 import { ValidCheck } from 'src/util/valid-check';
+import { Image } from 'src/entities/image.entity';
 
 @Injectable()
 export class FriendService {
@@ -50,18 +51,29 @@ export class FriendService {
       )
       .setParameter('userId', userId)
       .getRawMany();
+    
+    // 친구가 없는 경우 처리
+    if (friendIds.length === 0) {
+      return {
+        result: [],
+        total: 0,
+      };
+    }  
 
     // 친구 정보 및 이미지 URL 조회
     const [friendsData, total] = await this.userRepository
       .createQueryBuilder('user')
-      .leftJoinAndSelect('image', 'image', 
-        'image.imgId = COALESCE(user.defaultImgId, image.subId) AND (user.defaultImgId IS NOT NULL OR (image.subId = user.userId AND image.imgType = :imgType))', 
-        { imgType: ImageType.User })
+      .leftJoinAndMapOne(
+        'user.image', 
+        Image, 
+        'image', 
+        '(user.defaultImgId = image.imgId OR (user.defaultImgId IS NULL AND image.subId = user.userId AND image.imgType = :userType))',
+        { userType: ImageType.User }
+      )
       .where('user.userId IN (:...ids)', {
         ids: friendIds.map((fi) => fi.friendId),
       })
-      .select(['user.userId', 'user.userName', 'user.userNick'])
-      .addSelect('image.imgUrl', 'userImg')
+      .andWhere('user.delAt IS NULL')
       .getManyAndCount();
 
     // 결과 객체 반환
@@ -70,13 +82,44 @@ export class FriendService {
         userId: friend.userId,
         userName: friend.userName,
         userNick: friend.userNick,
-        userImg: friend.image ? friend.image.imgUrl : null, // 이미지가 있으면 URL을, 없으면 null
+        userImg: friend.image ? friend.image.imgUrl : null
       })),
       total,
     };
   }
 
-  async friendStatus(userId: number, friendId: number): Promise<{ message; }> {
+  async getFriendCount(userId: number): Promise<{ count: number }> {
+    const friendIds = await this.friendRepository
+      .createQueryBuilder('friend')
+      .where('friend.status = :status', { status: FriendStatus.Friend })
+      .andWhere(
+        new Brackets((qb) => {
+          qb.where('friend.userId = :userId', { userId }).orWhere(
+            'friend.friendId = :userId',
+            { userId },
+          );
+        }),
+      )
+      .select(
+        'CASE WHEN friend.userId = :userId THEN friend.friendId ELSE friend.userId END',
+        'friendId',
+      )
+      .setParameter('userId', userId)
+      .getRawMany();
+    
+    const count = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.userId IN (:...ids)', {
+        ids: friendIds.map((fi) => fi.friendId),
+      })
+      .getCount();
+    
+    return { count: count };
+  }
+
+  async friendStatus(tokenId: number, userId: number, friendId: number): Promise<{ message; }> {
+    await this.validCheck.verifyUserMatch(tokenId, userId);
+
     const friendship = await this.friendRepository
       .createQueryBuilder('friend')
       .where(
