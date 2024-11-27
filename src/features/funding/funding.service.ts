@@ -225,7 +225,7 @@ export class FundingService {
     queryBuilder.leftJoinAndSelect('funding.fundUser', 'user');
     // .leftJoinAndSelect('user.image', 'img');
 
-    const fundingPromies = await queryBuilder
+    const fundingPromies: Promise<FundingDto>[] = await queryBuilder
       .getMany()
       .then((fundings: Funding[]) =>
         fundings.map(async (funding) => {
