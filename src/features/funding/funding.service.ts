@@ -131,7 +131,7 @@ export class FundingService {
         // 친구 목록이 있는 경우
         if (fundPublFilter === 'all') {
           queryBuilder.andWhere(
-            'funding.fundPubl = :publ AND funding.fundUser NOT IN (:...ids)',
+            'funding.fundPubl = :publ',
             { publ: true, ids: friendIdsArray },
           );
         } else if (fundPublFilter === 'friends') {
