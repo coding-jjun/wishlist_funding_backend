@@ -40,6 +40,24 @@ export class FriendController {
     }
   }
 
+  @Get('/:userId')
+  @UseGuards(JwtAuthGuard)
+  async getFriendCount(
+    @Req() req: Request,
+    @Param('userId') userId: number,
+  ): Promise<CommonResponse> {
+    try {
+      const user = req.user as { user: User } as any;
+
+      return {
+        message: '친구 수 조회에 성공하였습니다.',
+        data: await this.friendService.getFriendCount(userId),
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Get('/:userId/:friendId')
   @UseGuards(JwtAuthGuard)
   async friendStatus(

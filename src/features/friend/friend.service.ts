@@ -50,6 +50,14 @@ export class FriendService {
       )
       .setParameter('userId', userId)
       .getRawMany();
+    
+    // 친구가 없는 경우 처리
+    if (friendIds.length === 0) {
+      return {
+        result: [],
+        total: 0,
+      };
+    }  
 
     // 친구 정보 및 이미지 URL 조회
     const [friendsData, total] = await this.userRepository
@@ -74,6 +82,35 @@ export class FriendService {
       })),
       total,
     };
+  }
+
+  async getFriendCount(userId: number): Promise<number> {
+    const friendIds = await this.friendRepository
+      .createQueryBuilder('friend')
+      .where('friend.status = :status', { status: FriendStatus.Friend })
+      .andWhere(
+        new Brackets((qb) => {
+          qb.where('friend.userId = :userId', { userId }).orWhere(
+            'friend.friendId = :userId',
+            { userId },
+          );
+        }),
+      )
+      .select(
+        'CASE WHEN friend.userId = :userId THEN friend.friendId ELSE friend.userId END',
+        'friendId',
+      )
+      .setParameter('userId', userId)
+      .getRawMany();
+    
+    const count = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.userId IN (:...ids)', {
+        ids: friendIds.map((fi) => fi.friendId),
+      })
+      .getCount();
+    
+    return count;
   }
 
   async friendStatus(tokenId: number, userId: number, friendId: number): Promise<{ message; }> {
