@@ -95,13 +95,15 @@ export class FundingService {
           .createQueryBuilder('friend')
           .where(
             '((friend.userId = :userId AND friend.friendId = :friendId) OR (friend.userId = :friendId AND friend.friendId = :userId))',
-            { userId: user.userId, friendId: userId },
-          )
+            { userId: user.userId, friendId: userId })
           .andWhere('friend.status = :status', { status: FriendStatus.Friend })
           .getOne();
 
         if (!friendship) {
-          queryBuilder.andWhere('fund.fundPubl = :publ', { publ: true });
+          queryBuilder.andWhere(
+            'fund.fundPubl = :publ',
+            { publ: true }
+          )
         }
       }
     } else {
@@ -319,10 +321,7 @@ export class FundingService {
     updateFundingDto: UpdateFundingDto,
     user: User,
   ): Promise<FundingDto> {
-    const funding = await this.findFundingByUuidAndUserId(
-      fundUuid,
-      user.userId,
-    );
+    const funding = await this.findFundingByUuidAndUserId(fundUuid, user.userId);
     const fundId = funding.fundId;
 
     // endAt이 앞당겨지면 안된다.
@@ -334,12 +333,7 @@ export class FundingService {
     }
 
     // 이미지 업데이트
-    const fundingImg = await this.updateFundingImage(
-      funding,
-      updateFundingDto.fundImg,
-      fundId,
-      user,
-    );
+    const fundingImg = await this.updateFundingImage(funding, updateFundingDto.fundImg, fundId, user);
 
     // Funding 업데이트
     await this.fundingRepository.update(
@@ -350,9 +344,8 @@ export class FundingService {
       },
     );
 
-    const { gifts, giftImgUrls: fundImgUrls } =
-      await this.giftService.findAllGift(funding);
-    const finalImgUrls = [fundingImg, ...fundImgUrls];
+    const { gifts, giftImgUrls } = await this.giftService.findAllGift(funding);
+    const finalImgUrls = [fundingImg, ...giftImgUrls];
 
     return new FundingDto(funding, gifts, finalImgUrls);
   }
