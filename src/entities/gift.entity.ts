@@ -16,7 +16,9 @@ export class Gift implements IImageId {
     return this.giftId;
   }
 
-  imageType: ImageType = ImageType.Gift;
+  get imageType(): ImageType {
+    return ImageType.Gift;
+  }
 
   @PrimaryGeneratedColumn()
   giftId: number;

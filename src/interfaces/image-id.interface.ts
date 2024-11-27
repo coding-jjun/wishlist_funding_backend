@@ -9,5 +9,5 @@ import { ImageType } from 'src/enums/image-type.enum';
 export interface IImageId {
   defaultImgId?: number;
   get imgSubId(): number;
-  imageType: ImageType;
+  get imageType(): ImageType;
 }

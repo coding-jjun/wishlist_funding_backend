@@ -54,7 +54,9 @@ export class Funding implements IImageId {
   get imgSubId(): number {
     return this.fundId;
   }
-  imageType: ImageType = ImageType.Funding;
+  get imageType(): ImageType {
+    return ImageType.Funding;
+  }
 
   @PrimaryGeneratedColumn()
   fundId: number;

@@ -17,7 +17,9 @@ export class RollingPaper implements IImageId {
   get imgSubId(): number {
     return this.rollId;
   }
-  imageType: ImageType = ImageType.RollingPaper;
+  get imageType(): ImageType {
+    return ImageType.RollingPaper;
+  }
   @PrimaryColumn()
   rollId: number;
 

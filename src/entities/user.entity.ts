@@ -24,7 +24,9 @@ export class User implements IImageId {
     return this.userId;
   }
 
-  imageType: ImageType = ImageType.User;
+  get imageType(): ImageType {
+    return ImageType.User;
+  }
 
   @PrimaryGeneratedColumn()
   userId: number;

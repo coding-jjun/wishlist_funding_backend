@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -72,9 +72,11 @@ export class UserService {
   ): Promise<UserDto> {
     const userId = user.userId;
     const { userImg, defaultImgId, ...userInfo } = userDto;
-  
+    
     // 1. userInfo를 user 객체에 병합
     Object.assign(user, userInfo);
+    
+    Logger.log(`user: ${JSON.stringify(user)}`);
   
     let imageUrl = '';
   
