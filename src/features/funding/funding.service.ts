@@ -230,7 +230,7 @@ export class FundingService {
       .then((fundings: Funding[]) =>
         fundings.map(async (funding) => {
           const fundUserImgUrl = await this.imageManager
-            .getImages(funding)
+            .getImages(funding.fundUser)
             .then((images) => images[0].imgUrl);
 
           return new FundingDto(funding, fundUserImgUrl);
