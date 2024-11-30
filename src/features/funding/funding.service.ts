@@ -167,6 +167,8 @@ export class FundingService {
     }
 
     const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
     if (status === 'ongoing') {
       queryBuilder.andWhere('funding.endAt >= :now', { now: currentDate });
     } else if (status === 'ended') {
