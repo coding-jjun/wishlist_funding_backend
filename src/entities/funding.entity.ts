@@ -136,6 +136,7 @@ export class Funding implements IImageId {
    */
   @Column('int', { nullable: true })
   @OneToOne(() => Image, (image) => image.imgId)
+  @JoinColumn({ name: 'defaultImgId' })
   defaultImgId?: number;
 
   @OneToOne(() => Image, (image) => image.subId)

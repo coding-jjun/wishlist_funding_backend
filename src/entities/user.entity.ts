@@ -83,6 +83,7 @@ export class User implements IImageId {
 
   @Column('int', { nullable: true })
   @OneToOne(() => Image, (image) => image.imgId)
+  @JoinColumn({ name: 'defaultImgId' })
   defaultImgId?: number;
 
   @OneToMany(() => Image, (image) => image.creator)
