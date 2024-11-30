@@ -13,9 +13,13 @@ export class TokenService {
 
   private readonly g2gException: GiftogetherExceptions
 
-  async createAccessToken(userType: UserType, userId: number): Promise<string> {
+  async createAccessToken(userType: UserType, userId: number, isAdmin: boolean): Promise<string> {
     return this.jwtService.sign(
-      { userId, time: new Date(), type: userType },
+      { userId,
+        time: new Date(),
+        type: userType,
+        isAdmin: isAdmin
+      },
       {
         secret: process.env.JWT_SECRET,
         expiresIn: '30m',
