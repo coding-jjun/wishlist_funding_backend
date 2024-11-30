@@ -12,7 +12,7 @@ export class GratitudeDto {
    * fundImg와 defaultImgId 둘 중에 하나만 null이어야 함
    */
   @IsNotEmpty()
-  @Validate(CustomUrlValidator)
+  @Validate(CustomUrlValidator, { each: true })
   gratImg: string[];
 
   /*
@@ -22,7 +22,12 @@ export class GratitudeDto {
   @IsOptional()
   defaultImgId?: number;
 
-  constructor(gratTitle: string, gratCont: string, gratImg?: string[], defaultImgId?: number) {
+  constructor(
+    gratTitle: string,
+    gratCont: string,
+    gratImg?: string[],
+    defaultImgId?: number,
+  ) {
     this.gratTitle = gratTitle;
     this.gratCont = gratCont;
     this.gratImg = gratImg || [];

@@ -13,6 +13,7 @@ import { DefaultImageIds } from 'src/enums/default-image-id';
 import { ImageService } from '../image/image.service';
 import { User } from 'src/entities/user.entity';
 import { FundingService } from '../funding/funding.service';
+import { ImageInstanceManager } from '../image/image-instance-manager';
 
 @Injectable()
 export class GratitudeService {
@@ -29,6 +30,8 @@ export class GratitudeService {
 
     private readonly imgService: ImageService,
 
+    private readonly imageManager: ImageInstanceManager,
+
     private readonly fundingService: FundingService,
   ) {}
 
@@ -41,18 +44,9 @@ export class GratitudeService {
     });
     if (!grat) throw this.g2gException.GratitudeNotExist;
 
-    let returnImgUrl: string[] = [];
-
-    if (grat.defaultImgId) {
-      const img = await this.imgService.getInstanceByPK(grat.defaultImgId);
-      returnImgUrl.push(img.imgUrl);
-    } else {
-      const images = await this.imgService.getInstancesBySubId(
-        ImageType.Gratitude,
-        grat.gratId,
-      );
-      returnImgUrl.push(...images.map((i) => i.imgUrl));
-    }
+    const returnImgUrl = await this.imageManager
+      .getImages(grat)
+      .then((images) => images.map((i) => i.imgUrl));
 
     return new GetGratitudeDto(
       funding.fundUuid,

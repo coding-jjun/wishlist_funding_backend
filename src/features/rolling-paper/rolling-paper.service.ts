@@ -12,6 +12,7 @@ import { ValidCheck } from 'src/util/valid-check';
 import { User } from 'src/entities/user.entity';
 import { DefaultImageIds } from 'src/enums/default-image-id';
 import { ImageService } from '../image/image.service';
+import { ImageInstanceManager } from '../image/image-instance-manager';
 
 @Injectable()
 export class RollingPaperService {
@@ -27,6 +28,8 @@ export class RollingPaperService {
     private readonly validChecker: ValidCheck,
 
     private readonly imgService: ImageService,
+
+    private readonly imageManager: ImageInstanceManager,
   ) {}
 
   async getAllRollingPapers(
@@ -52,25 +55,11 @@ export class RollingPaperService {
       relations: ['donation', 'donation.user'],
     });
 
-    const getImageUrl = async (roll: RollingPaper): Promise<string> => {
-      if (roll.defaultImgId) {
-        return (await this.imgService.getInstanceByPK(roll.defaultImgId))
-          ?.imgUrl;
-      }
-
-      // not a default
-      Logger.log(`롤링페이퍼 ID: ${roll.rollId}`);
-      return (
-        await this.imgService.getInstancesBySubId(
-          ImageType.RollingPaper,
-          roll.rollId,
-        )
-      )[0]?.imgUrl;
-    };
-
     const resolvedRolls = await Promise.all(rolls);
     const dtoPromises = resolvedRolls.map(async (roll) => {
-      const imageUrl = await getImageUrl(roll);
+      const imageUrl = await this.imageManager
+        .getImages(roll)
+        .then((i) => i[0].imgUrl);
       return new RollingPaperDto(roll, imageUrl);
     });
     return Promise.all(dtoPromises);

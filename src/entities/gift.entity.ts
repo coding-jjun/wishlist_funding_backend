@@ -3,15 +3,23 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Funding } from './funding.entity';
 import { Image } from './image.entity';
+import { IImageId } from 'src/interfaces/image-id.interface';
+import { ImageType } from 'src/enums/image-type.enum';
 
 @Entity()
-export class Gift {
+export class Gift implements IImageId {
+  get imgSubId(): number {
+    return this.giftId;
+  }
+
+  get imageType(): ImageType {
+    return ImageType.Gift;
+  }
+
   @PrimaryGeneratedColumn()
   giftId: number;
 

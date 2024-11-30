@@ -17,10 +17,11 @@ import { FundTheme } from 'src/enums/fund-theme.enum';
 import { Gift } from './gift.entity';
 import { Donation } from './donation.entity';
 import { Image } from './image.entity';
-import { ValidateNested } from 'class-validator';
+import { IImageId } from 'src/interfaces/image-id.interface';
+import { ImageType } from 'src/enums/image-type.enum';
 
 @Entity()
-export class Funding {
+export class Funding implements IImageId {
   constructor(
     fundUser: User,
     fundTitle: string,
@@ -49,6 +50,12 @@ export class Funding {
     this.fundRecvName = fundRecvName;
     this.fundRecvPhone = fundRecvPhone;
     this.fundRecvReq = fundRecvReq;
+  }
+  get imgSubId(): number {
+    return this.fundId;
+  }
+  get imageType(): ImageType {
+    return ImageType.Funding;
   }
 
   @PrimaryGeneratedColumn()
@@ -112,7 +119,7 @@ export class Funding {
 
   @UpdateDateColumn()
   uptAt: Date;
-  
+
   @OneToMany(() => Comment, (comment) => comment.funding)
   comments: Comment[];
 

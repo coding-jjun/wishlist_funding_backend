@@ -9,14 +9,15 @@ import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { AuthModule } from '../auth/auth.module';
 import { ValidCheck } from 'src/util/valid-check';
 import { User } from 'src/entities/user.entity';
-import { ImageService } from '../image/image.service';
+import { ImageModule } from '../image/image.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([RollingPaper, Funding, Image, User]),
     AuthModule,
+    ImageModule,
   ],
   controllers: [RollingPaperController],
-  providers: [RollingPaperService, GiftogetherExceptions, ValidCheck, ImageService],
+  providers: [RollingPaperService, GiftogetherExceptions, ValidCheck],
 })
 export class RollingPaperModule {}
