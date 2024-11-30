@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { Comment } from 'src/entities/comment.entity';
@@ -13,7 +13,8 @@ import { ValidCheck } from 'src/util/valid-check';
 
 function convertToGetCommentDto(comment: Comment): GetCommentDto {
   const { comId, content, regAt, isMod, authorId, author } = comment;
-  const authorName = author?.userName ?? 'ANONYMOUS';
+  Logger.log(`comment: ${JSON.stringify(comment)}`);
+  const authorName = author?.userName || 'ANONYMOUS';
   return new GetCommentDto(comId, content, regAt, isMod, authorId, authorName);
 }
 
