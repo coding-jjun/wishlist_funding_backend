@@ -44,5 +44,6 @@ export class Gift implements IImageId {
 
   @Column({ nullable: true })
   @ManyToOne(() => Image, (image) => image.imgId)
+  @JoinColumn({ name: 'defaultImgId' })
   defaultImgId?: number;
 }
