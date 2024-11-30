@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Body,
-  Patch,
   Req,
   Res,
   UseGuards,
@@ -27,12 +26,14 @@ import { RefreshTokenDto } from './dto/refresh.token.dto';
 import { UserType } from 'src/enums/user-type.enum';
 import { GuestLoginDto } from './dto/guest-login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
+import { TokenService } from './token.service';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly g2gException: GiftogetherExceptions,
+    private readonly tokenService: TokenService
   ) {}
 
   private cookieOptions = {
@@ -124,8 +125,8 @@ export class AuthController {
   async login(@Body() loginDto: LoginDto, @Res() res: Response){
     const user = await this.authService.login(loginDto);
     const token = new TokenDto()
-    token.accessToken = await this.authService.createAccessToken(UserType.USER,user.userId);
-    token.refreshToken = await this.authService.createRefreshToken(user.userId);
+    token.accessToken = await this.tokenService.createAccessToken(UserType.USER,user.userId);
+    token.refreshToken = await this.tokenService.createRefreshToken(user.userId);
 
     Logger.debug("accessToken: " + token.accessToken); // redirect로 변경되면서 디버그 환경에서 token을 확인하기 어려워졌습니다.
     Logger.debug("refreshToken: " + token.refreshToken); // redirect로 변경되면서 디버그 환경에서 token을 확인하기 어려워졌습니다.
@@ -148,8 +149,8 @@ export class AuthController {
   ) {
     const user = await this.authService.createUser(createUserDto)
     const token = new TokenDto();
-    token.accessToken = await this.authService.createAccessToken(UserType.USER, user.userId);
-    token.refreshToken = await this.authService.createRefreshToken(user.userId);
+    token.accessToken = await this.tokenService.createAccessToken(UserType.USER, user.userId);
+    token.refreshToken = await this.tokenService.createRefreshToken(user.userId);
     
     res.cookie("access_token", token.accessToken, this.cookieOptions);
     res.cookie("refresh_token", token.refreshToken, this.cookieOptions);
@@ -159,8 +160,8 @@ export class AuthController {
   
   @Post('/token')
   async reIssueAccessToken(@Body() tokenDto: RefreshTokenDto, @Res() res: Response){
-    const userId = await this.authService.chkValidRefreshToken(tokenDto.refreshToken);
-    const accessToken = await this.authService.createAccessToken(UserType.USER, userId)
+    const userId = await this.tokenService.chkValidRefreshToken(tokenDto.refreshToken);
+    const accessToken = await this.tokenService.createAccessToken(UserType.USER, userId)
     res.cookie("access_token", accessToken, this.cookieOptions);
     return res.json({ message: 'success' }); 
   }
@@ -238,7 +239,7 @@ export class AuthController {
   @Post('/guest')
   async guestLogin(@Body() guestLoginDto: GuestLoginDto, @Res() res: Response) {
     const guest = await this.authService.loginGuest(guestLoginDto);
-    const token = await this.authService.createAccessToken(UserType.GUEST, guest.userId);
+    const token = await this.tokenService.createAccessToken(UserType.GUEST, guest.userId);
     res.cookie("access_token", token);
     return res.json({ message: '비회원 로그인 성공' , user: guest});
   }

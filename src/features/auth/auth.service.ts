@@ -1,12 +1,10 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Like, Repository } from 'typeorm';
 import { User } from 'src/entities/user.entity';
-import { JwtService } from '@nestjs/jwt';
 import { AuthType } from 'src/enums/auth-type.enum';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { ImageType } from 'src/enums/image-type.enum';
-import { RedisClientType } from '@redis/client';
 import { UserDto } from '../user/dto/user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from '../user/dto/update-user.dto';
@@ -15,10 +13,10 @@ import * as bcrypt from 'bcrypt';
 import { DefaultImageIds } from 'src/enums/default-image-id';
 import { Nickname } from 'src/util/nickname';
 import { GuestLoginDto } from './dto/guest-login.dto';
-import { UserType } from 'src/enums/user-type.enum';
 import { DonationService } from '../donation/donation.service';
 import { ImageService } from '../image/image.service';
 import { ImageInstanceManager } from '../image/image-instance-manager';
+import { TokenService } from './token.service';
 
 @Injectable()
 export class AuthService {
@@ -26,11 +24,6 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-
-    private jwtService: JwtService,
-    private readonly jwtException: GiftogetherExceptions,
-    @Inject('REDIS_CLIENT')
-    private readonly redisClient: RedisClientType,
 
     private readonly g2gException: GiftogetherExceptions,
     private readonly nickName: Nickname,
@@ -40,6 +33,8 @@ export class AuthService {
     private readonly imgService: ImageService,
 
     private readonly imageManager: ImageInstanceManager,
+
+    private readonly tokenService: TokenService,
   ) {}
 
   async parseDate(yearString: string, birthday: string): Promise<Date> {
@@ -51,50 +46,11 @@ export class AuthService {
     return new Date(year, month, day);
   }
 
-  async createAccessToken(userType: UserType, userId: number): Promise<string> {
-    return this.jwtService.sign(
-      { userId, time: new Date(), type: userType },
-      {
-        secret: process.env.JWT_SECRET,
-        expiresIn: '30m',
-      },
-    );
-  }
-  async createRefreshToken(userId: number): Promise<string> {
-    await this.redisClient.del(`user:${userId}`);
-    const time = new Date();
-    const token = this.jwtService.sign(
-      { userId: userId, time: time },
-      {
-        secret: process.env.JWT_REFRESH_SECRET,
-        expiresIn: '7d',
-      },
-    );
-    await this.redisClient.set(`user:${userId}`, token, {
-      EX: 60 * 60 * 24 * 7, // 7일 동안 유효
-    });
-    return token;
-  }
-
-  async validateRefresh(
-    userId: string,
-    refreshToken: string,
-  ): Promise<boolean> {
-    try {
-      const storedToken = await this.redisClient.get(`user:${userId}`);
-      if (refreshToken !== storedToken) {
-        return false;
-      }
-      return true;
-    } catch (error) {
-      throw this.jwtException.RedisServerError;
-    }
-  }
 
   async isValidPassword(plainPw: string, hashPw: string): Promise<Boolean> {
     const isValidPw = await bcrypt.compare(plainPw, hashPw);
     if (!isValidPw) {
-      throw this.jwtException.PasswordIncorrect;
+      throw this.g2gException.PasswordIncorrect;
     }
     return true;
   }
@@ -105,7 +61,7 @@ export class AuthService {
       where: { userEmail: loginDto.userEmail },
     });
     if (!user) {
-      throw this.jwtException.UserNotFound;
+      throw this.g2gException.UserNotFound;
     }
 
     await this.isValidPassword(loginDto.userPw, user.userPw);
@@ -255,7 +211,7 @@ export class AuthService {
     }
 
     if (user.authType !== authType && userEmail === user.userEmail) {
-      throw this.jwtException.UserAlreadyExists;
+      throw this.g2gException.UserAlreadyExists;
     }
 
     const image = await this.imageManager
@@ -291,94 +247,13 @@ export class AuthService {
     return true;
   }
 
-  async verifyAccessToken(accessToken: string) {
-    try {
-      return await this.jwtService.verify(accessToken, {
-        secret: process.env.JWT_SECRET,
-      });
-    } catch (error) {
-      throw this.jwtException.NotValidToken;
-    }
-  }
-
   
   async logout(refreshToken: string) {
-    const tokenInfo = await this.verifyRefreshToken(refreshToken);
+    const tokenInfo = await this.tokenService.verifyRefreshToken(refreshToken);
     const userId = tokenInfo.userId;
 
-    await this.chkValidRefreshToken(refreshToken);
-    try {
-    
-      // refresh token blacklist 등록
-      const refreshKey = `black:${userId}:${refreshToken}`;
-      await this.redisClient.set(refreshKey, ' ');
-      await this.redisClient.expire(refreshKey, 60 * 60 * 24 * 7); // 7일 후 blacklist 에서 삭제
-
-      // 기존 refresh token 삭제
-      await this.redisClient.del(`user:${userId}`);
-
-    } catch (error) {
-      throw this.jwtException.FailedLogout;
-    }
-  }
-
-
-  // refresh token 유효성 검사 절차
-  async chkValidRefreshToken(refreshToken: string): Promise<number> {
-    if( !refreshToken){
-      throw this.jwtException.TokenMissing;
-    }
-    const tokenInfo = await this.verifyRefreshToken(refreshToken);
-    const userId = tokenInfo.userId;
-    
-    const isInBlackList = await this.isBlackListToken(userId, refreshToken);
-    if(isInBlackList){
-      throw this.jwtException.NotValidToken;
-    }
-    
-    const isValid = await this.compareToStoredRefresh(userId, refreshToken);
-    if(!isValid){
-      // 중복 로그인시, 기존 로그인한 회원은 해당 에러에 걸린다.
-      throw this.jwtException.NotValidToken;
-    }
-    return userId;
-  }
-
-  
-  /**
-   * refresh token 디코딩 및 유효성 검사
-   */
-  async verifyRefreshToken(refreshToken: string) {
-    try {
-      return await this.jwtService.verify(refreshToken, {
-        secret: process.env.JWT_REFRESH_SECRET,
-      });
-    } catch (error) {
-      throw this.jwtException.NotValidToken;
-    }
-  }
-  
-  async isBlackListToken(userId: number, token: string): Promise<boolean> {
-    try {
-      const result = await this.redisClient.get(`black:${userId}:${token}`);
-      return result !== null;
-    } catch (error) {
-      console.error('Redis server error:', error);
-      throw this.jwtException.RedisServerError;
-    }
-  }
-
-  // redis 저장된 토큰과 비교
-  async compareToStoredRefresh(
-    userId: number,
-    refreshToken: string,
-  ): Promise<boolean> {
-    try {
-      const storedToken = await this.redisClient.get(`user:${userId}`);
-      return refreshToken === storedToken;
-    } catch (error) {
-      throw this.jwtException.RedisServerError;
-    }
+    await this.tokenService.chkValidRefreshToken(refreshToken);
+    await this.tokenService.setRefreshTokenToBlackList (userId, refreshToken);
   }
 
   async createRandomNickname(): Promise<string> {

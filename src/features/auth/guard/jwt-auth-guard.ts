@@ -1,17 +1,14 @@
-import { ExecutionContext, Inject, Injectable } from '@nestjs/common';
+import { ExecutionContext, Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { RedisClientType } from '@redis/client';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
-import { AuthService } from '../auth.service';
 import { UserType } from 'src/enums/user-type.enum';
+import { TokenService } from '../token.service';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
   constructor(
-    private readonly jwtException: GiftogetherExceptions,
-    @Inject('REDIS_CLIENT')
-    private readonly redisClient: RedisClientType,
-    private readonly authService: AuthService,
+    private readonly g2gException: GiftogetherExceptions,
+    private readonly tokenService: TokenService
   ) {
     super('jwt');
   }
@@ -28,25 +25,25 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const accessToken = cookies['access_token'];
 
     if (!accessToken) {
-      throw this.jwtException.TokenMissing;
+      throw this.g2gException.TokenMissing;
     }
     
     try {
-      const tokenInfo = await this.authService.verifyAccessToken(accessToken);
+      const tokenInfo = await this.tokenService.verifyAccessToken(accessToken);
 
       // 비회원이 정회원 API 요청한 경우
       if(UserType.GUEST === tokenInfo.type && request.url !== '/donation/guest') {
-        throw this.jwtException.InvalidUserType;
+        throw this.g2gException.InvalidUserType;
 
       }
-      const isInBlackList = await this.authService.isBlackListToken(tokenInfo.userId, accessToken);
+      const isInBlackList = await this.tokenService.isBlackListToken(tokenInfo.userId, accessToken);
       if (isInBlackList) {
-        throw this.jwtException.NotValidToken;
+        throw this.g2gException.NotValidToken;
       }
 
       return super.canActivate(context) as Promise<boolean>;
     } catch (error) {
-      throw this.jwtException.NotValidToken;
+      throw this.g2gException.NotValidToken;
     }
   }
 }
