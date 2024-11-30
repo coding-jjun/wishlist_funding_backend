@@ -8,6 +8,7 @@ import { CreateUserDto } from "../dto/create-user.dto";
 import { TokenDto } from "../dto/token.dto";
 import { UserType } from "src/enums/user-type.enum";
 import { GiftogetherExceptions } from "src/filters/giftogether-exception";
+import { TokenService } from "../token.service";
 
 
 @Injectable()
@@ -16,6 +17,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google'){
     private readonly configService: ConfigService,
     private readonly authService: AuthService,
     private readonly g2gException: GiftogetherExceptions,
+    private readonly tokenService: TokenService
+
 
   ){
     super({
@@ -88,8 +91,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google'){
 
     }
     const tokenDto = new TokenDto();
-    tokenDto.accessToken = await this.authService.createAccessToken(UserType.USER, user.userId);
-    tokenDto.refreshToken = await this.authService.createRefreshToken(user.userId);
+    tokenDto.accessToken = await this.tokenService.createAccessToken(UserType.USER, user.userId);
+    tokenDto.refreshToken = await this.tokenService.createRefreshToken(user.userId);
     done(null, {user, tokenDto, type});
     
   }

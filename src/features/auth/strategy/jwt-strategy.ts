@@ -11,7 +11,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly jwtException: GiftogetherExceptions,
+    private readonly g2gException: GiftogetherExceptions,
   ) {
     super({
       // 토큰이 유효한지 확인하기 위한 키
@@ -34,7 +34,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       relations: ['account']
     });
     if(!user){
-      throw this.jwtException.UserNotFound;
+      throw this.g2gException.UserNotFound;
     }
     done(null, user)
   }

@@ -7,8 +7,8 @@ import { AuthType } from 'src/enums/auth-type.enum';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { TokenDto } from '../dto/token.dto';
-import { DefaultImageId } from 'src/enums/default-image-id';
 import { UserType } from 'src/enums/user-type.enum';
+import { TokenService } from '../token.service';
 
 @Injectable()
 export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
@@ -16,6 +16,8 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
     private readonly configService: ConfigService,
     private readonly authService: AuthService,
     private readonly g2gException: GiftogetherExceptions,
+    private readonly tokenService: TokenService
+
   ) {
     super({
       clientID: configService.get<string>('KAKAO_CLIENT_ID'),
@@ -94,8 +96,8 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
       type = "login"
     }
     const tokenDto = new TokenDto();
-    tokenDto.accessToken = await this.authService.createAccessToken(UserType.USER, user.userId);
-    tokenDto.refreshToken = await this.authService.createRefreshToken(user.userId);
+    tokenDto.accessToken = await this.tokenService.createAccessToken(UserType.USER, user.userId);
+    tokenDto.refreshToken = await this.tokenService.createRefreshToken(user.userId);
     done(null, {user, tokenDto, type});
   }
 }
