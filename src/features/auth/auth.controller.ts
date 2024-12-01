@@ -26,7 +26,7 @@ import { TokenDto } from './dto/token.dto';
 import { RefreshTokenDto } from './dto/refresh.token.dto';
 import { UserType } from 'src/enums/user-type.enum';
 import { GuestLoginDto } from './dto/guest-login.dto';
-import { LoginResponse, LoginResponseDto } from './dto/login-response.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
 
 @Controller('auth')
 export class AuthController {
