@@ -1,7 +1,7 @@
 import { ExecutionContext, Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
-import { UserType } from 'src/enums/user-type.enum';
+import { UserRole } from 'src/enums/user-role.enum';
 import { TokenService } from '../token.service';
 
 @Injectable()
@@ -32,8 +32,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       const tokenInfo = await this.tokenService.verifyAccessToken(accessToken);
 
       // 비회원이 정회원 API 요청한 경우
-      if(UserType.GUEST === tokenInfo.type && request.url !== '/donation/guest') {
-        throw this.g2gException.InvalidUserType;
+      if(UserRole.GUEST === tokenInfo.type && request.url !== '/donation/guest') {
+        throw this.g2gException.InvalidUserRole;
 
       }
       const isInBlackList = await this.tokenService.isBlackListToken(tokenInfo.userId, accessToken);
