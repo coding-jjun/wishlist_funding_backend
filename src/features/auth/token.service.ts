@@ -1,8 +1,9 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { RedisClientType } from "@redis/client/dist/lib/client";
-import { UserType } from "src/enums/user-type.enum";
+import { UserRole } from "src/enums/user-role.enum";
 import { GiftogetherExceptions } from "src/filters/giftogether-exception";
+import { TokenDto } from "./dto/token.dto";
 
 @Injectable()
 export class TokenService {
@@ -14,6 +15,16 @@ export class TokenService {
   private readonly g2gException: GiftogetherExceptions
 
   async createAccessToken(userType: UserType, userId: number, isAdmin: boolean): Promise<string> {
+  async issueUserRoleBasedToken(userId:number, isAdmin:boolean): Promise<TokenDto> {
+
+    const role = isAdmin ? UserRole.ADMIN : UserRole.USER;
+
+    const accessToken = await this.createAccessToken(role, userId);
+    const refreshToken = await this.createRefreshToken(userId);
+
+    return new TokenDto(accessToken, refreshToken);
+
+  }
     return this.jwtService.sign(
       { userId,
         time: new Date(),
