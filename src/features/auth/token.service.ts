@@ -7,13 +7,14 @@ import { TokenDto } from "./dto/token.dto";
 
 @Injectable()
 export class TokenService {
-  private readonly jwtService: JwtService
+  constructor(
+    private readonly jwtService: JwtService,
 
-  @Inject('REDIS_CLIENT')
-  private readonly redisClient: RedisClientType
+    @Inject('REDIS_CLIENT')
+    private readonly redisClient: RedisClientType,
 
-  private readonly g2gException: GiftogetherExceptions
-
+    private readonly g2gException: GiftogetherExceptions
+  ){}
   async issueUserRoleBasedToken(userId:number, isAdmin:boolean): Promise<TokenDto> {
 
     const role = isAdmin ? UserRole.ADMIN : UserRole.USER;
