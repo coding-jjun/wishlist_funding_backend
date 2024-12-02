@@ -14,7 +14,6 @@ export class TokenService {
 
   private readonly g2gException: GiftogetherExceptions
 
-  async createAccessToken(userType: UserType, userId: number, isAdmin: boolean): Promise<string> {
   async issueUserRoleBasedToken(userId:number, isAdmin:boolean): Promise<TokenDto> {
 
     const role = isAdmin ? UserRole.ADMIN : UserRole.USER;
@@ -25,11 +24,12 @@ export class TokenService {
     return new TokenDto(accessToken, refreshToken);
 
   }
+  async createAccessToken(role: UserRole, userId: number): Promise<string> { 
     return this.jwtService.sign(
-      { userId,
-        time: new Date(),
-        type: userType,
-        isAdmin: isAdmin
+      { 
+        sub: userId,
+        iat: Math.floor(Date.now() / 1000),
+        role: role
       },
       {
         secret: process.env.JWT_SECRET,
@@ -40,9 +40,11 @@ export class TokenService {
 
   async createRefreshToken(userId: number): Promise<string> {
     await this.redisClient.del(`user:${userId}`);
-    const time = new Date();
+    const iat = Math.floor(Date.now() / 1000);  // 초 단위로 발급 시간 기록
     const token = this.jwtService.sign(
-      { userId: userId, time: time },
+      { sub: userId,
+        iat: iat 
+      },
       {
         secret: process.env.JWT_REFRESH_SECRET,
         expiresIn: '7d',
@@ -108,7 +110,7 @@ export class TokenService {
       throw this.g2gException.TokenMissing;
     }
     const tokenInfo = await this.verifyRefreshToken(refreshToken);
-    const userId = tokenInfo.userId;
+    const userId = tokenInfo.sub;
     
     const isInBlackList = await this.isBlackListToken(userId, refreshToken);
     if(isInBlackList){

@@ -32,11 +32,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       const tokenInfo = await this.tokenService.verifyAccessToken(accessToken);
 
       // 비회원이 정회원 API 요청한 경우
-      if(UserRole.GUEST === tokenInfo.type && request.url !== '/donation/guest') {
+      if(UserRole.GUEST === tokenInfo.role && request.url !== '/donation/guest') {
         throw this.g2gException.InvalidUserRole;
 
       }
-      const isInBlackList = await this.tokenService.isBlackListToken(tokenInfo.userId, accessToken);
+      const isInBlackList = await this.tokenService.isBlackListToken(tokenInfo.sub, accessToken);
       if (isInBlackList) {
         throw this.g2gException.NotValidToken;
       }
