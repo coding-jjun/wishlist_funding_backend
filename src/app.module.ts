@@ -41,6 +41,7 @@ import { TransformInterceptor } from './transform/transform.interceptor';
 import { Gift } from './entities/gift.entity';
 import { GiftogetherError } from './entities/error.entity';
 import { GiftogetherMiddleware } from './interfaces/giftogether.middleware';
+import { DepositModule } from './features/deposit/deposit.module';
 @Module({
   imports: [
     ScheduleModule.forRoot(),
@@ -104,6 +105,7 @@ import { GiftogetherMiddleware } from './interfaces/giftogether.middleware';
     EventModule,
     AccountModule,
     ValidCheckModule,
+    DepositModule,
   ],
   controllers: [AppController],
   providers: [
