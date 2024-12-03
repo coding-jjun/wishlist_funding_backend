@@ -1,7 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { DepositService } from './deposit.service';
 import { DepositDto } from './dto/deposit.dto';
-import { CommonResponse } from 'src/interfaces/common-response.interface';
+import { CommonResponse } from '../../interfaces/common-response.interface';
 
 @Controller('deposits')
 export class DepositController {
