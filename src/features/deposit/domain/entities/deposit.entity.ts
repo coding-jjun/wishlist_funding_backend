@@ -6,7 +6,7 @@ export class Deposit {
     public readonly sender: string, // "홍길동-1234"
     public readonly receiver: string,
     public readonly amount: number,
-    public readonly trasferDate: Date,
+    public readonly transferDate: Date,
     public readonly depositBank: string,
     public readonly depositAccount: string,
     public readonly withdrawalAccount: string,

@@ -18,6 +18,8 @@ export class UploadDepositUseCase {
       withdrawalAccount: depositData.withdrawalAccount,
     });
 
+    this.depositRepository.save(deposit);
+
     return deposit;
   }
 }
