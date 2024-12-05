@@ -122,7 +122,9 @@ describe('MatchDepositUseCase', () => {
     );
 
     // Act
-    matchDepositUseCase.execute(deposit);
+    expect(() => matchDepositUseCase.execute(deposit)).toThrow(
+      g2gException.DepositUnmatched,
+    );
 
     // Assert
     const sponsorship = donationRepository.findBySenderAndAmount(
