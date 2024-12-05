@@ -25,14 +25,11 @@ describe('MatchDepositUseCase', () => {
       ],
     }).compile();
 
-    matchDepositUseCase = module.get<MatchDepositUseCase>(MatchDepositUseCase);
+    matchDepositUseCase = module.get(MatchDepositUseCase);
+    donationRepository = module.get(InMemoryProvisionalDonationRepository);
+    eventEmitter = module.get(EventEmitter2);
 
-    // Mock EventEmitter2
-    eventEmitter = new EventEmitter2();
     jest.spyOn(eventEmitter, 'emit'); // Spy on the `emit` method for assertions.
-
-    // Initialize repository and use case
-    donationRepository = new InMemoryProvisionalDonationRepository();
 
     // Seed sample donations
     donationRepository.save(
