@@ -264,4 +264,17 @@ export class GiftogetherExceptions {
     ErrorCode.InvalidUrl,
     HttpStatus.BAD_REQUEST,
   );
+
+  // Deposits
+  DepositUnmatched = new GiftogetherException(
+    ErrorMsg.DepositUnmatched,
+    ErrorCode.DepositUnmatched,
+    HttpStatus.BAD_REQUEST,
+  );
+
+  DepositPartiallyMatched = new GiftogetherException(
+    ErrorMsg.DepositPartiallyMatched,
+    ErrorCode.DepositPartiallyMatched,
+    HttpStatus.BAD_REQUEST,
+  );
 }

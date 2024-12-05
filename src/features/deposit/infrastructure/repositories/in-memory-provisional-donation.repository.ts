@@ -11,6 +11,10 @@ export class InMemoryProvisionalDonationRepository {
     this.donations.push(donation);
   }
 
+  findBySender(sender: string): ProvisionalDonation[] {
+    return this.donations.filter((s) => s.sender === sender);
+  }
+
   findBySenderAndAmount(
     sender: string,
     amount: number,
