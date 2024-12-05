@@ -6,6 +6,7 @@ import { MatchDepositUseCase } from './application/usecases/match-deposit.usecas
 import { InMemoryDepositRepository } from './infrastructure/repositories/in-memory-deposit.repository';
 import { InMemoryProvisionalDonationRepository } from './infrastructure/repositories/in-memory-provisional-donation.repository';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { GiftogetherExceptions } from '../../filters/giftogether-exception';
 
 describe('DepositController', () => {
   let controller: DepositController;
@@ -21,6 +22,7 @@ describe('DepositController', () => {
         MatchDepositUseCase,
         InMemoryDepositRepository,
         InMemoryProvisionalDonationRepository,
+        GiftogetherExceptions,
       ],
     }).compile();
 

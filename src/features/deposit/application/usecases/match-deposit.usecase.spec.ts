@@ -2,26 +2,37 @@ import { MatchDepositUseCase } from './match-deposit.usecase';
 import { InMemoryProvisionalDonationRepository } from '../../infrastructure/repositories/in-memory-provisional-donation.repository';
 import { Deposit } from '../../domain/entities/deposit.entity';
 import { ProvisionalDonation } from '../../domain/entities/provisional-donation.entity';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter';
 import { DepositMatchedEvent } from '../../domain/events/deposit-matched.event';
 import { DepositUnmatchedEvent } from '../../domain/events/deposit-unmatched.event';
+import { DepositPartiallyMatchedEvent } from '../../domain/events/deposit-partially-matched.event';
+import { GiftogetherExceptions } from '../../../../filters/giftogether-exception';
+import { Test, TestingModule } from '@nestjs/testing';
 
 describe('MatchDepositUseCase', () => {
   let donationRepository: InMemoryProvisionalDonationRepository;
   let matchDepositUseCase: MatchDepositUseCase;
   let eventEmitter: EventEmitter2;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [EventEmitterModule.forRoot()],
+      controllers: [],
+      providers: [
+        GiftogetherExceptions,
+        MatchDepositUseCase,
+        InMemoryProvisionalDonationRepository,
+      ],
+    }).compile();
+
+    matchDepositUseCase = module.get<MatchDepositUseCase>(MatchDepositUseCase);
+
     // Mock EventEmitter2
     eventEmitter = new EventEmitter2();
     jest.spyOn(eventEmitter, 'emit'); // Spy on the `emit` method for assertions.
 
     // Initialize repository and use case
     donationRepository = new InMemoryProvisionalDonationRepository();
-    matchDepositUseCase = new MatchDepositUseCase(
-      donationRepository,
-      eventEmitter,
-    );
 
     // Seed sample donations
     donationRepository.save(
@@ -33,6 +44,12 @@ describe('MatchDepositUseCase', () => {
     donationRepository.save(
       new ProvisionalDonation('3', '이영희-9012', 150000, 'PENDING'),
     );
+  });
+
+  it('should be defined', () => {
+    expect(donationRepository).toBeDefined();
+    expect(matchDepositUseCase).toBeDefined();
+    expect(eventEmitter).toBeDefined();
   });
 
   it('should match deposit with an exact sponsorship (Matched Case)', () => {
@@ -86,8 +103,8 @@ describe('MatchDepositUseCase', () => {
 
     expect(sponsorship).toBeUndefined(); // No exact match found
     expect(eventEmitter.emit).toHaveBeenCalledWith(
-      'deposit.unmatched',
-      expect.any(DepositUnmatchedEvent),
+      'deposit.partiallyMatched',
+      expect.any(DepositPartiallyMatchedEvent),
     );
   });
 
