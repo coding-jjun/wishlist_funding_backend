@@ -70,7 +70,7 @@ export class MatchDepositUseCase {
        *  - 관리자는 해당 건에 대해서 환불 조치를 진행해야 합니다.
        */
       this.eventEmitter.emit(
-        'deposit.unmatched',
+        'deposit.partiallyMatched',
         new DepositPartiallyMatchedEvent(deposit),
       );
       throw this.g2gException.DepositPartiallyMatched;

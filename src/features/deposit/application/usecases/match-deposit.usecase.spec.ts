@@ -13,6 +13,7 @@ describe('MatchDepositUseCase', () => {
   let donationRepository: InMemoryProvisionalDonationRepository;
   let matchDepositUseCase: MatchDepositUseCase;
   let eventEmitter: EventEmitter2;
+  let g2gException: GiftogetherExceptions;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -28,6 +29,7 @@ describe('MatchDepositUseCase', () => {
     matchDepositUseCase = module.get(MatchDepositUseCase);
     donationRepository = module.get(InMemoryProvisionalDonationRepository);
     eventEmitter = module.get(EventEmitter2);
+    g2gException = module.get(GiftogetherExceptions);
 
     jest.spyOn(eventEmitter, 'emit'); // Spy on the `emit` method for assertions.
 
@@ -90,7 +92,9 @@ describe('MatchDepositUseCase', () => {
     );
 
     // Act
-    matchDepositUseCase.execute(deposit);
+    expect(() => matchDepositUseCase.execute(deposit)).toThrow(
+      g2gException.DepositPartiallyMatched,
+    );
 
     // Assert
     const sponsorship = donationRepository.findBySenderAndAmount(
