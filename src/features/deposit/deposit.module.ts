@@ -7,6 +7,7 @@ import { MatchDepositUseCase } from './application/usecases/match-deposit.usecas
 import { InMemoryDepositRepository } from './infrastructure/repositories/in-memory-deposit.repository';
 import { InMemoryProvisionalDonationRepository } from './infrastructure/repositories/in-memory-provisional-donation.repository';
 import { GiftogetherExceptions } from '../../filters/giftogether-exception';
+import { DepositEventHandler } from './domain/events/deposit-event.handler';
 
 @Module({
   imports: [EventEmitterModule.forRoot()],
@@ -18,6 +19,7 @@ import { GiftogetherExceptions } from '../../filters/giftogether-exception';
     InMemoryDepositRepository,
     InMemoryProvisionalDonationRepository,
     GiftogetherExceptions,
+    DepositEventHandler,
   ],
 })
 export class DepositModule {}
