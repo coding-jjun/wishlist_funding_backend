@@ -94,4 +94,9 @@ export class User implements IImageId {
    */
   @OneToOne(() => Image, (image) => image.subId)
   image: Image;
+
+  
+  @Column({ default:false })
+  isAdmin: boolean;
+
 }
