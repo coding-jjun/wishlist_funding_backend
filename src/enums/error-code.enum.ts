@@ -18,7 +18,7 @@ export enum ErrorCode {
   // RollingPaper
 
   // Comment
-  CommentNotFound = "0500",
+  CommentNotFound = '0500',
 
   // Image
   IncorrectImageUrl = '0600',
@@ -32,17 +32,17 @@ export enum ErrorCode {
   UserNotFound = '0700',
   UserNotUpdated = '0701',
   UserAlreadyDeleted = '0702',
-  NotValidEmail = "0703",
-  NotValidPhone = "0704",
-  NotValidNick = "0705",
-  PasswordIncorrect = "0706",
+  NotValidEmail = '0703',
+  NotValidPhone = '0704',
+  NotValidNick = '0705',
+  PasswordIncorrect = '0706',
   UserFailedToCreate = '0707',
-  UserAccessDenied = "0708",
+  UserAccessDenied = '0708',
 
   // Friend
   AlreadySendRequest = '0800',
   AlreadyFriend = '0801',
-  
+
   // Jwt
   JwtNotExpired = '0900',
   JwtExpired = '0901',
@@ -53,11 +53,11 @@ export enum ErrorCode {
   FailedLogout = '0906',
   RedisServerError = '0907',
   InvalidUserType = '0908',
-  
+
   // Default image
   DefaultImgIdNotExist = '1000',
   DefaultImgNotExist = '1001',
-  
+
   // Account
   AccountNotFound = '1100',
 
@@ -69,4 +69,8 @@ export enum ErrorCode {
 
   // Validators
   InvalidUrl = '1400',
+
+  // Deposits
+  DepositUnmatched = '1500',
+  DepositPartiallyMatched = '1501',
 }
