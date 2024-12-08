@@ -133,10 +133,11 @@ export class AuthController {
     res.cookie("refresh_token", tokenDto.refreshToken, this.cookieOptions);
     res.cookie("user", user, this.cookieOptions);
 
-    return {
-      data: new LoginResponseDto(tokenDto.accessToken, tokenDto.refreshToken, user),
+
+    res.status(200).json({
+      data: new LoginResponseDto(token.accessToken, token.refreshToken, user),
       message: "success"
-    }
+    })
     // return res.redirect(process.env.LOGIN_URL);
   }
 
