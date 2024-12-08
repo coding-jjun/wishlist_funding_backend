@@ -135,7 +135,7 @@ export class AuthController {
 
 
     res.status(200).json({
-      data: new LoginResponseDto(token.accessToken, token.refreshToken, user),
+      data: new LoginResponseDto(tokenDto.accessToken, tokenDto.refreshToken, user),
       message: "success"
     })
     // return res.redirect(process.env.LOGIN_URL);
