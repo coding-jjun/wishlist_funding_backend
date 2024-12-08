@@ -21,6 +21,7 @@ import { ValidCheck } from 'src/util/valid-check';
 import { Nickname } from 'src/util/nickname';
 import { ImageService } from '../image/image.service';
 import { ImageInstanceManager } from '../image/image-instance-manager';
+import { TokenService } from './token.service';
 
 @Module({
   imports: [
@@ -52,7 +53,8 @@ import { ImageInstanceManager } from '../image/image-instance-manager';
     Nickname,
     ImageService,
     ImageInstanceManager,
+    TokenService
   ],
-  exports: [PassportModule, AuthService],
+  exports: [PassportModule, AuthService, TokenService],
 })
 export class AuthModule {}
