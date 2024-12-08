@@ -26,6 +26,7 @@ import { TokenDto } from './dto/token.dto';
 import { RefreshTokenDto } from './dto/refresh.token.dto';
 import { UserType } from 'src/enums/user-type.enum';
 import { GuestLoginDto } from './dto/guest-login.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -136,7 +137,11 @@ export class AuthController {
     res.cookie("refresh_token", token.refreshToken, this.cookieOptions);
     res.cookie("user", user, this.cookieOptions);
 
-    return res.redirect(process.env.LOGIN_URL);
+    return {
+      data: new LoginResponseDto(token.accessToken, token.refreshToken, user),
+      message: "success"
+    }
+    // return res.redirect(process.env.LOGIN_URL);
   }
 
   @Post(`/signup`)
