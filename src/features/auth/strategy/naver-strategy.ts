@@ -7,7 +7,8 @@ import { Injectable } from '@nestjs/common';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { TokenDto } from '../dto/token.dto';
-import { UserType } from 'src/enums/user-type.enum';
+import { UserRole } from 'src/enums/user-role.enum';
+import { TokenService } from '../token.service';
 
 @Injectable()
 export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
@@ -15,6 +16,7 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
     private readonly configService: ConfigService,
     private readonly authService: AuthService,
     private readonly g2gException: GiftogetherExceptions,
+    private readonly tokenService: TokenService
   ) {
     super({
       clientID: configService.get<string>('NAVER_CLIENT_ID'),
@@ -49,8 +51,13 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
     catch (error) {
       // console.log("error->",error.message);
       type = "fail"
-      return done(null, { type: "fail" });
+      return done(null, { type: "fail", errCode: this.g2gException.UserAlreadyExists.getErrCode() });
       // done(null, {user, tokenDto, type});
+    }
+
+    // 관리자 접근 제한
+    if(user.isAdmin) {
+      return done(null, { type: "fail", errCode : this.g2gException.SnsLoginBlocked.getErrCode() })
     }
     
     // ! user == 회원 가입
@@ -85,9 +92,7 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
     }else{
       type = "login"
     }
-    const tokenDto = new TokenDto();
-    tokenDto.accessToken = await this.authService.createAccessToken(UserType.USER, user.userId);
-    tokenDto.refreshToken = await this.authService.createRefreshToken(user.userId);
+    const tokenDto = await this.tokenService.issueUserRoleBasedToken(user.userId, user.isAdmin);
     done(null, {user, tokenDto, type});
     
   }

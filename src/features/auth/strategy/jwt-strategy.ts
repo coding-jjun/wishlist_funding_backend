@@ -11,7 +11,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly jwtException: GiftogetherExceptions,
+    private readonly g2gException: GiftogetherExceptions,
   ) {
     super({
       // 토큰이 유효한지 확인하기 위한 키
@@ -28,13 +28,13 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
    */
   async validate(tokenInfo: any, done: any) {
     // 사용자 인증/인가
-    const userId = tokenInfo.userId;
+    const userId = tokenInfo.sub;
     const user = await this.userRepository.findOne({
       where: { userId },
       relations: ['account']
     });
     if(!user){
-      throw this.jwtException.UserNotFound;
+      throw this.g2gException.UserNotFound;
     }
     done(null, user)
   }

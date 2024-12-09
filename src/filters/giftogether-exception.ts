@@ -164,6 +164,13 @@ export class GiftogetherExceptions {
     ErrorCode.UserAccessDenied,
     HttpStatus.NOT_FOUND,
   );
+  // Admin
+  
+  SnsLoginBlocked = new GiftogetherException(
+    ErrorMsg.SnsLoginBlocked,
+    ErrorCode.SnsLoginBlocked,
+    HttpStatus.BAD_REQUEST,
+  );
 
   // Friend
   AlreadySendRequest = new GiftogetherException(
@@ -225,9 +232,9 @@ export class GiftogetherExceptions {
     ErrorCode.RedisServerError,
     HttpStatus.CONFLICT,
   );
-  InvalidUserType = new GiftogetherException(
-    ErrorMsg.InvalidUserType,
-    ErrorCode.InvalidUserType,
+  InvalidUserRole = new GiftogetherException(
+    ErrorMsg.InvalidUserRole,
+    ErrorCode.InvalidUserRole,
     HttpStatus.BAD_REQUEST,
   );
 
