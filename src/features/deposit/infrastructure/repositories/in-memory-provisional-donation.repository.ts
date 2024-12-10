@@ -11,16 +11,16 @@ export class InMemoryProvisionalDonationRepository {
     this.donations.push(donation);
   }
 
-  findBySender(sender: string): ProvisionalDonation[] {
-    return this.donations.filter((s) => s.sender === sender);
+  findBySenderSig(senderSig: string): ProvisionalDonation[] {
+    return this.donations.filter((s) => s.senderSig === senderSig);
   }
 
   findBySenderAndAmount(
-    sender: string,
+    senderSig: string,
     amount: number,
   ): ProvisionalDonation | undefined {
     return this.donations.find(
-      (s) => s.sender === sender && s.amount === amount,
+      (s) => s.senderSig === senderSig && s.amount === amount,
     );
   }
 }

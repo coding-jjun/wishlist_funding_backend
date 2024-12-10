@@ -19,7 +19,7 @@ export class MatchDepositUseCase {
 
   execute(deposit: Deposit): void {
     const donations: ProvisionalDonation[] =
-      this.donationRepository.findBySender(deposit.sender);
+      this.donationRepository.findBySenderSig(deposit.sender);
 
     if (donations.length === 0) {
       /**
@@ -56,7 +56,7 @@ export class MatchDepositUseCase {
       donation.approve();
       this.eventEmitter.emit(
         'deposit.matched',
-        new DepositMatchedEvent(deposit, donation.id),
+        new DepositMatchedEvent(deposit, donation, donation.id),
       );
     } else {
       /**
