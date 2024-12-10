@@ -5,6 +5,7 @@ export enum ErrorMsg {
   // Donation
   FundingClosed = '이미 마감된 펀딩입니다.',
   FundingNotClosed = '아직 마감되지 않은 펀딩입니다.',
+  DonationNotExists = '존재하지 않는 후원입니다.',
 
   // Gift
   IncorrectGiftUrl = '선물 URL이 유효하지 않습니다.',
@@ -38,7 +39,7 @@ export enum ErrorMsg {
   UserFailedToCreate = '사용자 생성에 실패했습니다',
   UserAccessDenied = '접근 권한이 없는 요청입니다.',
   // Admin
-  SnsLoginBlocked = "관리자 계정은 SNS 로그인을 사용할 수 없습니다.",
+  SnsLoginBlocked = '관리자 계정은 SNS 로그인을 사용할 수 없습니다.',
 
   // Friend
   AlreadySendRequest = '이미 친구 요청을 보냈습니다.',
