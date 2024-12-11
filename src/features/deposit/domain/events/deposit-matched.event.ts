@@ -5,6 +5,5 @@ export class DepositMatchedEvent {
   constructor(
     public readonly deposit: Deposit,
     public readonly provisionalDonation: ProvisionalDonation,
-    public readonly donationId: string,
   ) {}
 }

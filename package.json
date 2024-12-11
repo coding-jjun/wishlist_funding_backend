@@ -99,6 +99,9 @@
     "testEnvironment": "node",
     "roots": [
       "<rootDir>/"
+    ],
+    "setupFiles": [
+      "dotenv/config"
     ]
   }
 }

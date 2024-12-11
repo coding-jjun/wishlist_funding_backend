@@ -38,11 +38,11 @@ export class MatchDepositUseCase {
       throw this.g2gException.DepositUnmatched;
     }
 
-    const donation: ProvisionalDonation = donations.find(
+    const provDonation: ProvisionalDonation = donations.find(
       (v) => v.amount === deposit.amount,
     );
 
-    if (donation) {
+    if (provDonation) {
       /**
        * ## 일치
        *
@@ -53,10 +53,10 @@ export class MatchDepositUseCase {
        *  - 펀딩의 달성 금액이 업데이트 됩니다.
        *  - 후원자에게 후원이 정상적으로 처리되었음을 알리는 알림을 발송합니다.
        */
-      donation.approve();
+      provDonation.approve();
       this.eventEmitter.emit(
         'deposit.matched',
-        new DepositMatchedEvent(deposit, donation, donation.id),
+        new DepositMatchedEvent(deposit, provDonation),
       );
     } else {
       /**
