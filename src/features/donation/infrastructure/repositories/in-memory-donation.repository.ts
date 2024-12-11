@@ -3,7 +3,6 @@ import { Donation } from 'src/entities/donation.entity';
 import { Funding } from 'src/entities/funding.entity';
 import { CreateDonationDto } from '../../dto/create-donation.dto';
 import { User } from 'src/entities/user.entity';
-import orderId from 'order-id';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 /**
@@ -27,7 +26,7 @@ export class InMemoryDonationRepository {
     // assign createDonationDto into donation entity
     donation.donAmnt = createDonationDto.donAmnt;
     donation.user = user;
-    donation.orderId = orderId('key').generate(); // Generate unique order ID
+    donation.orderId = require('order-id')('key').generate(); // Generate unique order ID
 
     this.donations.push(donation); // Add donation to in-memory storage
 

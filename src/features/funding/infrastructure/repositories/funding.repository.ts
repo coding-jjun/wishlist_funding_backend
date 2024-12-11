@@ -21,7 +21,7 @@ export class FundingRepository {
       .update(funding)
       .set({ fundSum: () => 'fundSum + :amount' })
       .setParameter('amount', amount)
-      .where('fundId: :fundId', { fundId: funding.fundId })
+      .where('fundId = :fundId', { fundId: funding.fundId })
       .execute();
   }
 }

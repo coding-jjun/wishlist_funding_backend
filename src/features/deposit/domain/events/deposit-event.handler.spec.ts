@@ -212,19 +212,23 @@ describe('DepositEventHandler', () => {
 
     // Verify notifications
     expect(notiSpy).toHaveBeenCalledTimes(2);
+
+    // 후원자에게 알림이 정상적으로 보내졌습니다
     expect(notiSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        recvId: 'donator',
+        recvId: matchedDonor.userId,
         notiType: 'DonationSuccess',
-        subId: 'fund-uuid',
+        subId: mockFunding.fundUuid,
       }),
     );
+
+    // 펀딩 주인에게 알림이 정상적으로 보내졌습니다
     expect(notiSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        recvId: 'fund-owner',
-        sendId: 'donator',
+        recvId: fundingOwner.userId,
+        sendId: matchedDonor.userId,
         notiType: 'NewDonate',
-        subId: 'fund-uuid',
+        subId: mockFunding.fundUuid,
       }),
     );
   });
