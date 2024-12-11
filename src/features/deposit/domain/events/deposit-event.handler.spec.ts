@@ -21,6 +21,7 @@ import { Comment } from 'src/entities/comment.entity';
 import { Address } from 'src/entities/address.entity';
 import { Image } from 'src/entities/image.entity';
 import { Gift } from 'src/entities/gift.entity';
+import { readFileSync } from 'fs';
 
 // TODO - move test module options into nice place
 const entities = [
@@ -44,8 +45,16 @@ const dataSourceOptions: DataSourceOptions = {
   username: process.env.DB_TEST_USERNAME,
   database: process.env.DB_TEST_DATABASE,
   synchronize: true,
-  logging: true,
+  logging: false,
   dropSchema: true,
+  ssl: {
+    ca: readFileSync('global-bundle.pem'),
+  },
+  extra: {
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  },
 };
 
 /**
