@@ -133,6 +133,7 @@ export class AuthController {
     res.cookie("refresh_token", tokenDto.refreshToken, this.cookieOptions);
     res.cookie("user", user, this.cookieOptions);
 
+
     res.status(200).json({
       data: new LoginResponseDto(tokenDto.accessToken, tokenDto.refreshToken, user),
       message: "success"

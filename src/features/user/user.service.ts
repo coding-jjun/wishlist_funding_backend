@@ -64,8 +64,8 @@ export class UserService {
       image.imgUrl,
       user.userId,
       user.isAdmin,
-      user.userEmail
-    )
+      user.userEmail,
+    );
   }
 
   async updateUser(
