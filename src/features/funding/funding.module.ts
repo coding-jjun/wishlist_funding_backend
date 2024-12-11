@@ -21,6 +21,7 @@ import { AuthModule } from '../auth/auth.module';
 import { ImageService } from '../image/image.service';
 import { S3Service } from '../image/s3.service';
 import { ImageInstanceManager } from '../image/image-instance-manager';
+import { FundingRepository } from './infrastructure/repositories/funding.repository';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { ImageInstanceManager } from '../image/image-instance-manager';
     ImageService,
     S3Service,
     ImageInstanceManager,
+    FundingRepository,
   ],
   exports: [FundingService],
 })

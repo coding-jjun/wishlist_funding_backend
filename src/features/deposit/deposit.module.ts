@@ -9,9 +9,19 @@ import { InMemoryProvisionalDonationRepository } from './infrastructure/reposito
 import { GiftogetherExceptions } from '../../filters/giftogether-exception';
 import { DepositEventHandler } from './domain/events/deposit-event.handler';
 import { InMemoryDonationRepository } from '../donation/infrastructure/repositories/in-memory-donation.repository';
+import { FundingRepository } from '../funding/infrastructure/repositories/funding.repository';
+import { NotificationService } from '../notification/notification.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Funding } from 'src/entities/funding.entity';
+import { Notification } from 'src/entities/notification.entity';
+import { User } from 'src/entities/user.entity';
+import { Donation } from 'src/entities/donation.entity';
 
 @Module({
-  imports: [EventEmitterModule.forRoot()],
+  imports: [
+    EventEmitterModule.forRoot(),
+    TypeOrmModule.forFeature([Funding, Notification, User, Donation]),
+  ],
   controllers: [DepositController],
   providers: [
     DepositService,
@@ -22,6 +32,8 @@ import { InMemoryDonationRepository } from '../donation/infrastructure/repositor
     GiftogetherExceptions,
     DepositEventHandler,
     InMemoryDonationRepository,
+    FundingRepository,
+    NotificationService,
   ],
 })
 export class DepositModule {}

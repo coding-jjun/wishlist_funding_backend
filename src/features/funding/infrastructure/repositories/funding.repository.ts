@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Funding } from 'src/entities/funding.entity';
 import { Repository } from 'typeorm';
 
@@ -10,7 +11,9 @@ import { Repository } from 'typeorm';
  */
 @Injectable()
 export class FundingRepository {
-  constructor(private readonly repository: Repository<Funding>) {}
+  constructor(
+    @InjectRepository(Funding) private readonly repository: Repository<Funding>,
+  ) {}
 
   async increasefundSum(funding: Funding, amount: number) {
     this.repository
