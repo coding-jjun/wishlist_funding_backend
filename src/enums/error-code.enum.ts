@@ -38,7 +38,7 @@ export enum ErrorCode {
   NotValidNick = '0705',
   PasswordIncorrect = '0706',
   UserFailedToCreate = '0707',
-  UserAccessDenied = '0708',
+  UserAccessDenied = "0708",
   // Admin
   SnsLoginBlocked = "0710",
 
@@ -56,7 +56,7 @@ export enum ErrorCode {
   FailedLogout = '0906',
   RedisServerError = '0907',
   InvalidUserRole = '0908',
-
+  
   // Default image
   DefaultImgIdNotExist = '1000',
   DefaultImgNotExist = '1001',
