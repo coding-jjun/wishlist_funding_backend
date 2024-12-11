@@ -19,7 +19,7 @@ export class MatchDepositUseCase {
 
   execute(deposit: Deposit): void {
     const donations: ProvisionalDonation[] =
-      this.donationRepository.findBySenderSig(deposit.sender);
+      this.donationRepository.findBySenderSig(deposit.senderSig);
 
     if (donations.length === 0) {
       /**

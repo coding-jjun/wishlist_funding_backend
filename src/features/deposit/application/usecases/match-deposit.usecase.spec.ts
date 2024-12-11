@@ -151,7 +151,7 @@ describe('MatchDepositUseCase', () => {
 
     // Assert
     const matchedSponsorship = donationRepository.findBySenderAndAmount(
-      deposit.sender,
+      deposit.senderSig,
       deposit.amount,
     );
 
@@ -181,7 +181,7 @@ describe('MatchDepositUseCase', () => {
 
     // Assert
     const sponsorship = donationRepository.findBySenderAndAmount(
-      deposit.sender,
+      deposit.senderSig,
       deposit.amount,
     );
 
@@ -211,7 +211,7 @@ describe('MatchDepositUseCase', () => {
 
     // Assert
     const sponsorship = donationRepository.findBySenderAndAmount(
-      deposit.sender,
+      deposit.senderSig,
       deposit.amount,
     );
 

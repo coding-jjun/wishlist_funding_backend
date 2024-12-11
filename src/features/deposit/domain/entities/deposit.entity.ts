@@ -15,7 +15,7 @@ export class Deposit {
   }
 
   constructor(
-    public readonly sender: string, // "홍길동-1234"
+    public readonly senderSig: string, // "홍길동-1234"
     public readonly receiver: string,
     public readonly amount: number,
     public readonly transferDate: Date,
