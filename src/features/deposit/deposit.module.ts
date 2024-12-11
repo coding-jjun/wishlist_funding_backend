@@ -8,6 +8,7 @@ import { InMemoryDepositRepository } from './infrastructure/repositories/in-memo
 import { InMemoryProvisionalDonationRepository } from './infrastructure/repositories/in-memory-provisional-donation.repository';
 import { GiftogetherExceptions } from '../../filters/giftogether-exception';
 import { DepositEventHandler } from './domain/events/deposit-event.handler';
+import { InMemoryDonationRepository } from '../donation/infrastructure/repositories/in-memory-donation.repository';
 
 @Module({
   imports: [EventEmitterModule.forRoot()],
@@ -20,6 +21,7 @@ import { DepositEventHandler } from './domain/events/deposit-event.handler';
     InMemoryProvisionalDonationRepository,
     GiftogetherExceptions,
     DepositEventHandler,
+    InMemoryDonationRepository,
   ],
 })
 export class DepositModule {}
