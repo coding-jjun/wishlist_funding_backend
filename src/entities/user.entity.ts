@@ -61,7 +61,7 @@ export class User implements IImageId {
     onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'userAcc' })
-  account?: Account;
+  account: Account;
 
   @CreateDateColumn()
   regAt: Date;

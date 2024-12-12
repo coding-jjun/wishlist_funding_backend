@@ -34,10 +34,10 @@ export class Comment {
   @CreateDateColumn()
   regAt: Date;
 
-  @Column('boolean', { default: false })
+  @Column('bool', { default: false })
   isMod: boolean;
 
-  @Column('boolean', { default: false })
+  @Column('bool', { default: false })
   isDel: boolean;
 
   constructor(comment: Partial<Comment>) {
