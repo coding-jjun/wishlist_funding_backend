@@ -1,6 +1,6 @@
 import { UploadDepositUseCase } from './upload-deposit.usecase';
-import { InMemoryDepositRepository } from '../../infrastructure/repositories/in-memory-deposit.repository';
-import { Deposit } from '../../domain/entities/deposit.entity';
+import { InMemoryDepositRepository } from '../infrastructure/repositories/in-memory-deposit.repository';
+import { Deposit } from '../domain/entities/deposit.entity';
 
 describe('UploadDepositUseCase', () => {
   let depositRepository: InMemoryDepositRepository;

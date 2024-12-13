@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { InMemoryProvisionalDonationRepository } from '../../infrastructure/repositories/in-memory-provisional-donation.repository';
+import { InMemoryProvisionalDonationRepository } from '../infrastructure/repositories/in-memory-provisional-donation.repository';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { DepositMatchedEvent } from '../../domain/events/deposit-matched.event';
-import { DepositUnmatchedEvent } from '../../domain/events/deposit-unmatched.event';
-import { Deposit } from '../../domain/entities/deposit.entity';
-import { GiftogetherExceptions } from '../../../../filters/giftogether-exception';
-import { DepositStatus } from '../../../../enums/deposit-status.enum';
-import { ProvisionalDonation } from '../../domain/entities/provisional-donation.entity';
-import { DepositPartiallyMatchedEvent } from '../../domain/events/deposit-partially-matched.event';
+import { DepositMatchedEvent } from '../domain/events/deposit-matched.event';
+import { DepositUnmatchedEvent } from '../domain/events/deposit-unmatched.event';
+import { Deposit } from '../domain/entities/deposit.entity';
+import { GiftogetherExceptions } from '../../../filters/giftogether-exception';
+import { DepositStatus } from '../../../enums/deposit-status.enum';
+import { ProvisionalDonation } from '../domain/entities/provisional-donation.entity';
+import { DepositPartiallyMatchedEvent } from '../domain/events/deposit-partially-matched.event';
 
 @Injectable()
 export class MatchDepositUseCase {
