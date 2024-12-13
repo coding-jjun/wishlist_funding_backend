@@ -168,6 +168,8 @@ describe('DepositEventHandler', () => {
   });
 
   it('should be defined', () => {
+    expect(process.env.NODE_ENV).toBeDefined();
+    expect(process.env.NODE_ENV).toBe('test');
     expect(process.env.DB_HOST).toBeDefined();
     expect(process.env.DB_TEST_DATABASE).toBeDefined();
     expect(process.env.DB_TEST_PASSWORD).toBeDefined();
@@ -198,7 +200,7 @@ describe('DepositEventHandler', () => {
     const fundingSpy = jest.spyOn(fundingRepository, 'increasefundSum');
     const notiSpy = jest.spyOn(notificationService, 'createNoti');
 
-    await handler.handleDepositMatched(event);
+    handler.handleDepositMatched(event);
 
     // Verify donation creation
     expect(donationSpy).toHaveBeenCalledWith(
@@ -231,5 +233,11 @@ describe('DepositEventHandler', () => {
         subId: mockFunding.fundUuid,
       }),
     );
+
+    // donation 인스턴스가 실제로 저장이 되었습니다
+    const donations = await donationRepository.getAllByFunding(mockFunding);
+    expect(donations).toHaveLength(1);
+    expect(donations[0].funding).toBe(mockFunding);
+    expect(donations[0].user).toBe(matchedDonor);
   });
 });
