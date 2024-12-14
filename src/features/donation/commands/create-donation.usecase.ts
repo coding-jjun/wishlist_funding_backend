@@ -21,7 +21,7 @@ export class CreateDonationUseCase {
     const { funding, amount, donor } = cmd;
     const donation = Donation.create(funding, donor, amount, this.g2gException);
 
-    this.donationRepo.save(donation);
+    await this.donationRepo.save(donation);
 
     return donation;
   }

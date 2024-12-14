@@ -14,7 +14,7 @@ export class IncreaseFundSumUseCase {
   async execute(cmd: IncreaseFundSumCommand) {
     const { funding, amount } = cmd;
 
-    this.fundingRepo
+    await this.fundingRepo
       .createQueryBuilder()
       .update(funding)
       .set({ fundSum: () => 'fundSum + :amount' })

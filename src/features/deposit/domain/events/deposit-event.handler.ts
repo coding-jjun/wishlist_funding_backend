@@ -26,16 +26,16 @@ export class DepositEventHandler {
    * 4. 펀딩주인에게 알림을 보냅니다. `NewDonate`
    */
   @OnEvent('deposit.matched')
-  handleDepositMatched(event: DepositMatchedEvent) {
+  async handleDepositMatched(event: DepositMatchedEvent) {
     const { deposit, provisionalDonation } = event;
     const { funding, senderUser } = provisionalDonation;
     // 1
-    this.createDonation.execute(
+    await this.createDonation.execute(
       new CreateDonationCommand(funding, deposit.amount, senderUser),
     );
 
     // 2
-    this.increaseFundSum.execute(
+    await this.increaseFundSum.execute(
       new IncreaseFundSumCommand(funding, deposit.amount),
     );
 
@@ -46,7 +46,7 @@ export class DepositEventHandler {
       notiType: NotiType.DonationSuccess,
       subId: funding.fundUuid,
     });
-    this.notiService.createNoti(createNotificationDtoForSender);
+    await this.notiService.createNoti(createNotificationDtoForSender);
 
     // 4
     const createNotificationDtoForReceiver = new CreateNotificationDto({
@@ -55,7 +55,7 @@ export class DepositEventHandler {
       notiType: NotiType.NewDonate,
       subId: funding.fundUuid,
     });
-    this.notiService.createNoti(createNotificationDtoForReceiver);
+    await this.notiService.createNoti(createNotificationDtoForReceiver);
   }
 
   @OnEvent('deposit.partiallyMatched')

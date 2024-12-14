@@ -51,6 +51,8 @@ export class Donation {
     this.funding = funding;
     this.user = donor;
     this.donAmnt = amount;
+    this.donStat = DonationStatus.Donated;
+    this.orderId = require('order-id')('key').generate();
   }
 
   static create(
@@ -63,6 +65,8 @@ export class Donation {
       // [정책] 후원금액의 최대치는 펀딩금액을 넘지 못합니다.
       throw g2gException.DonationAmountExceeded;
     }
+
+    // TODO - Add RollingPaper for inner object
     return new Donation(funding, donor, amount);
   }
 }
