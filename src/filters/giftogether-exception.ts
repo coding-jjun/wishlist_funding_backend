@@ -46,6 +46,11 @@ export class GiftogetherExceptions {
     ErrorCode.DonationNotExists,
     HttpStatus.NOT_FOUND,
   );
+  DonationAmountExceeded = new GiftogetherException(
+    ErrorMsg.DonationAmountExceeded,
+    ErrorCode.DonationAmountExceeded,
+    HttpStatus.BAD_REQUEST,
+  );
 
   // Gift
   IncorrectGiftUrl = new GiftogetherException(

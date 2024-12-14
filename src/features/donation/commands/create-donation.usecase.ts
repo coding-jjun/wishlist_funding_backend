@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Donation } from 'src/entities/donation.entity';
 import { Repository } from 'typeorm';
 import { CreateDonationCommand } from './create-donation.command';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 /**
  * 이 유스케이스가 호출되는 시점은 DepositMatched 이벤트가 발행된 직후로,
@@ -13,9 +14,15 @@ export class CreateDonationUseCase {
   constructor(
     @InjectRepository(Donation)
     private readonly donationRepo: Repository<Donation>,
+    private readonly g2gException: GiftogetherExceptions,
   ) {}
+
   async execute(cmd: CreateDonationCommand): Promise<Donation> {
     const { funding, amount, donor } = cmd;
-    
+    const donation = Donation.create(funding, donor, amount, this.g2gException);
+
+    this.donationRepo.save(donation);
+
+    return donation;
   }
 }
