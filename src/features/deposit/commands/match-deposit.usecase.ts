@@ -12,14 +12,16 @@ import { DepositPartiallyMatchedEvent } from '../domain/events/deposit-partially
 @Injectable()
 export class MatchDepositUseCase {
   constructor(
-    private readonly donationRepository: InMemoryProvisionalDonationRepository,
     private readonly eventEmitter: EventEmitter2,
     private readonly g2gException: GiftogetherExceptions,
+    private readonly findDonationsBySenderSig: FindDonationsBySenderSigUseCase,
+    private readonly increaseFundSum: IncreaseFundSumUseCase,
+    private readonly createDonation: CreateDonationUseCase,
   ) {}
 
   execute(deposit: Deposit): void {
     const donations: ProvisionalDonation[] =
-      this.donationRepository.findBySenderSig(deposit.senderSig);
+      this.findDonationsBySenderSig.execute(deposit.senderSig);
 
     if (donations.length === 0) {
       /**

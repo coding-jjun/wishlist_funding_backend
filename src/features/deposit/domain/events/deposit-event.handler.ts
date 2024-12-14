@@ -3,18 +3,19 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { DepositMatchedEvent } from './deposit-matched.event';
 import { DepositPartiallyMatchedEvent } from './deposit-partially-matched.event';
 import { DepositUnmatchedEvent } from './deposit-unmatched.event';
-import { InMemoryDonationRepository } from 'src/features/donation/infrastructure/repositories/in-memory-donation.repository';
-import { CreateDonationDto } from 'src/features/donation/dto/create-donation.dto';
-import { FundingRepository } from 'src/features/funding/infrastructure/repositories/funding.repository';
 import { NotificationService } from 'src/features/notification/notification.service';
 import { CreateNotificationDto } from 'src/features/notification/dto/create-notification.dto';
 import { NotiType } from 'src/enums/noti-type.enum';
+import { CreateDonationUseCase } from 'src/features/donation/commands/create-donation.usecase';
+import { CreateDonationCommand } from 'src/features/donation/commands/create-donation.command';
+import { IncreaseFundSumUseCase } from 'src/features/funding/commands/increase-fundsum.usecase';
+import { IncreaseFundSumCommand } from 'src/features/funding/commands/increase-fundsum.command';
 
 @Injectable()
 export class DepositEventHandler {
   constructor(
-    private readonly donationRepository: InMemoryDonationRepository,
-    private readonly fundingRepository: FundingRepository,
+    private readonly createDonation: CreateDonationUseCase,
+    private readonly increaseFundSum: IncreaseFundSumUseCase,
     private readonly notiService: NotificationService,
   ) {}
 
@@ -29,13 +30,14 @@ export class DepositEventHandler {
     const { deposit, provisionalDonation } = event;
     const { funding, senderUser } = provisionalDonation;
     // 1
-    const createDonationDto = new CreateDonationDto();
-    createDonationDto.donAmnt = deposit.amount;
-
-    this.donationRepository.create(funding, createDonationDto, senderUser);
+    this.createDonation.execute(
+      new CreateDonationCommand(funding, deposit.amount, senderUser),
+    );
 
     // 2
-    this.fundingRepository.increasefundSum(funding, deposit.amount);
+    this.increaseFundSum.execute(
+      new IncreaseFundSumCommand(funding, deposit.amount),
+    );
 
     // 3
     const createNotificationDtoForSender = new CreateNotificationDto({
