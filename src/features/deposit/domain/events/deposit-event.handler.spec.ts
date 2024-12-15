@@ -1,9 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DepositEventHandler } from './deposit-event.handler';
 import { DepositMatchedEvent } from './deposit-matched.event';
-import { FundingRepository } from 'src/features/funding/infrastructure/repositories/funding.repository';
 import { NotificationService } from 'src/features/notification/notification.service';
-import { InMemoryDonationRepository } from 'src/features/donation/infrastructure/repositories/in-memory-donation.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSourceOptions } from 'typeorm';
 import { User } from 'src/entities/user.entity';
@@ -22,6 +20,9 @@ import { Address } from 'src/entities/address.entity';
 import { Image } from 'src/entities/image.entity';
 import { Gift } from 'src/entities/gift.entity';
 import { readFileSync } from 'fs';
+import { CreateDonationUseCase } from 'src/features/donation/commands/create-donation.usecase';
+import { IncreaseFundSumUseCase } from 'src/features/funding/commands/increase-fundsum.usecase';
+import { GetDonationsByFundingUseCase } from 'src/features/donation/queries/get-donations-by-funding.usecase';
 
 // TODO - move test module options into nice place
 const entities = [
@@ -69,14 +70,14 @@ const dataSourceOptions: DataSourceOptions = {
  */
 describe('DepositEventHandler', () => {
   let handler: DepositEventHandler;
-  let fundingRepository: FundingRepository;
   let notificationService: NotificationService;
-  let donationRepository: InMemoryDonationRepository;
   let fundingOwner: User;
   let matchedDonor: User;
   let partiallyMatchedDonor: User;
   let unmatchedDonator: User;
   let mockFunding: Funding;
+  let createDonation: CreateDonationUseCase;
+  let increaseFundSum: IncreaseFundSumUseCase;
 
   beforeEach(async () => {
     // TODO - move test module options into nice place
@@ -87,19 +88,18 @@ describe('DepositEventHandler', () => {
       ],
       providers: [
         DepositEventHandler,
-        FundingRepository,
         NotificationService,
-        InMemoryDonationRepository,
         GiftogetherExceptions,
+        CreateDonationUseCase,
+        IncreaseFundSumUseCase,
+        GetDonationsByFundingUseCase,
       ],
     }).compile();
 
     handler = module.get(DepositEventHandler);
-    fundingRepository = module.get(FundingRepository);
     notificationService = module.get(NotificationService);
-    donationRepository = module.get<InMemoryDonationRepository>(
-      InMemoryDonationRepository,
-    );
+    createDonation = module.get(CreateDonationUseCase);
+    increaseFundSum = module.get(IncreaseFundSumUseCase);
 
     // TODO - call mock factory
     fundingOwner = {
@@ -196,21 +196,25 @@ describe('DepositEventHandler', () => {
     );
     const event = new DepositMatchedEvent(deposit, provisionalDonation);
 
-    const donationSpy = jest.spyOn(donationRepository, 'create');
-    const fundingSpy = jest.spyOn(fundingRepository, 'increasefundSum');
+    const donationSpy = jest.spyOn(createDonation, 'execute');
+    const fundingSpy = jest.spyOn(increaseFundSum, 'execute');
     const notiSpy = jest.spyOn(notificationService, 'createNoti');
 
     handler.handleDepositMatched(event);
 
     // Verify donation creation
     expect(donationSpy).toHaveBeenCalledWith(
-      mockFunding,
-      expect.objectContaining({ donAmnt: deposit.amount }),
-      matchedDonor,
+      expect.objectContaining({
+        funding: mockFunding,
+        amount: deposit.amount,
+        donor: matchedDonor,
+      }),
     );
 
     // Verify funding update
-    expect(fundingSpy).toHaveBeenCalledWith(mockFunding, deposit.amount);
+    expect(fundingSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ funding: mockFunding, amount: deposit.amount }),
+    );
 
     // Verify notifications
     expect(notiSpy).toHaveBeenCalledTimes(2);
@@ -233,11 +237,5 @@ describe('DepositEventHandler', () => {
         subId: mockFunding.fundUuid,
       }),
     );
-
-    // donation 인스턴스가 실제로 저장이 되었습니다
-    const donations = await donationRepository.getAllByFunding(mockFunding);
-    expect(donations).toHaveLength(1);
-    expect(donations[0].funding).toBe(mockFunding);
-    expect(donations[0].user).toBe(matchedDonor);
   });
 });
