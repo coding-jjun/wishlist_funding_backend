@@ -137,13 +137,7 @@ export class DonationService {
     const donAmnt = createDonationDto.donAmnt;
     const updateFunding = await this.updateFundingSum(funding, donAmnt);
 
-    const donation = new Donation();
-    donation.user = user;
-    donation.funding = updateFunding;
-
-    const orderId = require('order-id')('key').generate();
-    donation.orderId = orderId;
-    donation.donAmnt = donAmnt;
+    const donation = Donation.create(funding, user, donAmnt, this.g2gException);
 
     const savedDonation = await this.donationRepo.save(donation);
 
