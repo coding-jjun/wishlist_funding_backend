@@ -42,6 +42,8 @@ import { Gift } from './entities/gift.entity';
 import { GiftogetherError } from './entities/error.entity';
 import { GiftogetherMiddleware } from './interfaces/giftogether.middleware';
 import { DepositModule } from './features/deposit/deposit.module';
+import { Deposit } from './features/deposit/domain/entities/deposit.entity';
+import { ProvisionalDonation } from './features/deposit/domain/entities/provisional-donation.entity';
 @Module({
   imports: [
     ScheduleModule.forRoot(),
@@ -76,6 +78,8 @@ import { DepositModule } from './features/deposit/deposit.module';
         Account,
         Gift,
         GiftogetherError,
+        Deposit,
+        ProvisionalDonation,
       ],
       ssl: {
         ca: readFileSync('global-bundle.pem'),

@@ -17,27 +17,27 @@ export class Deposit {
   @PrimaryGeneratedColumn()
   readonly depositId: number;
 
-  @Column('string')
+  @Column('varchar')
   readonly senderSig: string; // 보내는분, '홍길동-1234'
 
-  @Column('string')
+  @Column('varchar')
   readonly receiver: string; // 받는분
 
   @IsInt()
   @Min(0)
-  @Column('number')
+  @Column('int')
   readonly amount: number;
 
   @Column('date')
   readonly transferDate: Date;
 
-  @Column('string')
+  @Column('varchar')
   readonly depositBank: string; // 이체은행
 
-  @Column('string')
+  @Column('varchar')
   readonly depositAccount: string; // 이체계좌번호
 
-  @Column('string')
+  @Column('varchar')
   readonly withdrawalAccount: string; // 환불계좌번호
 
   @Column({

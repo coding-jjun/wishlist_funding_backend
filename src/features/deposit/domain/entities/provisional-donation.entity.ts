@@ -22,22 +22,22 @@ export class ProvisionalDonation {
   @PrimaryGeneratedColumn()
   readonly provDonId: number;
 
-  @Column('string')
+  @Column('varchar')
   readonly senderSig: string; // '홍길동-1234'
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onDelete: 'SET NULL' })
   @JoinColumn({
     name: 'senderUserId',
-    referencedColumnName: 'senderUserId',
+    referencedColumnName: 'userId',
   })
   readonly senderUser: User;
 
   @IsInt()
   @Min(0)
-  @Column('number')
+  @Column('int')
   readonly amount: number;
 
-  @ManyToOne(() => Funding)
+  @ManyToOne(() => Funding, { onDelete: 'SET NULL' })
   @JoinColumn({
     name: 'fundId',
     referencedColumnName: 'fundId',
