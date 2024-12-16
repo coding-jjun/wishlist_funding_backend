@@ -1,6 +1,6 @@
 export class DepositDto {
   constructor(
-    public readonly sender: string,
+    public readonly senderSig: string,
     public readonly receiver: string,
     public readonly amount: number,
     public readonly transferDate: Date,
