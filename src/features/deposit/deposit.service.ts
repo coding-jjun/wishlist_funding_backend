@@ -12,7 +12,8 @@ export class DepositService {
   ) {}
 
   async uploadDeposit(depositData: DepositDto): Promise<DepositDto> {
-    const deposit: Deposit = this.uploadDepositUseCase.execute(depositData);
+    const deposit: Deposit =
+      await this.uploadDepositUseCase.execute(depositData);
 
     this.matchDepositUseCase.execute(deposit);
 
