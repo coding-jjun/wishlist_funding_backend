@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { DepositEventHandler } from './deposit-event.handler';
 import { DepositMatchedEvent } from './deposit-matched.event';
 import { NotificationService } from 'src/features/notification/notification.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { DataSourceOptions } from 'typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { User } from 'src/entities/user.entity';
 import { Funding } from 'src/entities/funding.entity';
 import { Donation } from 'src/entities/donation.entity';
@@ -19,12 +19,12 @@ import { Comment } from 'src/entities/comment.entity';
 import { Address } from 'src/entities/address.entity';
 import { Image } from 'src/entities/image.entity';
 import { Gift } from 'src/entities/gift.entity';
-import { readFileSync } from 'fs';
 import { CreateDonationUseCase } from 'src/features/donation/commands/create-donation.usecase';
 import { IncreaseFundSumUseCase } from 'src/features/funding/commands/increase-fundsum.usecase';
 import { GetDonationsByFundingUseCase } from 'src/features/donation/queries/get-donations-by-funding.usecase';
+import { Provider } from '@nestjs/common';
+import { createMockRepository } from '../../../../tests/create-mock-repository';
 
-// TODO - move test module options into nice place
 const entities = [
   User,
   Account,
@@ -36,27 +36,6 @@ const entities = [
   Donation,
   Notification,
 ];
-
-// TODO - move test module options into nice place
-const dataSourceOptions: DataSourceOptions = {
-  type: 'postgres',
-  host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT) || 5432,
-  password: process.env.DB_TEST_PASSWORD,
-  username: process.env.DB_TEST_USERNAME,
-  database: process.env.DB_TEST_DATABASE,
-  synchronize: true,
-  logging: false,
-  dropSchema: true,
-  ssl: {
-    ca: readFileSync('global-bundle.pem'),
-  },
-  extra: {
-    ssl: {
-      rejectUnauthorized: false,
-    },
-  },
-};
 
 /**
  * ## 전제조건
@@ -82,10 +61,6 @@ describe('DepositEventHandler', () => {
   beforeEach(async () => {
     // TODO - move test module options into nice place
     const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        TypeOrmModule.forRoot({ ...dataSourceOptions, autoLoadEntities: true }),
-        TypeOrmModule.forFeature(entities),
-      ],
       providers: [
         DepositEventHandler,
         NotificationService,
@@ -93,6 +68,24 @@ describe('DepositEventHandler', () => {
         CreateDonationUseCase,
         IncreaseFundSumUseCase,
         GetDonationsByFundingUseCase,
+        /**
+         * 아래 프로바이더들은 Repository<Entity>를 모킹하기 위해
+         * 사용됩니다. 즉, 단위테스트를 위해 실제 RDS에 데이터를 저장하는
+         * 것이 아닌, MockRepository에 호출만 합니다.
+         *
+         * 만약 실제로 데이터를 넣고 그 결과를 재가공해야 할 필요가 있다면
+         * 아래 두가지 방법 중 하나를 사용할 수 있습니다:
+         *
+         * 1. TypeOrmModule을 `imports:`에 추가한다. 테스트 DB에 직접
+         *    데이터를 CRUD한다.
+         * 2. 사용하고자 하는 메서드만 In Memory에 조작을 가한다.
+         */
+        ...entities.map(
+          (e): Provider => ({
+            provide: getRepositoryToken(e),
+            useValue: createMockRepository(Repository<typeof e>),
+          }),
+        ),
       ],
     }).compile();
 
@@ -167,15 +160,6 @@ describe('DepositEventHandler', () => {
       '실수로 보내는 분에 실명을 적어넣은 순진한 후원자';
   });
 
-  it('should be defined', () => {
-    expect(process.env.NODE_ENV).toBeDefined();
-    expect(process.env.NODE_ENV).toBe('test');
-    expect(process.env.DB_HOST).toBeDefined();
-    expect(process.env.DB_TEST_DATABASE).toBeDefined();
-    expect(process.env.DB_TEST_PASSWORD).toBeDefined();
-    expect(process.env.DB_TEST_USERNAME).toBeDefined();
-  });
-
   it('should handle deposit.matched event', async () => {
     const deposit = new Deposit(
       'sender',
@@ -200,7 +184,7 @@ describe('DepositEventHandler', () => {
     const fundingSpy = jest.spyOn(increaseFundSum, 'execute');
     const notiSpy = jest.spyOn(notificationService, 'createNoti');
 
-    handler.handleDepositMatched(event);
+    await handler.handleDepositMatched(event);
 
     // Verify donation creation
     expect(donationSpy).toHaveBeenCalledWith(
@@ -210,6 +194,8 @@ describe('DepositEventHandler', () => {
         donor: matchedDonor,
       }),
     );
+
+    expect(donationSpy).toHaveBeenCalledTimes(1);
 
     // Verify funding update
     expect(fundingSpy).toHaveBeenCalledWith(
