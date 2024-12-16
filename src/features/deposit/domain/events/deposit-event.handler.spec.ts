@@ -57,6 +57,7 @@ describe('DepositEventHandler', () => {
   let mockFunding: Funding;
   let createDonation: CreateDonationUseCase;
   let increaseFundSum: IncreaseFundSumUseCase;
+  let g2gException: GiftogetherExceptions;
 
   beforeEach(async () => {
     // TODO - move test module options into nice place
@@ -93,6 +94,7 @@ describe('DepositEventHandler', () => {
     notificationService = module.get(NotificationService);
     createDonation = module.get(CreateDonationUseCase);
     increaseFundSum = module.get(IncreaseFundSumUseCase);
+    g2gException = module.get(GiftogetherExceptions);
 
     // TODO - call mock factory
     fundingOwner = {
@@ -161,7 +163,7 @@ describe('DepositEventHandler', () => {
   });
 
   it('should handle deposit.matched event', async () => {
-    const deposit = new Deposit(
+    const deposit = Deposit.create(
       'sender',
       'receiver',
       1000,
@@ -171,8 +173,8 @@ describe('DepositEventHandler', () => {
       'withdrawalAccount',
     );
 
-    const provisionalDonation = new ProvisionalDonation(
-      '1',
+    const provisionalDonation = ProvisionalDonation.create(
+      g2gException,
       matchedDonor.userName + '-1234',
       matchedDonor,
       1000,
