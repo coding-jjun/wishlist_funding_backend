@@ -77,4 +77,7 @@ export enum ErrorCode {
   // Deposits
   DepositUnmatched = '1500',
   DepositPartiallyMatched = '1501',
+
+  // Generic
+  InvalidStatusChange = '1600',
 }

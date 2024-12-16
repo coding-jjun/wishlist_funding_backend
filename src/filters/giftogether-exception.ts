@@ -294,4 +294,12 @@ export class GiftogetherExceptions {
     ErrorCode.DepositPartiallyMatched,
     HttpStatus.BAD_REQUEST,
   );
+
+  // Generic
+
+  InvalidStatusChange = new GiftogetherException(
+    ErrorMsg.InvalidStatusChange,
+    ErrorCode.InvalidStatusChange,
+    HttpStatus.BAD_REQUEST,
+  );
 }

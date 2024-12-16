@@ -1,25 +1,118 @@
+import { IsInt, Min } from 'class-validator';
 import { Funding } from 'src/entities/funding.entity';
 import { User } from 'src/entities/user.entity';
 import { ProvisionalDonationStatus } from 'src/enums/provisional-donation-status.enum';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 /**
- * TODO - 현재 PoC를 위한 엔티티입니다. `@Entity` 데코레이터를 나중에 등록해야 합니다.
+ * 예비후원 엔티티입니다. 유저가 새 후원을 등록하면 이 인스턴스가 생성됩니다. 추후 입금(혹은 결제)
+ * 내역이 확인되면 자동으로 Donation 인스턴스가 생성이 됩니다.
  */
+@Entity()
 export class ProvisionalDonation {
-  constructor(
-    public readonly id: string,
-    public readonly senderSig: string, // '홍길동-1234'
-    public readonly senderUser: User, // User('홍길동')
-    public readonly amount: number,
-    public readonly funding: Funding,
-    public status: ProvisionalDonationStatus = ProvisionalDonationStatus.Pending,
-  ) {}
+  @PrimaryGeneratedColumn()
+  provDonId: number;
 
-  approve(): void {
+  @Column('string')
+  senderSig: string; // '홍길동-1234'
+
+  @ManyToOne(() => User)
+  @JoinColumn({
+    name: 'senderUserId',
+    referencedColumnName: 'senderUserId',
+  })
+  senderUser: User;
+
+  @IsInt()
+  @Min(0)
+  @Column('number')
+  amount: number;
+
+  @ManyToOne(() => Funding)
+  @JoinColumn({
+    name: 'fundId',
+    referencedColumnName: 'fundId',
+  })
+  funding: Funding;
+
+  @Column({
+    type: 'enum',
+    enum: ProvisionalDonationStatus,
+    default: ProvisionalDonationStatus.Pending,
+  })
+  status: ProvisionalDonationStatus;
+
+  @CreateDateColumn()
+  regAt?: Date;
+
+  @DeleteDateColumn()
+  delAt?: Date;
+
+  protected constructor(args: Partial<ProvisionalDonation>) {
+    Object.assign(this, args);
+  }
+
+  approve(g2gException: GiftogetherExceptions): void {
+    if (this.status !== ProvisionalDonationStatus.Pending) {
+      // [정책] 매칭이 Pending 상태인 경우에만 상태전이 가능합니다.
+      throw g2gException.InvalidStatusChange;
+    }
     this.status = ProvisionalDonationStatus.Approved;
   }
 
-  reject(): void {
+  reject(g2gException: GiftogetherExceptions): void {
+    if (this.status !== ProvisionalDonationStatus.Pending) {
+      // [정책] 매칭이 Pending 상태인 경우에만 상태전이 가능합니다.
+      throw g2gException.InvalidStatusChange;
+    }
     this.status = ProvisionalDonationStatus.Rejected;
+  }
+
+  pending(g2gException: GiftogetherExceptions): void {
+    if (this.status !== ProvisionalDonationStatus.Approved) {
+      // [정책] 매칭 성공 후 관리자 권한에 의해 다시 Pending 상태로 넘어가는 것만
+      // 가능합니다.
+      throw g2gException.InvalidStatusChange;
+    }
+    this.status = ProvisionalDonationStatus.Pending;
+  }
+
+  refund(g2gException: GiftogetherExceptions): void {
+    if (this.status !== ProvisionalDonationStatus.Rejected) {
+      // [정책] 매칭 취소 후 관리자가 환불처리한 경우에만 Refund 상태변화가 가능합니다.
+      throw g2gException.InvalidStatusChange;
+    }
+    this.status = ProvisionalDonationStatus.Refunded;
+  }
+
+  static create(
+    g2gException: GiftogetherExceptions,
+    senderSig: string, // '홍길동-1234'
+    senderUser: User, // User('홍길동')
+    amount: number,
+    funding: Funding,
+    status: ProvisionalDonationStatus = ProvisionalDonationStatus.Pending,
+  ) {
+    if (amount > funding.fundGoal) {
+      // [정책] 후원금액의 최대치는 펀딩금액을 넘지 못합니다.
+      throw g2gException.DonationAmountExceeded;
+    }
+
+    return new ProvisionalDonation({
+      senderSig,
+      senderUser,
+      amount,
+      funding,
+      status,
+    });
   }
 }
