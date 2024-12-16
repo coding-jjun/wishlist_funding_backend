@@ -41,6 +41,16 @@ export class GiftogetherExceptions {
     ErrorCode.FundingNotClosed,
     HttpStatus.BAD_REQUEST,
   );
+  DonationNotExists = new GiftogetherException(
+    ErrorMsg.DonationNotExists,
+    ErrorCode.DonationNotExists,
+    HttpStatus.NOT_FOUND,
+  );
+  DonationAmountExceeded = new GiftogetherException(
+    ErrorMsg.DonationAmountExceeded,
+    ErrorCode.DonationAmountExceeded,
+    HttpStatus.BAD_REQUEST,
+  );
 
   // Gift
   IncorrectGiftUrl = new GiftogetherException(
@@ -165,7 +175,7 @@ export class GiftogetherExceptions {
     HttpStatus.NOT_FOUND,
   );
   // Admin
-  
+
   SnsLoginBlocked = new GiftogetherException(
     ErrorMsg.SnsLoginBlocked,
     ErrorCode.SnsLoginBlocked,

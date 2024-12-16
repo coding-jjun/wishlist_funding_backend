@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Deposit } from '../../domain/entities/deposit.entity';
-import { InMemoryDepositRepository } from '../../infrastructure/repositories/in-memory-deposit.repository';
-import { DepositDto } from '../../dto/deposit.dto';
+import { Deposit } from '../domain/entities/deposit.entity';
+import { InMemoryDepositRepository } from '../infrastructure/repositories/in-memory-deposit.repository';
+import { DepositDto } from '../dto/deposit.dto';
 
 @Injectable()
 export class UploadDepositUseCase {

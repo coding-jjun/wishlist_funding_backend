@@ -10,6 +10,8 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
 } from 'typeorm';
+import { IsInt, Min } from 'class-validator';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 @Entity()
 export class Donation {
@@ -34,6 +36,8 @@ export class Donation {
   @Column()
   orderId: string;
 
+  @IsInt()
+  @Min(0)
   @Column({ default: 0 })
   donAmnt: number;
 
@@ -42,4 +46,27 @@ export class Donation {
 
   @DeleteDateColumn()
   delAt: Date;
+
+  private constructor(funding: Funding, donor: User, amount: number) {
+    this.funding = funding;
+    this.user = donor;
+    this.donAmnt = amount;
+    this.donStat = DonationStatus.Donated;
+    this.orderId = require('order-id')('key').generate();
+  }
+
+  static create(
+    funding: Funding,
+    donor: User,
+    amount: number,
+    g2gException: GiftogetherExceptions,
+  ) {
+    if (amount > funding.fundGoal) {
+      // [정책] 후원금액의 최대치는 펀딩금액을 넘지 못합니다.
+      throw g2gException.DonationAmountExceeded;
+    }
+
+    // TODO - Add RollingPaper for inner object
+    return new Donation(funding, donor, amount);
+  }
 }

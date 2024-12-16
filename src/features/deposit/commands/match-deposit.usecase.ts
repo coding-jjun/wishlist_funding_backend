@@ -1,25 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { InMemoryProvisionalDonationRepository } from '../../infrastructure/repositories/in-memory-provisional-donation.repository';
+import { InMemoryProvisionalDonationRepository } from '../infrastructure/repositories/in-memory-provisional-donation.repository';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { DepositMatchedEvent } from '../../domain/events/deposit-matched.event';
-import { DepositUnmatchedEvent } from '../../domain/events/deposit-unmatched.event';
-import { Deposit } from '../../domain/entities/deposit.entity';
-import { GiftogetherExceptions } from '../../../../filters/giftogether-exception';
-import { DepositStatus } from '../../../../enums/deposit-status.enum';
-import { ProvisionalDonation } from '../../domain/entities/provisional-donation.entity';
-import { DepositPartiallyMatchedEvent } from '../../domain/events/deposit-partially-matched.event';
+import { DepositMatchedEvent } from '../domain/events/deposit-matched.event';
+import { DepositUnmatchedEvent } from '../domain/events/deposit-unmatched.event';
+import { Deposit } from '../domain/entities/deposit.entity';
+import { GiftogetherExceptions } from '../../../filters/giftogether-exception';
+import { DepositStatus } from '../../../enums/deposit-status.enum';
+import { ProvisionalDonation } from '../domain/entities/provisional-donation.entity';
+import { DepositPartiallyMatchedEvent } from '../domain/events/deposit-partially-matched.event';
 
 @Injectable()
 export class MatchDepositUseCase {
   constructor(
-    private readonly donationRepository: InMemoryProvisionalDonationRepository,
     private readonly eventEmitter: EventEmitter2,
     private readonly g2gException: GiftogetherExceptions,
+    private readonly findDonationsBySenderSig: FindDonationsBySenderSigUseCase,
+    private readonly increaseFundSum: IncreaseFundSumUseCase,
+    private readonly createDonation: CreateDonationUseCase,
   ) {}
 
   execute(deposit: Deposit): void {
     const donations: ProvisionalDonation[] =
-      this.donationRepository.findBySender(deposit.sender);
+      this.findDonationsBySenderSig.execute(deposit.senderSig);
 
     if (donations.length === 0) {
       /**
@@ -38,11 +40,11 @@ export class MatchDepositUseCase {
       throw this.g2gException.DepositUnmatched;
     }
 
-    const donation: ProvisionalDonation = donations.find(
+    const provDonation: ProvisionalDonation = donations.find(
       (v) => v.amount === deposit.amount,
     );
 
-    if (donation) {
+    if (provDonation) {
       /**
        * ## 일치
        *
@@ -53,10 +55,10 @@ export class MatchDepositUseCase {
        *  - 펀딩의 달성 금액이 업데이트 됩니다.
        *  - 후원자에게 후원이 정상적으로 처리되었음을 알리는 알림을 발송합니다.
        */
-      donation.approve();
+      provDonation.approve();
       this.eventEmitter.emit(
         'deposit.matched',
-        new DepositMatchedEvent(deposit, donation.id),
+        new DepositMatchedEvent(deposit, provDonation),
       );
     } else {
       /**

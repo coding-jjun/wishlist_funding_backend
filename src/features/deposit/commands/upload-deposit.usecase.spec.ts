@@ -1,6 +1,6 @@
 import { UploadDepositUseCase } from './upload-deposit.usecase';
-import { InMemoryDepositRepository } from '../../infrastructure/repositories/in-memory-deposit.repository';
-import { Deposit } from '../../domain/entities/deposit.entity';
+import { InMemoryDepositRepository } from '../infrastructure/repositories/in-memory-deposit.repository';
+import { Deposit } from '../domain/entities/deposit.entity';
 
 describe('UploadDepositUseCase', () => {
   let depositRepository: InMemoryDepositRepository;
@@ -36,7 +36,7 @@ describe('UploadDepositUseCase', () => {
 
     // Verify the returned entity
     expect(createdDeposit).toBeInstanceOf(Deposit);
-    expect(createdDeposit.sender).toBe(depositData.sender);
+    expect(createdDeposit.senderSig).toBe(depositData.sender);
     expect(createdDeposit.receiver).toBe(depositData.receiver);
     expect(createdDeposit.amount).toBe(depositData.amount);
     expect(createdDeposit.transferDate).toEqual(depositData.transferDate);
@@ -82,7 +82,7 @@ describe('UploadDepositUseCase', () => {
     expect(savedDeposits).toContainEqual(createdDeposit2);
 
     // Verify the properties of the second deposit
-    expect(createdDeposit2.sender).toBe(depositData2.sender);
+    expect(createdDeposit2.senderSig).toBe(depositData2.sender);
     expect(createdDeposit2.receiver).toBe(depositData2.receiver);
     expect(createdDeposit2.amount).toBe(depositData2.amount);
     expect(createdDeposit2.transferDate).toEqual(depositData2.transferDate);

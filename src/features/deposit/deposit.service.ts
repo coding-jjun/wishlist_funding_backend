@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { UploadDepositUseCase } from './application/usecases/upload-deposit.usecase';
-import { MatchDepositUseCase } from './application/usecases/match-deposit.usecase';
+import { UploadDepositUseCase } from './commands/upload-deposit.usecase';
+import { MatchDepositUseCase } from './commands/match-deposit.usecase';
 import { DepositDto } from './dto/deposit.dto';
 import { Deposit } from './domain/entities/deposit.entity';
 
