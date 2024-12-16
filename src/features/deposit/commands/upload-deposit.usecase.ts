@@ -8,15 +8,15 @@ export class UploadDepositUseCase {
   constructor(private readonly depositRepository: InMemoryDepositRepository) {}
 
   execute(depositData: DepositDto): Deposit {
-    const deposit = Deposit.create({
-      sender: depositData.sender,
-      receiver: depositData.receiver,
-      amount: depositData.amount,
-      transferDate: depositData.transferDate,
-      depositBank: depositData.depositBank,
-      depositAccount: depositData.depositAccount,
-      withdrawalAccount: depositData.withdrawalAccount,
-    });
+    const deposit = Deposit.create(
+      depositData.senderSig,
+      depositData.receiver,
+      depositData.amount,
+      depositData.transferDate,
+      depositData.depositBank,
+      depositData.depositAccount,
+      depositData.withdrawalAccount,
+    );
 
     this.depositRepository.save(deposit);
 
