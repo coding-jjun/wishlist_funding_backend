@@ -65,7 +65,7 @@ export class MatchDepositUseCase {
        *  - 후원자에게 후원이 정상적으로 처리되었음을 알리는 알림을 발송합니다.
        */
       provDonation.approve(this.g2gException);
-      this.provDonRepo.save(provDonation);
+      await this.provDonRepo.save(provDonation);
 
       this.eventEmitter.emit(
         'deposit.matched',
