@@ -2,8 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { DepositEventHandler } from './deposit-event.handler';
 import { DepositMatchedEvent } from './deposit-matched.event';
 import { NotificationService } from 'src/features/notification/notification.service';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { User } from 'src/entities/user.entity';
 import { Funding } from 'src/entities/funding.entity';
 import { Donation } from 'src/entities/donation.entity';
@@ -22,8 +20,7 @@ import { Gift } from 'src/entities/gift.entity';
 import { CreateDonationUseCase } from 'src/features/donation/commands/create-donation.usecase';
 import { IncreaseFundSumUseCase } from 'src/features/funding/commands/increase-fundsum.usecase';
 import { GetDonationsByFundingUseCase } from 'src/features/donation/queries/get-donations-by-funding.usecase';
-import { Provider } from '@nestjs/common';
-import { createMockRepository } from '../../../../tests/create-mock-repository';
+import { createMockProvider } from '../../../../tests/create-mock-repository';
 
 const entities = [
   User,
@@ -60,7 +57,6 @@ describe('DepositEventHandler', () => {
   let g2gException: GiftogetherExceptions;
 
   beforeEach(async () => {
-    // TODO - move test module options into nice place
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DepositEventHandler,
@@ -69,24 +65,7 @@ describe('DepositEventHandler', () => {
         CreateDonationUseCase,
         IncreaseFundSumUseCase,
         GetDonationsByFundingUseCase,
-        /**
-         * 아래 프로바이더들은 Repository<Entity>를 모킹하기 위해
-         * 사용됩니다. 즉, 단위테스트를 위해 실제 RDS에 데이터를 저장하는
-         * 것이 아닌, MockRepository에 호출만 합니다.
-         *
-         * 만약 실제로 데이터를 넣고 그 결과를 재가공해야 할 필요가 있다면
-         * 아래 두가지 방법 중 하나를 사용할 수 있습니다:
-         *
-         * 1. TypeOrmModule을 `imports:`에 추가한다. 테스트 DB에 직접
-         *    데이터를 CRUD한다.
-         * 2. 사용하고자 하는 메서드만 In Memory에 조작을 가한다.
-         */
-        ...entities.map(
-          (e): Provider => ({
-            provide: getRepositoryToken(e),
-            useValue: createMockRepository(Repository<typeof e>),
-          }),
-        ),
+        ...entities.map(createMockProvider),
       ],
     }).compile();
 

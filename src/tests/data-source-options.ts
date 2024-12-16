@@ -12,7 +12,7 @@ import { DataSourceOptions } from 'typeorm';
  * ],
  * ```
  */
-const dataSourceOptions: DataSourceOptions = {
+export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
   host: process.env.DB_HOST,
   port: parseInt(process.env.DB_PORT) || 5432,
