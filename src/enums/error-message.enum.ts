@@ -75,4 +75,7 @@ export enum ErrorMsg {
   // Deposits
   DepositUnmatched = '입금내역이 어느 후원과도 매칭되지 않습니다.',
   DepositPartiallyMatched = '입금내역과 후원금액이 서로 일치하지 않습니다.',
+
+  // Generic
+  InvalidStatusChange = '유효하지 않은 상태 변화입니다.',
 }

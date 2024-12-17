@@ -1,3 +1,4 @@
+import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
 import { readFileSync } from 'fs';
 import { DataSourceOptions } from 'typeorm';
 
@@ -6,7 +7,7 @@ import { DataSourceOptions } from 'typeorm';
  *
  * ```
  * imports: [
- *   TypeOrmModule.forRoot({ ...dataSourceOptions, autoLoadEntities: true }),
+ *   TypeOrmModule.forRoot({ ...dataSourceOptions, entities: [...entities] }),
  *   TypeOrmModule.forFeature(entities),
  * ],
  * ```
@@ -30,3 +31,9 @@ export const dataSourceOptions: DataSourceOptions = {
     },
   },
 };
+
+export function createDataSourceOptions(
+  entities: EntityClassOrSchema[],
+): DataSourceOptions {
+  return { ...dataSourceOptions, entities };
+}

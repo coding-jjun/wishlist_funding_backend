@@ -1,24 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import { Deposit } from '../domain/entities/deposit.entity';
-import { InMemoryDepositRepository } from '../infrastructure/repositories/in-memory-deposit.repository';
 import { DepositDto } from '../dto/deposit.dto';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UploadDepositUseCase {
-  constructor(private readonly depositRepository: InMemoryDepositRepository) {}
+  constructor(
+    @InjectRepository(Deposit)
+    private readonly depositRepository: Repository<Deposit>,
+  ) {}
 
-  execute(depositData: DepositDto): Deposit {
-    const deposit = Deposit.create({
-      sender: depositData.sender,
-      receiver: depositData.receiver,
-      amount: depositData.amount,
-      transferDate: depositData.transferDate,
-      depositBank: depositData.depositBank,
-      depositAccount: depositData.depositAccount,
-      withdrawalAccount: depositData.withdrawalAccount,
-    });
+  async execute(depositData: DepositDto): Promise<Deposit> {
+    const deposit = Deposit.create(
+      depositData.senderSig,
+      depositData.receiver,
+      depositData.amount,
+      depositData.transferDate,
+      depositData.depositBank,
+      depositData.depositAccount,
+      depositData.withdrawalAccount,
+    );
 
-    this.depositRepository.save(deposit);
+    await this.depositRepository.save(deposit);
 
     return deposit;
   }

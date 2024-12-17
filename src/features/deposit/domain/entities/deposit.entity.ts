@@ -1,45 +1,101 @@
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { DepositStatus } from '../../../../enums/deposit-status.enum';
+import { IsInt, Min } from 'class-validator';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 /**
- * TODO - 현재 PoC를 위한 엔티티입니다. `@Entity` 데코레이터를 나중에 등록해야 합니다.
+ * 이체내역을 관리하는 엔티티 입니다.
  */
+@Entity()
 export class Deposit {
-  private _status: DepositStatus = DepositStatus.Unmatched;
+  @PrimaryGeneratedColumn()
+  readonly depositId: number;
 
-  get status(): DepositStatus {
+  @Column('varchar')
+  readonly senderSig: string; // 보내는분, '홍길동-1234'
+
+  @Column('varchar')
+  readonly receiver: string; // 받는분
+
+  @IsInt()
+  @Min(0)
+  @Column('int')
+  readonly amount: number;
+
+  @Column('date')
+  readonly transferDate: Date;
+
+  @Column('varchar')
+  readonly depositBank: string; // 이체은행
+
+  @Column('varchar')
+  readonly depositAccount: string; // 이체계좌번호
+
+  @Column('varchar')
+  readonly withdrawalAccount: string; // 환불계좌번호
+
+  @Column({
+    type: 'enum',
+    enum: DepositStatus,
+    name: 'status',
+  })
+  private _status: DepositStatus;
+
+  public get status(): DepositStatus {
     return this._status;
   }
 
-  set status(value: DepositStatus) {
-    this._status = value;
+  orphan(g2gException: GiftogetherExceptions) {
+    if (this._status !== DepositStatus.Unmatched) {
+      throw g2gException.InvalidStatusChange;
+    }
+    this._status = DepositStatus.Orphan;
   }
 
-  constructor(
-    public readonly senderSig: string, // "홍길동-1234"
-    public readonly receiver: string,
-    public readonly amount: number,
-    public readonly transferDate: Date,
-    public readonly depositBank: string,
-    public readonly depositAccount: string,
-    public readonly withdrawalAccount: string,
-  ) {}
-  static create(data: {
-    sender: string;
-    receiver: string;
-    amount: number;
-    transferDate: Date;
-    depositBank: string;
-    depositAccount: string;
-    withdrawalAccount: string;
-  }): Deposit {
-    return new Deposit(
-      data.sender,
-      data.receiver,
-      data.amount,
-      data.transferDate,
-      data.depositBank,
-      data.depositAccount,
-      data.withdrawalAccount,
-    );
+  matched(g2gException: GiftogetherExceptions) {
+    if (this._status !== DepositStatus.Unmatched) {
+      throw g2gException.InvalidStatusChange;
+    }
+    this._status = DepositStatus.Matched;
+  }
+
+  @CreateDateColumn()
+  regAt?: Date;
+
+  @DeleteDateColumn()
+  delAt?: Date;
+
+  protected constructor(
+    args: Partial<Deposit>,
+    status = DepositStatus.Unmatched,
+  ) {
+    Object.assign(this, args);
+    this._status = status;
+  }
+
+  static create(
+    senderSig: string,
+    receiver: string,
+    amount: number,
+    transferDate: Date,
+    depositBank: string,
+    depositAccount: string,
+    withdrawalAccount: string,
+  ): Deposit {
+    return new Deposit({
+      senderSig,
+      receiver,
+      amount,
+      transferDate,
+      depositBank,
+      depositAccount,
+      withdrawalAccount,
+    });
   }
 }
