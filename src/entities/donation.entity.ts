@@ -14,6 +14,7 @@ import {
 import { IsInt, Min } from 'class-validator';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
 import { Deposit } from 'src/features/deposit/domain/entities/deposit.entity';
+import { InconsistentAggregationError } from 'src/exceptions/inconsistent-aggregation';
 
 @Entity()
 export class Donation {
@@ -54,6 +55,25 @@ export class Donation {
 
   @DeleteDateColumn()
   delAt: Date;
+
+  /**
+   * 비록 fundSum이라는 프로퍼티로 엮여있지만, Donation과 Funding과는
+   * 즉각적인 일관성이 필요하지 않습니다. 따라서, Donation 삭제시 일관적인
+   * 상태인지만 확인하고 softDelete를 수행합니다.
+   */
+  delete() {
+    if (
+      [
+        DonationStatus.WaitingRefund,
+        DonationStatus.RefundComplete,
+        DonationStatus.Deleted,
+      ].includes(this.donStat)
+    ) {
+      throw new InconsistentAggregationError();
+    }
+    this.donStat = DonationStatus.Deleted;
+    this.delAt = new Date(Date.now()); // softDelete까지 수행함.
+  }
 
   private constructor(funding: Funding, donor: User, amount: number) {
     this.funding = funding;

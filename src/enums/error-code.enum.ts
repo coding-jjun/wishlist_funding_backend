@@ -80,4 +80,5 @@ export enum ErrorCode {
 
   // Generic
   InvalidStatusChange = '1600',
+  InconsistentAggregationError = '1700',
 }

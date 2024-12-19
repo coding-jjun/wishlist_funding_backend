@@ -127,8 +127,11 @@ export class DepositEventHandler {
    * DepositUnmatched 이벤트 이후 관리자의 사후조치에 따른 이벤트입니다.
    *
    * 관리자가 해당 입금내역을 삭제처리한 경우 입금내역의 생애주기가 올바르게 전환되는지를 따져보아야 합니다.
+   *
+   * 1. Deposit의 상태가 Unmatched가 아닌 경우 에러발생
+   * 2. Deposit의 상태를 Deleted로 변경
+   * 3. 해당 Deposit을 softDelete
    */
   @OnEvent('deposit.unmatched.deleted')
-  async handleDepositUnmatchedDeleted(event: DepositUnmatchedRefundedEvent) {
-  }
+  async handleDepositUnmatchedDeleted(event: DepositUnmatchedRefundedEvent) {}
 }

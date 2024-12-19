@@ -3,4 +3,5 @@ export enum DepositStatus {
   Matched = 'Matched',
   Orphan = 'Orphan',
   Refunded = 'Refunded',
+  Deleted = 'Deleted',
 }
