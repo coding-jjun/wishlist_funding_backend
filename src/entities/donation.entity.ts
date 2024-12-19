@@ -57,6 +57,21 @@ export class Donation {
   delAt: Date;
 
   /**
+   * !NOTE: 아직 WaitingRefund 상태에 대한 예외처리가 되어있지 않습니다.
+   */
+  refund(g2gException: GiftogetherExceptions) {
+    if (
+      [DonationStatus.Deleted, DonationStatus.RefundComplete].includes(
+        this.donStat,
+      )
+    ) {
+      throw g2gException.InvalidStatusChange;
+    }
+    this.donStat = DonationStatus.RefundComplete;
+    this.delAt = new Date(Date.now()); // softDelete까지 수행함.
+  }
+
+  /**
    * 비록 fundSum이라는 프로퍼티로 엮여있지만, Donation과 Funding과는
    * 즉각적인 일관성이 필요하지 않습니다. 따라서, Donation 삭제시 일관적인
    * 상태인지만 확인하고 softDelete를 수행합니다.

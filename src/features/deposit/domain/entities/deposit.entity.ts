@@ -87,11 +87,17 @@ export class Deposit {
     ) {
       throw g2gException.InvalidStatusChange;
     }
+    if (this._status === DepositStatus.Matched) {
+      // Donation이 존재하는 상황!
+      if (!this.donation) {
+        throw new InconsistentAggregationError();
+      }
+      this.donation.refund(g2gException);
+    }
     this._status = DepositStatus.Refunded;
   }
 
   /**
-   * 이미 Donation이 만들어져있고, Funding.fundSum이 increase 되어있습니다.
    * Donation 엔티티와의 즉각적인 일관성이 필요합니다. Funding과는 느슨한 일관성을
    * 유지해도 될 것 같습니다.
    */

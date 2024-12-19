@@ -18,6 +18,9 @@ import { FindAllAdminsUseCase } from 'src/features/admin/queries/find-all-admins
 import { User } from 'src/entities/user.entity';
 import { DepositUnmatchedRefundedEvent as DepositRefundedEvent } from './deposit-refunded.event';
 import { DepositUnmatchedDeletedEvent as DepositDeletedEvent } from './deposit-deleted.event';
+import { DepositStatus } from 'src/enums/deposit-status.enum';
+import { DecreaseFundSumUseCase } from 'src/features/funding/commands/decrease-fundsum.usecase';
+import { DecreaseFundSumCommand } from 'src/features/funding/commands/decrease-fundsum.command';
 
 @Injectable()
 export class DepositEventHandler {
@@ -25,6 +28,7 @@ export class DepositEventHandler {
     private readonly g2gException: GiftogetherExceptions,
     private readonly createDonation: CreateDonationUseCase,
     private readonly increaseFundSum: IncreaseFundSumUseCase,
+    private readonly decreaseFundSum: DecreaseFundSumUseCase,
     private readonly notiService: NotificationService,
     @InjectRepository(Deposit)
     private readonly depositRepo: Repository<Deposit>,
@@ -111,7 +115,20 @@ export class DepositEventHandler {
   @OnEvent('deposit.refunded')
   async handleDepositUnmatchedRefunded(event: DepositRefundedEvent) {
     const { deposit } = event;
+
     deposit.refund(this.g2gException);
+
+    if (deposit.status === DepositStatus.Matched) {
+      /**
+       * 이미 Donation이 만들어져있고, Funding.fundSum이 increase 되어있습니다.
+       *
+       * 1. donation을 refund 처리합니다. [[donation.entity]] 참조
+       * 2. fundSum을 donAmnt 만큼 decrease 시키는 도메인 이벤트를 발생시킵니다.
+       */
+      this.decreaseFundSum.execute(
+        new DecreaseFundSumCommand(deposit.donation.funding, deposit.amount),
+      );
+    }
 
     this.depositRepo.save(deposit);
     this.depositRepo.softDelete(deposit.depositId);
