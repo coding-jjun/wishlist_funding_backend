@@ -9,9 +9,11 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   DeleteDateColumn,
+  OneToOne,
 } from 'typeorm';
 import { IsInt, Min } from 'class-validator';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { Deposit } from 'src/features/deposit/domain/entities/deposit.entity';
 
 @Entity()
 export class Donation {
@@ -25,6 +27,10 @@ export class Donation {
   @ManyToOne(() => User)
   @JoinColumn({ name: 'userId', referencedColumnName: 'userId' })
   user: User;
+
+  @OneToOne(() => Deposit, { nullable: false })
+  @JoinColumn({ name: 'depositId', referencedColumnName: 'donation' })
+  deposit: Deposit;
 
   @Column({
     type: 'enum',
