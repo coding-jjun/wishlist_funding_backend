@@ -82,8 +82,7 @@ export class DepositEventHandler {
    */
   @OnEvent('deposit.unmatched')
   async handleDepositUnmatched(event: DepositUnmatchedEvent) {
-    const { deposit, provisionalDonation } = event;
-    const { funding, senderUser } = provisionalDonation;
+    const { deposit } = event;
 
     // 1
     deposit.orphan(this.g2gException);
