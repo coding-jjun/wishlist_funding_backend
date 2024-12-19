@@ -28,7 +28,9 @@ export class Donation {
   @JoinColumn({ name: 'userId', referencedColumnName: 'userId' })
   user: User;
 
-  @OneToOne(() => Deposit, { nullable: false })
+  @OneToOne(() => Deposit, {
+    nullable: false, // Donation은 있는데 Deposit이 없는 케이스는 존재하지 않습니다.,
+  })
   @JoinColumn({ name: 'depositId', referencedColumnName: 'donation' })
   deposit: Deposit;
 
