@@ -10,13 +10,24 @@ import { CreateDonationUseCase } from 'src/features/donation/commands/create-don
 import { CreateDonationCommand } from 'src/features/donation/commands/create-donation.command';
 import { IncreaseFundSumUseCase } from 'src/features/funding/commands/increase-fundsum.usecase';
 import { IncreaseFundSumCommand } from 'src/features/funding/commands/increase-fundsum.command';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { Repository } from 'typeorm';
+import { Deposit } from '../entities/deposit.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { FindAllAdminsUseCase } from 'src/features/admin/queries/find-all-admins.usecase';
+import { User } from 'src/entities/user.entity';
+import { DepositUnmatchedRefundedEvent } from './deposit-unmatched-refunded.event';
 
 @Injectable()
 export class DepositEventHandler {
   constructor(
+    private readonly g2gException: GiftogetherExceptions,
     private readonly createDonation: CreateDonationUseCase,
     private readonly increaseFundSum: IncreaseFundSumUseCase,
     private readonly notiService: NotificationService,
+    @InjectRepository(Deposit)
+    private readonly depositRepo: Repository<Deposit>,
+    private readonly findAllAdmins: FindAllAdminsUseCase,
   ) {}
 
   /**
@@ -61,6 +72,42 @@ export class DepositEventHandler {
   @OnEvent('deposit.partiallyMatched')
   handleDepositPartiallyMatched(event: DepositPartiallyMatchedEvent) {}
 
+  /**
+   * 1. 입금 내역을 ‘고아 상태’로 표시합니다.
+   * 2. 시스템은 관리자에게 해당 입금내역이 고아상태임을 알리는 알림을 발송합니다.
+   * 3. 관리자는 해당 건에 대해 확인 및 조치를 취해야 합니다.
+   *     - 보내는 분의 신원이 식별될 경우 환불을 진행합니다.
+   *     - 보내는 분의 신원이 식별되지 않을경우? 어쩌지? 냠냠?
+   */
   @OnEvent('deposit.unmatched')
-  handleDepositUnmatched(event: DepositUnmatchedEvent) {}
+  async handleDepositUnmatched(event: DepositUnmatchedEvent) {
+    const { deposit, provisionalDonation } = event;
+    const { funding, senderUser } = provisionalDonation;
+
+    // 1
+    deposit.orphan(this.g2gException);
+    this.depositRepo.save(deposit);
+
+    // 2
+    const users: User[] = await this.findAllAdmins.execute();
+    for (const u of users) {
+      const notiDto = new CreateNotificationDto({
+        recvId: u.userId,
+        sendId: null, // because system is sender
+        notiType: NotiType.DepositUnmatched,
+        subId: deposit.depositId.toString(),
+      });
+      await this.notiService.createNoti(notiDto);
+    }
+
+    // 3은 관리자 중 한명이 업무를 처리하여 삭제하던, 환불조치를 취하던 ACT가 발생한
+    // 이후에 처리해야 합니다. DepositEventHandler는 고아처리가 된 입금내역에 대한
+    // 사후처리를 책임져야 합니다.
+  }
+
+  @OnEvent('deposit.unmatched.refunded')
+  async handleDepositUnmatchedRefunded(event: DepositUnmatchedRefundedEvent) {}
+
+  @OnEvent('deposit.unmatched.deleted')
+  async handleDepositUnmatchedRefunded(event: DepositUnmatchedRefundedEvent) {}
 }
