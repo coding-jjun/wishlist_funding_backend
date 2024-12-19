@@ -25,7 +25,7 @@ export class Donation {
   @JoinColumn({ name: 'fundId', referencedColumnName: 'fundId' })
   funding: Funding;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId', referencedColumnName: 'userId' })
   user: User;
 
