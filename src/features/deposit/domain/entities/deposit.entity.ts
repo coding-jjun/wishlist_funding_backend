@@ -3,11 +3,14 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { DepositStatus } from '../../../../enums/deposit-status.enum';
 import { IsInt, Min } from 'class-validator';
-import { GiftogetherException, GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { Donation } from 'src/entities/donation.entity';
 
 /**
  * 이체내역을 관리하는 엔티티 입니다.
@@ -16,6 +19,10 @@ import { GiftogetherException, GiftogetherExceptions } from 'src/filters/giftoge
 export class Deposit {
   @PrimaryGeneratedColumn()
   readonly depositId: number;
+
+  @OneToOne(() => Donation, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'donationId' })
+  donation?: Donation;
 
   @Column('varchar')
   readonly senderSig: string; // 보내는분, '홍길동-1234'
