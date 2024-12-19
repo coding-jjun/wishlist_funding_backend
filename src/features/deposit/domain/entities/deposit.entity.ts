@@ -77,7 +77,14 @@ export class Deposit {
   }
 
   refund(g2gException: GiftogetherExceptions) {
-    if (this._status !== DepositStatus.Unmatched) {
+    if (
+      this._status in
+      [
+        DepositStatus.Unmatched, //
+        DepositStatus.Refunded, //
+        DepositStatus.Deleted,
+      ]
+    ) {
       throw g2gException.InvalidStatusChange;
     }
     this._status = DepositStatus.Refunded;
