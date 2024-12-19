@@ -16,7 +16,8 @@ import { Deposit } from '../entities/deposit.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindAllAdminsUseCase } from 'src/features/admin/queries/find-all-admins.usecase';
 import { User } from 'src/entities/user.entity';
-import { DepositUnmatchedRefundedEvent } from './deposit-unmatched-refunded.event';
+import { DepositUnmatchedRefundedEvent as DepositRefundedEvent } from './deposit-refunded.event';
+import { DepositUnmatchedDeletedEvent as DepositDeletedEvent } from './deposit-deleted.event';
 
 @Injectable()
 export class DepositEventHandler {
@@ -106,16 +107,10 @@ export class DepositEventHandler {
   }
 
   /**
-   * DepositUnmatched 이벤트 이후 관리자의 사후조치에 따른 이벤트입니다.
-   *
    * 관리자가 해당 입금내역을 환불처리한 경우 입금내역의 생애주기가 올바르게 전환되는지를 따져보아야 합니다.
-   *
-   * 1. Deposit의 상태가 Unmatched가 아닌 경우 에러발생
-   * 2. Deposit의 상태를 Refunded로 변경
-   * 3. 해당 Deposit을 softDelete
    */
-  @OnEvent('deposit.unmatched.refunded')
-  async handleDepositUnmatchedRefunded(event: DepositUnmatchedRefundedEvent) {
+  @OnEvent('deposit.refunded')
+  async handleDepositUnmatchedRefunded(event: DepositRefundedEvent) {
     const { deposit } = event;
     deposit.refund(this.g2gException);
 
@@ -124,14 +119,14 @@ export class DepositEventHandler {
   }
 
   /**
-   * DepositUnmatched 이벤트 이후 관리자의 사후조치에 따른 이벤트입니다.
-   *
    * 관리자가 해당 입금내역을 삭제처리한 경우 입금내역의 생애주기가 올바르게 전환되는지를 따져보아야 합니다.
-   *
-   * 1. Deposit의 상태가 Unmatched가 아닌 경우 에러발생
-   * 2. Deposit의 상태를 Deleted로 변경
-   * 3. 해당 Deposit을 softDelete
    */
-  @OnEvent('deposit.unmatched.deleted')
-  async handleDepositUnmatchedDeleted(event: DepositUnmatchedRefundedEvent) {}
+  @OnEvent('deposit.deleted')
+  async handleDepositUnmatchedDeleted(event: DepositDeletedEvent) {
+    const { deposit } = event;
+    deposit.delete();
+
+    this.depositRepo.save(deposit);
+    this.depositRepo.softDelete(deposit.depositId);
+  }
 }
