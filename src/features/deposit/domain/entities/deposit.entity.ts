@@ -22,7 +22,7 @@ export class Deposit {
 
   @OneToOne(() => Donation, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'donationId' })
-  donation: Donation;
+  donation?: Donation;
 
   @Column('varchar')
   readonly senderSig: string; // 보내는분, '홍길동-1234'
