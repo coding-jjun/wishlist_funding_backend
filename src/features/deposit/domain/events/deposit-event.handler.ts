@@ -105,9 +105,30 @@ export class DepositEventHandler {
     // 사후처리를 책임져야 합니다.
   }
 
+  /**
+   * DepositUnmatched 이벤트 이후 관리자의 사후조치에 따른 이벤트입니다.
+   *
+   * 관리자가 해당 입금내역을 환불처리한 경우 입금내역의 생애주기가 올바르게 전환되는지를 따져보아야 합니다.
+   *
+   * 1. Deposit의 상태가 Unmatched가 아닌 경우 에러발생
+   * 2. Deposit의 상태를 Refunded로 변경
+   * 3. 해당 Deposit을 softDelete
+   */
   @OnEvent('deposit.unmatched.refunded')
-  async handleDepositUnmatchedRefunded(event: DepositUnmatchedRefundedEvent) {}
+  async handleDepositUnmatchedRefunded(event: DepositUnmatchedRefundedEvent) {
+    const { deposit } = event;
+    deposit.refund(this.g2gException);
 
+    this.depositRepo.save(deposit);
+    this.depositRepo.softDelete(deposit.depositId);
+  }
+
+  /**
+   * DepositUnmatched 이벤트 이후 관리자의 사후조치에 따른 이벤트입니다.
+   *
+   * 관리자가 해당 입금내역을 삭제처리한 경우 입금내역의 생애주기가 올바르게 전환되는지를 따져보아야 합니다.
+   */
   @OnEvent('deposit.unmatched.deleted')
-  async handleDepositUnmatchedRefunded(event: DepositUnmatchedRefundedEvent) {}
+  async handleDepositUnmatchedDeleted(event: DepositUnmatchedRefundedEvent) {
+  }
 }

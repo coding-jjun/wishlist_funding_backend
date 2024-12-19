@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { DepositStatus } from '../../../../enums/deposit-status.enum';
 import { IsInt, Min } from 'class-validator';
-import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
+import { GiftogetherException, GiftogetherExceptions } from 'src/filters/giftogether-exception';
 
 /**
  * 이체내역을 관리하는 엔티티 입니다.
@@ -63,6 +63,13 @@ export class Deposit {
       throw g2gException.InvalidStatusChange;
     }
     this._status = DepositStatus.Matched;
+  }
+
+  refund(g2gException: GiftogetherExceptions) {
+    if (this._status !== DepositStatus.Unmatched) {
+      throw g2gException.InvalidStatusChange;
+    }
+    this._status = DepositStatus.Refunded;
   }
 
   @CreateDateColumn()
