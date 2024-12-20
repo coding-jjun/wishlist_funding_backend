@@ -17,6 +17,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindAllAdminsUseCase } from 'src/features/admin/queries/find-all-admins.usecase';
 import { User } from 'src/entities/user.entity';
 import { DecreaseFundSumUseCase } from 'src/features/funding/commands/decrease-fundsum.usecase';
+import { DepositRefundedEvent } from './deposit-refunded.event';
+import { DepositStatus } from 'src/enums/deposit-status.enum';
+import { DecreaseFundSumCommand } from 'src/features/funding/commands/decrease-fundsum.command';
+import { DepositDeletedEvent } from './deposit-deleted.event';
 
 @Injectable()
 export class DepositEventHandler {
@@ -103,5 +107,42 @@ export class DepositEventHandler {
     // 3은 관리자 중 한명이 업무를 처리하여 삭제하던, 환불조치를 취하던 ACT가 발생한
     // 이후에 처리해야 합니다. DepositEventHandler는 고아처리가 된 입금내역에 대한
     // 사후처리를 책임져야 합니다.
+  }
+
+  /**
+   * 관리자가 해당 입금내역을 환불처리한 경우 입금내역의 생애주기가 올바르게 전환되는지를 따져보아야 합니다.
+   */
+  @OnEvent('deposit.refunded')
+  async handleDepositRefunded(event: DepositRefundedEvent) {
+    const { deposit } = event;
+
+    deposit.refund(this.g2gException);
+
+    if (deposit.status === DepositStatus.Matched) {
+      /**
+       * 이미 Donation이 만들어져있고, Funding.fundSum이 increase 되어있습니다.
+       *
+       * 1. donation을 refund 처리합니다. [[donation.entity]] 참조
+       * 2. fundSum을 donAmnt 만큼 decrease 시키는 도메인 이벤트를 발생시킵니다.
+       */
+      this.decreaseFundSum.execute(
+        new DecreaseFundSumCommand(deposit.donation.funding, deposit.amount),
+      );
+    }
+
+    this.depositRepo.save(deposit);
+    this.depositRepo.softDelete(deposit.depositId);
+  }
+
+  /**
+   * 관리자가 해당 입금내역을 삭제처리한 경우 입금내역의 생애주기가 올바르게 전환되는지를 따져보아야 합니다.
+   */
+  @OnEvent('deposit.deleted')
+  async handleDepositDeleted(event: DepositDeletedEvent) {
+    const { deposit } = event;
+    deposit.delete();
+
+    this.depositRepo.save(deposit);
+    this.depositRepo.softDelete(deposit.depositId);
   }
 }

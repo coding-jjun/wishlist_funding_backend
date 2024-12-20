@@ -1,5 +1,5 @@
 import { Deposit } from '../entities/deposit.entity';
 
-export class DepositUnmatchedDeletedEvent {
+export class DepositDeletedEvent {
   constructor(public readonly deposit: Deposit) {}
 }
