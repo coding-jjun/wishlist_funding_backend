@@ -19,6 +19,8 @@ import { FindProvDonationsBySenderSigUseCase } from './queries/find-provisional-
 import { CreateDonationUseCase } from '../donation/commands/create-donation.usecase';
 import { IncreaseFundSumUseCase } from '../funding/commands/increase-fundsum.usecase';
 import { NotificationService } from '../notification/notification.service';
+import { DecreaseFundSumUseCase } from '../funding/commands/decrease-fundsum.usecase';
+import { FindAllAdminsUseCase } from '../admin/queries/find-all-admins.usecase';
 
 @Module({
   imports: [
@@ -44,7 +46,9 @@ import { NotificationService } from '../notification/notification.service';
     FindProvDonationsBySenderSigUseCase,
     CreateDonationUseCase,
     IncreaseFundSumUseCase,
+    DecreaseFundSumUseCase,
     NotificationService,
+    FindAllAdminsUseCase,
   ],
 })
 export class DepositModule {}
