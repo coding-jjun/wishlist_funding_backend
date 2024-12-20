@@ -16,11 +16,7 @@ import { Deposit } from '../entities/deposit.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindAllAdminsUseCase } from 'src/features/admin/queries/find-all-admins.usecase';
 import { User } from 'src/entities/user.entity';
-import { DepositUnmatchedRefundedEvent as DepositRefundedEvent } from './deposit-refunded.event';
-import { DepositUnmatchedDeletedEvent as DepositDeletedEvent } from './deposit-deleted.event';
-import { DepositStatus } from 'src/enums/deposit-status.enum';
 import { DecreaseFundSumUseCase } from 'src/features/funding/commands/decrease-fundsum.usecase';
-import { DecreaseFundSumCommand } from 'src/features/funding/commands/decrease-fundsum.command';
 
 @Injectable()
 export class DepositEventHandler {
