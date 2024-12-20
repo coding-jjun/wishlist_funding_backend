@@ -21,6 +21,11 @@ import { CreateDonationUseCase } from 'src/features/donation/commands/create-don
 import { IncreaseFundSumUseCase } from 'src/features/funding/commands/increase-fundsum.usecase';
 import { GetDonationsByFundingUseCase } from 'src/features/donation/queries/get-donations-by-funding.usecase';
 import { createMockProvider } from '../../../../tests/create-mock-repository';
+import { DepositUnmatchedEvent } from './deposit-unmatched.event';
+import { CreateNotificationDto } from 'src/features/notification/dto/create-notification.dto';
+import { NotiType } from 'src/enums/noti-type.enum';
+import { DecreaseFundSumUseCase } from 'src/features/funding/commands/decrease-fundsum.usecase';
+import { FindAllAdminsUseCase } from 'src/features/admin/queries/find-all-admins.usecase';
 
 const entities = [
   User,
@@ -32,6 +37,7 @@ const entities = [
   Gift,
   Donation,
   Notification,
+  Deposit,
 ];
 
 /**
@@ -64,6 +70,8 @@ describe('DepositEventHandler', () => {
         GiftogetherExceptions,
         CreateDonationUseCase,
         IncreaseFundSumUseCase,
+        DecreaseFundSumUseCase,
+        FindAllAdminsUseCase,
         GetDonationsByFundingUseCase,
         ...entities.map(createMockProvider),
       ],
@@ -202,6 +210,62 @@ describe('DepositEventHandler', () => {
         sendId: matchedDonor.userId,
         notiType: 'NewDonate',
         subId: mockFunding.fundUuid,
+      }),
+    );
+  });
+
+  it('should handle deposit.unmatched event', async () => {
+    const deposit = Deposit.create(
+      '익명의 천사',
+      '최승현',
+      1_000_000_000,
+      new Date(),
+      'depositBank',
+      'depositAccount',
+      'withdrawalAccount',
+      1,
+    );
+
+    deposit.orphan = jest.fn();
+
+    const event = new DepositUnmatchedEvent(deposit);
+
+    const depositSaveSpy = jest
+      .spyOn(handler['depositRepo'], 'save')
+      .mockResolvedValue(deposit);
+    const findAllAdminsSpy = jest
+      .spyOn(handler['findAllAdmins'], 'execute')
+      .mockResolvedValue([{ userId: 1 } as User, { userId: 2 } as User]);
+    const createNotiSpy = jest
+      .spyOn(notificationService, 'createNoti')
+      .mockResolvedValue(null);
+
+    // 이벤트 생성!
+    await handler.handleDepositUnmatched(event);
+
+    // Verify deposit is marked as orphan
+    expect(deposit.orphan).toHaveBeenCalledWith(g2gException);
+
+    // Verify deposit is saved
+    expect(depositSaveSpy).toHaveBeenCalledWith(deposit);
+
+    // Verify notifications are sent to all admins
+    expect(findAllAdminsSpy).toHaveBeenCalled();
+    expect(createNotiSpy).toHaveBeenCalledTimes(2);
+    expect(createNotiSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recvId: 1,
+        sendId: null,
+        notiType: NotiType.DepositUnmatched,
+        subId: deposit.depositId.toString(),
+      }),
+    );
+    expect(createNotiSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recvId: 2,
+        sendId: null,
+        notiType: NotiType.DepositUnmatched,
+        subId: deposit.depositId.toString(),
       }),
     );
   });

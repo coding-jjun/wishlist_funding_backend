@@ -135,6 +135,7 @@ export class Deposit {
     depositBank: string,
     depositAccount: string,
     withdrawalAccount: string,
+    depositId?: number,
   ): Deposit {
     return new Deposit({
       senderSig,
@@ -144,6 +145,7 @@ export class Deposit {
       depositBank,
       depositAccount,
       withdrawalAccount,
+      depositId,
     });
   }
 }
