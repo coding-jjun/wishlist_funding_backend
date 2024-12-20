@@ -32,7 +32,7 @@ export class Donation {
   @OneToOne(() => Deposit, {
     nullable: false, // Donation은 있는데 Deposit이 없는 케이스는 존재하지 않습니다.,
   })
-  @JoinColumn({ name: 'depositId', referencedColumnName: 'donation' })
+  @JoinColumn({ name: 'depositId' })
   deposit: Deposit;
 
   @Column({
@@ -90,9 +90,15 @@ export class Donation {
     this.delAt = new Date(Date.now()); // softDelete까지 수행함.
   }
 
-  private constructor(funding: Funding, donor: User, amount: number) {
+  private constructor(
+    funding: Funding,
+    senderUser: User,
+    deposit: Deposit,
+    amount: number,
+  ) {
     this.funding = funding;
-    this.user = donor;
+    this.user = senderUser;
+    this.deposit = deposit;
     this.donAmnt = amount;
     this.donStat = DonationStatus.Donated;
     this.orderId = require('order-id')('key').generate();
@@ -100,7 +106,8 @@ export class Donation {
 
   static create(
     funding: Funding,
-    donor: User,
+    senderUser: User,
+    deposit: Deposit,
     amount: number,
     g2gException: GiftogetherExceptions,
   ) {
@@ -110,6 +117,6 @@ export class Donation {
     }
 
     // TODO - Add RollingPaper for inner object
-    return new Donation(funding, donor, amount);
+    return new Donation(funding, senderUser, deposit, amount);
   }
 }
