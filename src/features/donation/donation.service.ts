@@ -133,41 +133,44 @@ export class DonationService {
     return await this.createDonation(funding, createDonationDto, user);
   }
 
+  /**
+   * TODO Change it into "CreateProvDonation"
+   */
   async createDonation(funding: Funding, createDonationDto: CreateDonationDto, user:User) {
-    const donAmnt = createDonationDto.donAmnt;
-    const updateFunding = await this.updateFundingSum(funding, donAmnt);
+    // const donAmnt = createDonationDto.donAmnt;
+    // const updateFunding = await this.updateFundingSum(funding, donAmnt);
 
-    const donation = Donation.create(funding, user, donAmnt, this.g2gException);
+    // const donation = Donation.create(funding, user, donAmnt, this.g2gException);
 
-    const savedDonation = await this.donationRepo.save(donation);
+    // const savedDonation = await this.donationRepo.save(donation);
 
-    const rollingPaper = await this.rollService.createRollingPaper(
-      funding.fundId,
-      savedDonation,
-      new CreateRollingPaperDto(
-        savedDonation.donId,
-        createDonationDto.rollMsg,
-        createDonationDto.rollImg,
-        createDonationDto.defaultImgId,
-      ),
-      user,
-    );
+    // const rollingPaper = await this.rollService.createRollingPaper(
+    //   funding.fundId,
+    //   savedDonation,
+    //   new CreateRollingPaperDto(
+    //     savedDonation.donId,
+    //     createDonationDto.rollMsg,
+    //     createDonationDto.rollImg,
+    //     createDonationDto.defaultImgId,
+    //   ),
+    //   user,
+    // );
 
-    if (updateFunding.fundSum >= updateFunding.fundGoal) {
-      this.eventEmitter.emit('FundAchieve', {
-        recvId: updateFunding.fundUser,  // Handling server as a sender
-        subId: funding.fundUuid
-      });
-    }
+    // if (updateFunding.fundSum >= updateFunding.fundGoal) {
+    //   this.eventEmitter.emit('FundAchieve', {
+    //     recvId: updateFunding.fundUser,  // Handling server as a sender
+    //     subId: funding.fundUuid
+    //   });
+    // }
 
-    // Trigger NewDonate event
-    this.eventEmitter.emit('NewDonate', {
-      recvId: updateFunding.fundUser,
-      sendId: user.userId,
-      subId: funding.fundUuid
-    });
+    // // Trigger NewDonate event
+    // this.eventEmitter.emit('NewDonate', {
+    //   recvId: updateFunding.fundUser,
+    //   sendId: user.userId,
+    //   subId: funding.fundUuid
+    // });
 
-    return new DonationDto(savedDonation, rollingPaper.rollId);
+    // return new DonationDto(savedDonation, rollingPaper.rollId);
   }
   
   async findMineAll(userId: number, status: string, lastId?: number): Promise<{donations: MyDonationListDto[], lastId: number}> {

@@ -37,7 +37,7 @@ const entities = [
 ];
 
 describe('MatchDepositUseCase', () => {
-  let donationRepository: Repository<ProvisionalDonation>;
+  let provDonationRepository: Repository<ProvisionalDonation>;
   let fundingRepository: Repository<Funding>;
   let userRepository: Repository<User>;
   let matchDepositUseCase: MatchDepositUseCase;
@@ -60,7 +60,7 @@ describe('MatchDepositUseCase', () => {
     }).compile();
 
     matchDepositUseCase = module.get(MatchDepositUseCase);
-    donationRepository = module.get<Repository<ProvisionalDonation>>(
+    provDonationRepository = module.get<Repository<ProvisionalDonation>>(
       getRepositoryToken(ProvisionalDonation),
     );
     fundingRepository = module.get<Repository<Funding>>(
@@ -123,7 +123,7 @@ describe('MatchDepositUseCase', () => {
     jest.spyOn(eventEmitter, 'emit'); // Spy on the `emit` method for assertions.
 
     // Seed sample donations
-    await donationRepository.insert(
+    await provDonationRepository.insert(
       ProvisionalDonation.create(
         g2gException,
         '홍길동-1234',
@@ -132,7 +132,7 @@ describe('MatchDepositUseCase', () => {
         mockFunding,
       ),
     );
-    await donationRepository.insert(
+    await provDonationRepository.insert(
       ProvisionalDonation.create(
         g2gException,
         '김철수-5678',
@@ -141,7 +141,7 @@ describe('MatchDepositUseCase', () => {
         mockFunding,
       ),
     );
-    await donationRepository.insert(
+    await provDonationRepository.insert(
       ProvisionalDonation.create(
         g2gException,
         '이영희-9012',
@@ -153,7 +153,7 @@ describe('MatchDepositUseCase', () => {
   });
 
   it('should be defined', () => {
-    expect(donationRepository).toBeDefined();
+    expect(provDonationRepository).toBeDefined();
     expect(matchDepositUseCase).toBeDefined();
     expect(eventEmitter).toBeDefined();
   });
@@ -173,7 +173,7 @@ describe('MatchDepositUseCase', () => {
     // Act
     await matchDepositUseCase.execute(deposit);
 
-    const matchedSponsorship = await donationRepository.findOne({
+    const matchedSponsorship = await provDonationRepository.findOne({
       where: {
         senderSig: deposit.senderSig,
         amount: deposit.amount,
@@ -208,7 +208,7 @@ describe('MatchDepositUseCase', () => {
     );
 
     // Assert
-    const sponsorship = await donationRepository.findOne({
+    const sponsorship = await provDonationRepository.findOne({
       where: {
         senderSig: deposit.senderSig,
         amount: deposit.amount,
@@ -240,7 +240,7 @@ describe('MatchDepositUseCase', () => {
     );
 
     // Assert
-    const sponsorship = await donationRepository.findOne({
+    const sponsorship = await provDonationRepository.findOne({
       where: {
         senderSig: deposit.senderSig,
         amount: deposit.amount,
@@ -252,5 +252,92 @@ describe('MatchDepositUseCase', () => {
       'deposit.unmatched',
       expect.any(DepositUnmatchedEvent),
     );
+  });
+
+  it('should create a provdonation successfully when matched', async () => {
+    // Arrange
+    const deposit = Deposit.create(
+      '홍길동-1234',
+      'Receiver Name',
+      50000,
+      new Date(),
+      'Bank Name',
+      'Deposit Account',
+      'Withdrawal Account',
+    );
+
+    // Act
+    await matchDepositUseCase.execute(deposit);
+
+    const matchedSponsorship = await provDonationRepository.findOne({
+      where: {
+        senderSig: deposit.senderSig,
+        amount: deposit.amount,
+      },
+    });
+
+    // Assert
+    expect(matchedSponsorship?.status).toBe(ProvisionalDonationStatus.Approved);
+    const donation = await provDonationRepository.findOne({
+      where: {
+        senderSig: deposit.senderSig,
+        amount: deposit.amount,
+      },
+    });
+    expect(donation).toBeDefined();
+  });
+
+  it('should not create a provdonation when partially matched', async () => {
+    // Arrange
+    const deposit = Deposit.create(
+      '홍길동-1234',
+      'Receiver Name',
+      99999999, // Mismatched amount
+      new Date(),
+      'Bank Name',
+      'Deposit Account',
+      'Withdrawal Account',
+    );
+
+    // Act
+    await expect(() => matchDepositUseCase.execute(deposit)).rejects.toThrow(
+      g2gException.DepositPartiallyMatched,
+    );
+
+    // Assert
+    const donation = await provDonationRepository.findOne({
+      where: {
+        senderSig: deposit.senderSig,
+        amount: deposit.amount,
+      },
+    });
+    expect(donation).toBeNull();
+  });
+
+  it('should not create a provdonation when unmatched', async () => {
+    // Arrange
+    const deposit = Deposit.create(
+      '박영수-9999', // Non-existent sender
+      'Receiver Name',
+      50000,
+      new Date(),
+      'Bank Name',
+      'Deposit Account',
+      'Withdrawal Account',
+    );
+
+    // Act
+    await expect(() => matchDepositUseCase.execute(deposit)).rejects.toThrow(
+      g2gException.DepositUnmatched,
+    );
+
+    // Assert
+    const donation = await provDonationRepository.findOne({
+      where: {
+        senderSig: deposit.senderSig,
+        amount: deposit.amount,
+      },
+    });
+    expect(donation).toBeNull();
   });
 });
