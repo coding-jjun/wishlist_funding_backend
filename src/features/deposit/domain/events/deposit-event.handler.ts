@@ -113,7 +113,7 @@ export class DepositEventHandler {
    * 관리자가 해당 입금내역을 환불처리한 경우 입금내역의 생애주기가 올바르게 전환되는지를 따져보아야 합니다.
    */
   @OnEvent('deposit.refunded')
-  async handleDepositUnmatchedRefunded(event: DepositRefundedEvent) {
+  async handleDepositRefunded(event: DepositRefundedEvent) {
     const { deposit } = event;
 
     deposit.refund(this.g2gException);
@@ -138,7 +138,7 @@ export class DepositEventHandler {
    * 관리자가 해당 입금내역을 삭제처리한 경우 입금내역의 생애주기가 올바르게 전환되는지를 따져보아야 합니다.
    */
   @OnEvent('deposit.deleted')
-  async handleDepositUnmatchedDeleted(event: DepositDeletedEvent) {
+  async handleDepositDeleted(event: DepositDeletedEvent) {
     const { deposit } = event;
     deposit.delete();
 
