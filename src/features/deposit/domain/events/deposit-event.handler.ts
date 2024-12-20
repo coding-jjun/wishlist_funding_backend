@@ -47,7 +47,7 @@ export class DepositEventHandler {
     const { funding, senderUser } = provisionalDonation;
     // 1
     await this.createDonation.execute(
-      new CreateDonationCommand(funding, deposit.amount, senderUser),
+      new CreateDonationCommand(funding, deposit.amount, senderUser, deposit),
     );
 
     // 2

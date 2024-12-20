@@ -18,8 +18,14 @@ export class CreateDonationUseCase {
   ) {}
 
   async execute(cmd: CreateDonationCommand): Promise<Donation> {
-    const { funding, amount, donor } = cmd;
-    const donation = Donation.create(funding, donor, amount, this.g2gException);
+    const { funding, amount, senderUser, deposit } = cmd;
+    const donation = Donation.create(
+      funding,
+      senderUser,
+      deposit,
+      amount,
+      this.g2gException,
+    );
 
     await this.donationRepo.save(donation);
 
