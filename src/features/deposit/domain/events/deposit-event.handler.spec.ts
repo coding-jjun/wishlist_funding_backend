@@ -26,6 +26,7 @@ import { CreateNotificationDto } from 'src/features/notification/dto/create-noti
 import { NotiType } from 'src/enums/noti-type.enum';
 import { DecreaseFundSumUseCase } from 'src/features/funding/commands/decrease-fundsum.usecase';
 import { FindAllAdminsUseCase } from 'src/features/admin/queries/find-all-admins.usecase';
+import { CreateDonationCommand } from 'src/features/donation/commands/create-donation.command';
 
 const entities = [
   User,
@@ -180,8 +181,9 @@ describe('DepositEventHandler', () => {
       expect.objectContaining({
         funding: mockFunding,
         amount: deposit.amount,
-        donor: matchedDonor,
-      }),
+        senderUser: matchedDonor,
+        deposit: deposit,
+      } as CreateDonationCommand),
     );
 
     expect(donationSpy).toHaveBeenCalledTimes(1);
