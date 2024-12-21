@@ -27,6 +27,7 @@ import { NotiType } from 'src/enums/noti-type.enum';
 import { DecreaseFundSumUseCase } from 'src/features/funding/commands/decrease-fundsum.usecase';
 import { FindAllAdminsUseCase } from 'src/features/admin/queries/find-all-admins.usecase';
 import { CreateDonationCommand } from 'src/features/donation/commands/create-donation.command';
+import { DepositPartiallyMatchedEvent } from './deposit-partially-matched.event';
 
 const entities = [
   User,
@@ -39,6 +40,7 @@ const entities = [
   Donation,
   Notification,
   Deposit,
+  ProvisionalDonation,
 ];
 
 /**
@@ -267,6 +269,76 @@ describe('DepositEventHandler', () => {
         recvId: 2,
         sendId: null,
         notiType: NotiType.DepositUnmatched,
+        subId: deposit.depositId.toString(),
+      }),
+    );
+  });
+  it('should handle deposit.partiallyMatched event', async () => {
+    const deposit = Deposit.create(
+      'sender',
+      'receiver',
+      1000,
+      new Date(),
+      'depositBank',
+      'depositAccount',
+      'withdrawalAccount',
+      1,
+    );
+
+    const provisionalDonation = ProvisionalDonation.create(
+      g2gException,
+      partiallyMatchedDonor.userName + '-1234',
+      partiallyMatchedDonor,
+      2000, // Different amount to simulate partial match
+      mockFunding,
+    );
+
+    const event = new DepositPartiallyMatchedEvent(
+      deposit,
+      provisionalDonation,
+    );
+
+    const rejectSpy = jest.spyOn(provisionalDonation, 'reject');
+    const saveSpy = jest.spyOn(handler['provDonRepo'], 'save');
+    const notiSpy = jest.spyOn(notificationService, 'createNoti');
+    const findAllAdminsSpy = jest
+      .spyOn(handler['findAllAdmins'], 'execute')
+      .mockResolvedValue([{ userId: 1 } as User, { userId: 2 } as User]);
+
+    await handler.handleDepositPartiallyMatched(event);
+
+    // Verify provisional donation is rejected
+    expect(rejectSpy).toHaveBeenCalledWith(g2gException);
+
+    // Verify provisional donation is saved
+    expect(saveSpy).toHaveBeenCalledWith(provisionalDonation);
+
+    // Verify notification is sent to the sender
+    expect(notiSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recvId: partiallyMatchedDonor.userId,
+        sendId: null,
+        notiType: NotiType.DonationPartiallyMatched,
+        subId: deposit.depositId.toString(),
+      }),
+    );
+
+    // Verify notifications are sent to all admins
+    expect(findAllAdminsSpy).toHaveBeenCalled();
+    expect(notiSpy).toHaveBeenCalledTimes(3); // 1 for sender, 2 for admins
+    expect(notiSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recvId: 1,
+        sendId: null,
+        notiType: NotiType.DonationPartiallyMatched,
+        subId: deposit.depositId.toString(),
+      }),
+    );
+    expect(notiSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recvId: 2,
+        sendId: null,
+        notiType: NotiType.DonationPartiallyMatched,
         subId: deposit.depositId.toString(),
       }),
     );
