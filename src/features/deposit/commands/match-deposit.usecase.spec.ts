@@ -14,7 +14,6 @@ import { FundTheme } from 'src/enums/fund-theme.enum';
 import { ProvisionalDonationStatus } from 'src/enums/provisional-donation-status.enum';
 import { Repository } from 'typeorm';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
-import { FindProvDonationsBySenderSigUseCase } from '../queries/find-provisional-donations-by-sender-sig.usecase';
 import { createDataSourceOptions } from 'src/tests/data-source-options';
 import { Account } from 'src/entities/account.entity';
 import { Comment } from 'src/entities/comment.entity';
@@ -52,11 +51,7 @@ describe('MatchDepositUseCase', () => {
         TypeOrmModule.forFeature(entities),
       ],
       controllers: [],
-      providers: [
-        GiftogetherExceptions,
-        MatchDepositUseCase,
-        FindProvDonationsBySenderSigUseCase,
-      ],
+      providers: [GiftogetherExceptions, MatchDepositUseCase],
     }).compile();
 
     matchDepositUseCase = module.get(MatchDepositUseCase);

@@ -15,7 +15,6 @@ import { User } from 'src/entities/user.entity';
 import { Donation } from 'src/entities/donation.entity';
 import { Deposit } from './domain/entities/deposit.entity';
 import { ProvisionalDonation } from './domain/entities/provisional-donation.entity';
-import { FindProvDonationsBySenderSigUseCase } from './queries/find-provisional-donations-by-sender-sig.usecase';
 import { CreateDonationUseCase } from '../donation/commands/create-donation.usecase';
 import { IncreaseFundSumUseCase } from '../funding/commands/increase-fundsum.usecase';
 import { NotificationService } from '../notification/notification.service';
@@ -43,7 +42,6 @@ import { FindAllAdminsUseCase } from '../admin/queries/find-all-admins.usecase';
     InMemoryProvisionalDonationRepository,
     GiftogetherExceptions,
     DepositEventHandler,
-    FindProvDonationsBySenderSigUseCase,
     CreateDonationUseCase,
     IncreaseFundSumUseCase,
     DecreaseFundSumUseCase,

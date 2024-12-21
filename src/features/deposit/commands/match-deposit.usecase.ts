@@ -6,7 +6,6 @@ import { Deposit } from '../domain/entities/deposit.entity';
 import { GiftogetherExceptions } from '../../../filters/giftogether-exception';
 import { ProvisionalDonation } from '../domain/entities/provisional-donation.entity';
 import { DepositPartiallyMatchedEvent } from '../domain/events/deposit-partially-matched.event';
-import { FindProvDonationsBySenderSigUseCase } from '../queries/find-provisional-donations-by-sender-sig.usecase';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -22,15 +21,14 @@ export class MatchDepositUseCase {
     private readonly eventEmitter: EventEmitter2,
 
     private readonly g2gException: GiftogetherExceptions,
-
-    private readonly findDonationsBySenderSig: FindProvDonationsBySenderSigUseCase,
   ) {}
 
   async execute(deposit: Deposit): Promise<void> {
-    const donations: ProvisionalDonation[] =
-      await this.findDonationsBySenderSig.execute(deposit.senderSig);
+    const provDon = await this.provDonRepo.findOne({
+      where: { senderSig: deposit.senderSig },
+    });
 
-    if (donations.length === 0) {
+    if (!provDon) {
       /**
        * ## 불일치
        *
@@ -49,11 +47,7 @@ export class MatchDepositUseCase {
       throw this.g2gException.DepositUnmatched;
     }
 
-    const provDonation: ProvisionalDonation = donations.find(
-      (v) => v.amount === deposit.amount,
-    );
-
-    if (provDonation) {
+    if (provDon.amount === deposit.amount) {
       /**
        * ## 일치
        *
@@ -64,12 +58,12 @@ export class MatchDepositUseCase {
        *  - 펀딩의 달성 금액이 업데이트 됩니다.
        *  - 후원자에게 후원이 정상적으로 처리되었음을 알리는 알림을 발송합니다.
        */
-      provDonation.approve(this.g2gException);
-      await this.provDonRepo.save(provDonation);
+      provDon.approve(this.g2gException);
+      await this.provDonRepo.save(provDon);
 
       this.eventEmitter.emit(
         'deposit.matched',
-        new DepositMatchedEvent(deposit, provDonation),
+        new DepositMatchedEvent(deposit, provDon),
       );
     } else {
       /**
@@ -84,7 +78,7 @@ export class MatchDepositUseCase {
        */
       this.eventEmitter.emit(
         'deposit.partiallyMatched',
-        new DepositPartiallyMatchedEvent(deposit),
+        new DepositPartiallyMatchedEvent(deposit, provDon),
       );
       throw this.g2gException.DepositPartiallyMatched;
     }
