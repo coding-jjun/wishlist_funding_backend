@@ -21,6 +21,7 @@ import { DepositRefundedEvent } from './deposit-refunded.event';
 import { DepositStatus } from 'src/enums/deposit-status.enum';
 import { DecreaseFundSumCommand } from 'src/features/funding/commands/decrease-fundsum.command';
 import { DepositDeletedEvent } from './deposit-deleted.event';
+import { ProvisionalDonation } from '../entities/provisional-donation.entity';
 
 @Injectable()
 export class DepositEventHandler {
@@ -32,6 +33,8 @@ export class DepositEventHandler {
     private readonly notiService: NotificationService,
     @InjectRepository(Deposit)
     private readonly depositRepo: Repository<Deposit>,
+    @InjectRepository(ProvisionalDonation)
+    private readonly provDonRepo: Repository<ProvisionalDonation>,
     private readonly findAllAdmins: FindAllAdminsUseCase,
   ) {}
 
@@ -88,6 +91,33 @@ export class DepositEventHandler {
 
     // 1
     provDon.reject(this.g2gException);
+    this.provDonRepo.save(provDon);
+
+    // 2
+    const notiDtoForSender = new CreateNotificationDto({
+      recvId: provDon.senderUser.userId,
+      sendId: null, // because system is sender
+      notiType: NotiType.DonationPartiallyMatched,
+      subId: deposit.depositId.toString(),
+    });
+    this.notiService.createNoti(notiDtoForSender);
+
+    // 3
+    this.findAllAdmins.execute().then((admins: User[]) => {
+      admins.forEach((admin: User) => {
+        const notiDto = new CreateNotificationDto({
+          recvId: admin.userId,
+          sendId: null, // because the system is sender
+          notiType: NotiType.DonationPartiallyMatched,
+          subId: deposit.depositId.toString(),
+        });
+        this.notiService.createNoti(notiDto);
+      });
+    });
+
+    // 3은 관리자 중 한명이 업무를 처리하여 삭제하던, 환불조치를 취하던 ACT가 발생한
+    // 이후에 처리해야 합니다. DepositEventHandler는 Unmatched된 입금내역에 대한
+    // 사후처리를 책임져야 합니다.
   }
 
   /**
