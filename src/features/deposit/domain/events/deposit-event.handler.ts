@@ -74,8 +74,21 @@ export class DepositEventHandler {
     await this.notiService.createNoti(createNotificationDtoForReceiver);
   }
 
+  /**
+   * - 조건: 보내는 분은 일치하지만 이체 금액이 다른 경우 → 부분 매칭
+   *
+   * 1. 예비 후원의 상태를 ‘반려’로 변경합니다.
+   * 2. 시스템은 후원자에게 반려 사유를 포함한 알림을 발송합니다.
+   * 3. 시스템은 관리자에게 부분매칭이 된 예비후원이 발생함 알림을 발송합니다.
+   * 4. 관리자는 해당 건에 대해서 환불, 혹은 삭제 조치를 진행해야 합니다.
+   */
   @OnEvent('deposit.partiallyMatched')
-  handleDepositPartiallyMatched(event: DepositPartiallyMatchedEvent) {}
+  handleDepositPartiallyMatched(event: DepositPartiallyMatchedEvent) {
+    const { deposit, provDon } = event;
+
+    // 1
+    provDon.reject(this.g2gException);
+  }
 
   /**
    * 1. 입금 내역을 ‘고아 상태’로 표시합니다.
