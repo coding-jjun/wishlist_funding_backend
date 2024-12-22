@@ -94,11 +94,9 @@ export class DonationService {
     return funding;
   }
 
-  async validFundingDate(fundUuid: string){
+  async validFundingDate(fundUuid: string) {
     const funding = await this.fundingRepo.findOne({ where: { fundUuid } });
-    const now = getNow();
-
-    if (new Date(funding.endAt).getTime() < new Date(now).getTime()) {
+    if (funding.isClosed()) {
       throw this.g2gException.FundingClosed;
     }
     return funding;

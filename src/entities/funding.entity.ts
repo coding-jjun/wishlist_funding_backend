@@ -19,6 +19,7 @@ import { Donation } from './donation.entity';
 import { Image } from './image.entity';
 import { IImageId } from 'src/interfaces/image-id.interface';
 import { ImageType } from 'src/enums/image-type.enum';
+import { truncateTime } from 'src/util/truncate-tiime';
 
 @Entity()
 export class Funding implements IImageId {
@@ -141,4 +142,14 @@ export class Funding implements IImageId {
 
   @OneToOne(() => Image, (image) => image.subId)
   image: Image;
+
+  /**
+   * 펀딩 마감정책: env.TZ, Day를 기준으로 endAt을 **포함하는**
+   * 날까지 ongoing 상태. 따라서, endAt 다음날부터 이 펀딩은 closed 상태가 됩니다.
+   */
+  isClosed(): boolean {
+    const endAt = truncateTime(this.endAt);
+    const now = truncateTime(new Date(Date.now()));
+    return endAt < now;
+  }
 }
