@@ -38,7 +38,7 @@ export class DonationController {
         data: await this.donationService.createUserDonation(
           fundUuid,
           createDonationDto,
-          user
+          user,
         ),
       };
     } catch (error) {

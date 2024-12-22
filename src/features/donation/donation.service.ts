@@ -20,6 +20,7 @@ import { DonationListDto } from './dto/other-donation-list.dto';
 import { ValidCheck } from 'src/util/valid-check';
 import { DefaultImageId } from 'src/enums/default-image-id';
 import * as bcrypt from 'bcrypt';
+import { ProvisionalDonation } from '../deposit/domain/entities/provisional-donation.entity';
 
 @Injectable()
 export class DonationService {
@@ -35,6 +36,9 @@ export class DonationService {
 
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+
+    @InjectRepository(ProvisionalDonation)
+    private readonly provDonRepo: Repository<ProvisionalDonation>,
 
     private readonly rollService: RollingPaperService,
 
@@ -132,43 +136,11 @@ export class DonationService {
   }
 
   /**
-   * TODO Change it into "CreateProvDonation"
+   * 사용자는 새 Donation을 바로 만들 수 없습니다. 예비후원이라는 의미의 ProvisionalDonation (줄여서 ProvDon)을 
+   * 만들어 시스템에 제출하고 안내받은 계좌번호를 통해 입금을 해야합니다.
    */
   async createDonation(funding: Funding, createDonationDto: CreateDonationDto, user:User) {
-    // const donAmnt = createDonationDto.donAmnt;
-    // const updateFunding = await this.updateFundingSum(funding, donAmnt);
-
-    // const donation = Donation.create(funding, user, donAmnt, this.g2gException);
-
-    // const savedDonation = await this.donationRepo.save(donation);
-
-    // const rollingPaper = await this.rollService.createRollingPaper(
-    //   funding.fundId,
-    //   savedDonation,
-    //   new CreateRollingPaperDto(
-    //     savedDonation.donId,
-    //     createDonationDto.rollMsg,
-    //     createDonationDto.rollImg,
-    //     createDonationDto.defaultImgId,
-    //   ),
-    //   user,
-    // );
-
-    // if (updateFunding.fundSum >= updateFunding.fundGoal) {
-    //   this.eventEmitter.emit('FundAchieve', {
-    //     recvId: updateFunding.fundUser,  // Handling server as a sender
-    //     subId: funding.fundUuid
-    //   });
-    // }
-
-    // // Trigger NewDonate event
-    // this.eventEmitter.emit('NewDonate', {
-    //   recvId: updateFunding.fundUser,
-    //   sendId: user.userId,
-    //   subId: funding.fundUuid
-    // });
-
-    // return new DonationDto(savedDonation, rollingPaper.rollId);
+    const provDon = ProvisionalDonation.create(this.g2gException, );
   }
   
   async findMineAll(userId: number, status: string, lastId?: number): Promise<{donations: MyDonationListDto[], lastId: number}> {
@@ -255,5 +227,18 @@ export class DonationService {
     } else {
       return false;
     }
+  }
+
+  /**
+   * 한 유저가 여러번 후원하는 경우 예비후원과 이체내역을 찾을 수 없는 문제 때문에
+   * '보내는 분'에 고유식별번호를 추가하기로 했습니다.
+   *
+   * [노션 문서](https://www.notion.so/c3cd436359344df6b60bfaed9bdbf784?pvs=4) 참고
+   * @param username 입금자명
+   */
+  createSenderSig(username: string) {
+    const signature: string = Math.round(Math.random() * 100).toString();
+    const delimeter = '-';
+    return username + delimeter + signature;
   }
 }
