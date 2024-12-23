@@ -148,8 +148,7 @@ export class Funding implements IImageId {
    * 날까지 ongoing 상태. 따라서, endAt 다음날부터 이 펀딩은 closed 상태가 됩니다.
    */
   isClosed(): boolean {
-    const endAt = truncateTime(this.endAt);
-    const now = truncateTime(new Date(Date.now()));
-    return endAt < now;
+    const now = truncateTime(new Date());
+    return this.endAt < now;
   }
 }
