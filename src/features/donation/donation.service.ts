@@ -23,6 +23,7 @@ import * as bcrypt from 'bcrypt';
 import { ProvisionalDonation } from '../deposit/domain/entities/provisional-donation.entity';
 import { CreateProvisionalDonationUseCase } from './commands/create-provisional-donation.usecase';
 import { CreateProvisionalDonationCommand } from './commands/create-provisional-donation.command';
+import { ProvisionalDonationDto } from './dto/provisional-donation.dto';
 
 @Injectable()
 export class DonationService {
@@ -113,9 +114,18 @@ export class DonationService {
     fundUuid: string,
     createDonationDto: CreateDonationDto,
     user: User,
-  ): Promise<ProvisionalDonation> {
+  ): Promise<ProvisionalDonationDto> {
     const funding = await this.validFundingDate(fundUuid);
-    return this.createDonation(funding, createDonationDto, user);
+    const provDon = await this.createDonation(funding, createDonationDto, user);
+    return new ProvisionalDonationDto(
+      provDon.provDonId,
+      provDon.senderSig,
+      provDon.senderUser.userId,
+      provDon.amount,
+      provDon.funding.fundUuid,
+      provDon.status,
+      provDon.regAt,
+    );
   }
 
   async createGuest(guest: CreateGuestDto): Promise<User> {

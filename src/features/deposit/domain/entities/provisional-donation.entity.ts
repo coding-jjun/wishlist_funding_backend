@@ -22,7 +22,7 @@ export class ProvisionalDonation {
   @PrimaryGeneratedColumn()
   readonly provDonId: number;
 
-  @Column('varchar')
+  @Column('varchar', { unique: true })
   readonly senderSig: string; // '홍길동-1234'
 
   @ManyToOne(() => User, { onDelete: 'SET NULL' })

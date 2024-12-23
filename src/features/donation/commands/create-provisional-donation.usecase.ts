@@ -24,6 +24,8 @@ export class CreateProvisionalDonationUseCase {
       cmd.amount,
       { fundUuid: cmd.fundUuid } as Funding,
     );
-    return this.provdonRepo.save(provdon);
+    await this.provdonRepo.insert(provdon);
+
+    return provdon;
   }
 }
