@@ -50,10 +50,10 @@ export class DonationController {
    * 이체시 사용할 고유식별번호를 요청합니다.
    * @returns '보내는 분' 자리에 들어갈 이름과 식별번호 조합
    */
-  @Post('/senderSig')
+  @Get('/senderSig')
   @UseGuards(JwtAuthGuard)
-  createSenderSig(@Req() req: Request): CommonResponse {
-    const user = req.user as User;
+  async createSenderSig(@Req() req: Request): Promise<CommonResponse> {
+    const user = req.user as { user: User } as any;
     return {
       message: 'senderSig 생성완료',
       data: this.donationService.createSenderSig(user.userName),
