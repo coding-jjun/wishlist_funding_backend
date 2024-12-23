@@ -21,6 +21,8 @@ import { ValidCheck } from 'src/util/valid-check';
 import { DefaultImageId } from 'src/enums/default-image-id';
 import * as bcrypt from 'bcrypt';
 import { ProvisionalDonation } from '../deposit/domain/entities/provisional-donation.entity';
+import { CreateProvisionalDonationUseCase } from './commands/create-provisional-donation.usecase';
+import { CreateProvisionalDonationCommand } from './commands/create-provisional-donation.command';
 
 @Injectable()
 export class DonationService {
@@ -37,15 +39,14 @@ export class DonationService {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
 
-    @InjectRepository(ProvisionalDonation)
-    private readonly provDonRepo: Repository<ProvisionalDonation>,
-
     private readonly rollService: RollingPaperService,
 
     private readonly g2gException: GiftogetherExceptions,
 
     private eventEmitter: EventEmitter2,
     private readonly validCheck: ValidCheck,
+
+    private readonly createProvisionalDonation: CreateProvisionalDonationUseCase,
   ) {}
 
   async getAllDonations(userId: number): Promise<Donation[]> {
@@ -62,29 +63,28 @@ export class DonationService {
 
   /**
    * 비회원 로그인시 orderId 로 사용자 정보 조회
-   * @param orderId 
-   * @returns 
+   * @param orderId
+   * @returns
    */
   async getGuestInfoByOrderId(orderId: string) {
-
     const donation = await this.donationRepo
       .createQueryBuilder('d')
       .leftJoinAndSelect('d.user', 'u')
       .where('d.orderId = :orderId', { orderId })
       .getOne();
-      
+
     return donation.user;
   }
 
   async getDonationByUserId(userId: number) {
     const donation = await this.donationRepo
-    .createQueryBuilder('d')
-    .leftJoinAndSelect('d.funding', 'f')
-    .leftJoinAndSelect('d.user', 'u')
-    .select(['d.orderId', 'd.donAmnt', 'd.regAt', 'f.fundUuid'])
-    .where('u.userId = :userId', { userId })
-    .getOne();
-  return donation;
+      .createQueryBuilder('d')
+      .leftJoinAndSelect('d.funding', 'f')
+      .leftJoinAndSelect('d.user', 'u')
+      .select(['d.orderId', 'd.donAmnt', 'd.regAt', 'f.fundUuid'])
+      .where('u.userId = :userId', { userId })
+      .getOne();
+    return donation;
   }
 
   async updateFundingSum(funding: Funding, donAmnt: number) {
@@ -106,14 +106,18 @@ export class DonationService {
     return funding;
   }
 
-  async createUserDonation(fundUuid: string, createDonationDto: CreateDonationDto, user:User){
+  async createUserDonation(
+    fundUuid: string,
+    createDonationDto: CreateDonationDto,
+    user: User,
+  ) {
     const funding = await this.validFundingDate(fundUuid);
     return await this.createDonation(funding, createDonationDto, user);
   }
 
-  async createGuest(guest: CreateGuestDto): Promise<User>{
-    if(!guest || typeof guest === 'string'){
-      throw this.g2gException.UserFailedToCreate
+  async createGuest(guest: CreateGuestDto): Promise<User> {
+    if (!guest || typeof guest === 'string') {
+      throw this.g2gException.UserFailedToCreate;
     }
     const { userNick, userPhone, accBank, accNum } = guest;
     const user = new User();
@@ -127,7 +131,10 @@ export class DonationService {
     return await this.userRepo.save(user);
   }
 
-  async createGuestDonation(fundUuid: string, createDonationDto: CreateDonationDto){
+  async createGuestDonation(
+    fundUuid: string,
+    createDonationDto: CreateDonationDto,
+  ) {
     // TODO Donation 생성 실패시 user 객체 롤백 작업 필요
     // TODO createGuest 로직 createUser 메소드 재사용
     const funding = await this.validFundingDate(fundUuid);
@@ -136,21 +143,49 @@ export class DonationService {
   }
 
   /**
-   * 사용자는 새 Donation을 바로 만들 수 없습니다. 예비후원이라는 의미의 ProvisionalDonation (줄여서 ProvDon)을 
+   * 사용자는 새 Donation을 바로 만들 수 없습니다. 예비후원이라는 의미의 ProvisionalDonation (줄여서 ProvDon)을
    * 만들어 시스템에 제출하고 안내받은 계좌번호를 통해 입금을 해야합니다.
    */
-  async createDonation(funding: Funding, createDonationDto: CreateDonationDto, user:User) {
-    const provDon = ProvisionalDonation.create(this.g2gException, );
+  async createDonation(
+    funding: Funding,
+    dto: CreateDonationDto,
+    user: User,
+  ): Promise<ProvisionalDonation> {
+    return this.createProvisionalDonation.execute(
+      new CreateProvisionalDonationCommand(
+        dto.senderSig,
+        user.userId,
+        dto.donAmnt,
+        funding.fundUuid,
+      ),
+    );
   }
-  
-  async findMineAll(userId: number, status: string, lastId?: number): Promise<{donations: MyDonationListDto[], lastId: number}> {
+
+  async findMineAll(
+    userId: number,
+    status: string,
+    lastId?: number,
+  ): Promise<{ donations: MyDonationListDto[]; lastId: number }> {
     const currentDate = new Date();
-    let query = this.donationRepo.createQueryBuilder('donation')
+    let query = this.donationRepo
+      .createQueryBuilder('donation')
       .leftJoinAndSelect('donation.funding', 'funding')
       .leftJoinAndSelect('donation.user', 'user')
       .leftJoinAndSelect('funding.fundUser', 'fundUser')
-      .leftJoinAndMapOne('fundUser.image', Image, 'image', 'fundUser.defaultImgId = image.imgId OR (fundUser.defaultImgId IS NULL AND image.subId = fundUser.userId AND image.imgType = :userType)', { userType: ImageType.User })
-      .leftJoinAndMapMany('funding.images', Image, 'fundImages', 'funding.defaultImgId = fundImages.imgId OR (funding.defaultImgId IS NULL AND fundImages.subId = funding.fundId AND fundImages.imgType = :fundType)', { fundType: ImageType.Funding })
+      .leftJoinAndMapOne(
+        'fundUser.image',
+        Image,
+        'image',
+        'fundUser.defaultImgId = image.imgId OR (fundUser.defaultImgId IS NULL AND image.subId = fundUser.userId AND image.imgType = :userType)',
+        { userType: ImageType.User },
+      )
+      .leftJoinAndMapMany(
+        'funding.images',
+        Image,
+        'fundImages',
+        'funding.defaultImgId = fundImages.imgId OR (funding.defaultImgId IS NULL AND fundImages.subId = funding.fundId AND fundImages.imgType = :fundType)',
+        { fundType: ImageType.Funding },
+      )
       .where('donation.userId = :userId', { userId })
       .setParameter('currentDate', currentDate)
       .orderBy('donation.donId', 'DESC');
@@ -162,36 +197,50 @@ export class DonationService {
     }
 
     if (lastId) {
-      query.andWhere('donation.donId < :lastId', { lastId })
-    };
+      query.andWhere('donation.donId < :lastId', { lastId });
+    }
     query.take(10);
-  
-    const donations = (await query.getMany()).map(donation => new MyDonationListDto(donation));
+
+    const donations = (await query.getMany()).map(
+      (donation) => new MyDonationListDto(donation),
+    );
     return {
       donations: donations,
       lastId: donations[donations.length - 1]?.donId,
-    }
+    };
   }
 
-  async findAll(funding: Funding, lastId?: number): Promise<{donations: DonationListDto[], lastId: number}> {
-    const query = this.donationRepo.createQueryBuilder('donation')
+  async findAll(
+    funding: Funding,
+    lastId?: number,
+  ): Promise<{ donations: DonationListDto[]; lastId: number }> {
+    const query = this.donationRepo
+      .createQueryBuilder('donation')
       .orderBy('donation.donId', 'DESC')
-      .where('donation.funding = :fundId', { fundId : funding.fundId })
+      .where('donation.funding = :fundId', { fundId: funding.fundId })
       .leftJoinAndSelect('donation.user', 'user')
-      .leftJoinAndMapOne('user.image', Image, 'image', '(user.defaultImgId = image.imgId OR (user.defaultImgId IS NULL AND image.subId = user.userId AND image.imgType = :userType))', { userType: ImageType.User })
+      .leftJoinAndMapOne(
+        'user.image',
+        Image,
+        'image',
+        '(user.defaultImgId = image.imgId OR (user.defaultImgId IS NULL AND image.subId = user.userId AND image.imgType = :userType))',
+        { userType: ImageType.User },
+      );
 
     if (lastId) {
-      query.andWhere('donation.donId < :lastId', { lastId })
+      query.andWhere('donation.donId < :lastId', { lastId });
     }
     query.take(10);
 
-    const donations = (await query.getMany()).map(donation => new DonationListDto(donation));
+    const donations = (await query.getMany()).map(
+      (donation) => new DonationListDto(donation),
+    );
 
     return {
       donations: donations,
-      lastId: donations[donations.length - 1]?.donId
-    }
-  } 
+      lastId: donations[donations.length - 1]?.donId,
+    };
+  }
 
   // Guest Delete
   async deleteGuestDonation(orderId: string): Promise<Boolean> {
@@ -209,10 +258,10 @@ export class DonationService {
   }
 
   // DELETE
-  async deleteDonation(userId:number, donId: number): Promise<Boolean> {
+  async deleteDonation(userId: number, donId: number): Promise<Boolean> {
     const donation = await this.donationRepo.findOne({
       relations: {
-        user : true,
+        user: true,
       },
       where: { donId },
     });
@@ -220,7 +269,7 @@ export class DonationService {
       console.log(donation);
 
       // userId 유효성 검사
-      await this.validCheck.verifyUserMatch(donation.user.userId, userId)
+      await this.validCheck.verifyUserMatch(donation.user.userId, userId);
       await this.donationRepo.softDelete(donId);
       await this.rollingPaperRepo.softDelete({ rollId: donId });
       return true;
