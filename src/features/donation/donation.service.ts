@@ -100,6 +100,9 @@ export class DonationService {
 
   async validFundingDate(fundUuid: string) {
     const funding = await this.fundingRepo.findOne({ where: { fundUuid } });
+    if (!funding) {
+      throw this.g2gException.FundingNotExists;
+    }
     if (funding.isClosed()) {
       throw this.g2gException.FundingClosed;
     }
@@ -110,9 +113,9 @@ export class DonationService {
     fundUuid: string,
     createDonationDto: CreateDonationDto,
     user: User,
-  ) {
+  ): Promise<ProvisionalDonation> {
     const funding = await this.validFundingDate(fundUuid);
-    return await this.createDonation(funding, createDonationDto, user);
+    return this.createDonation(funding, createDonationDto, user);
   }
 
   async createGuest(guest: CreateGuestDto): Promise<User> {
