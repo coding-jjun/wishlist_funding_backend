@@ -5,7 +5,6 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { UploadDepositUseCase } from './commands/upload-deposit.usecase';
 import { MatchDepositUseCase } from './commands/match-deposit.usecase';
 import { InMemoryDepositRepository } from './infrastructure/repositories/in-memory-deposit.repository';
-import { InMemoryProvisionalDonationRepository } from './infrastructure/repositories/in-memory-provisional-donation.repository';
 import { GiftogetherExceptions } from '../../filters/giftogether-exception';
 import { DepositEventHandler } from './domain/events/deposit-event.handler';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -39,7 +38,6 @@ import { FindAllAdminsUseCase } from '../admin/queries/find-all-admins.usecase';
     UploadDepositUseCase,
     MatchDepositUseCase,
     InMemoryDepositRepository,
-    InMemoryProvisionalDonationRepository,
     GiftogetherExceptions,
     DepositEventHandler,
     CreateDonationUseCase,

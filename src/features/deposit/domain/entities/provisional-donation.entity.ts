@@ -22,7 +22,7 @@ export class ProvisionalDonation {
   @PrimaryGeneratedColumn()
   readonly provDonId: number;
 
-  @Column('varchar')
+  @Column('varchar', { unique: true })
   readonly senderSig: string; // '홍길동-1234'
 
   @ManyToOne(() => User, { onDelete: 'SET NULL' })
@@ -37,12 +37,22 @@ export class ProvisionalDonation {
   @Column('int')
   readonly amount: number;
 
-  @ManyToOne(() => Funding, { onDelete: 'SET NULL' })
+  @ManyToOne(
+    () => Funding, //
+    (funding) => funding.provDons, //
+    {
+      onDelete: 'SET NULL',
+      nullable: true,
+    },
+  )
   @JoinColumn({
     name: 'fundId',
     referencedColumnName: 'fundId',
   })
   readonly funding: Funding;
+
+  @Column('fundId')
+  readonly fundId: number;
 
   @Column({
     type: 'enum',
