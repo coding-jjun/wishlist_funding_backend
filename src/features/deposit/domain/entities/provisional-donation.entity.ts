@@ -37,12 +37,22 @@ export class ProvisionalDonation {
   @Column('int')
   readonly amount: number;
 
-  @ManyToOne(() => Funding, { onDelete: 'SET NULL' })
+  @ManyToOne(
+    () => Funding, //
+    (funding) => funding.provDons, //
+    {
+      onDelete: 'SET NULL',
+      nullable: true,
+    },
+  )
   @JoinColumn({
     name: 'fundId',
     referencedColumnName: 'fundId',
   })
   readonly funding: Funding;
+
+  @Column('fundId')
+  readonly fundId: number;
 
   @Column({
     type: 'enum',

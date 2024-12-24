@@ -22,7 +22,7 @@ export class CreateProvisionalDonationUseCase {
       cmd.senderSig,
       { userId: cmd.senderUserId } as User,
       cmd.amount,
-      { fundUuid: cmd.fundUuid } as Funding,
+      { fundId: cmd.fundId } as Funding,
     );
     await this.provdonRepo.insert(provdon);
 

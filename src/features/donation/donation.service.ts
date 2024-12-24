@@ -7,11 +7,8 @@ import { CreateDonationDto } from './dto/create-donation.dto';
 import { CreateGuestDto } from './dto/create-guest.dto';
 import { Funding } from 'src/entities/funding.entity';
 import { User } from 'src/entities/user.entity';
-import { DonationDto } from './dto/donation.dto';
 import { RollingPaperService } from '../rolling-paper/rolling-paper.service';
-import { CreateRollingPaperDto } from '../rolling-paper/dto/create-rolling-paper.dto';
 import { GiftogetherExceptions } from 'src/filters/giftogether-exception';
-import { getNow } from 'src/app.module';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Image } from 'src/entities/image.entity';
 import { ImageType } from 'src/enums/image-type.enum';
@@ -122,7 +119,7 @@ export class DonationService {
       provDon.senderSig,
       provDon.senderUser.userId,
       provDon.amount,
-      provDon.funding.fundUuid,
+      funding.fundUuid,
       provDon.status,
       provDon.regAt,
     );
@@ -169,7 +166,7 @@ export class DonationService {
         dto.senderSig,
         user.userId,
         dto.donAmnt,
-        funding.fundUuid,
+        funding.fundId,
       ),
     );
   }
