@@ -1,4 +1,5 @@
 export interface Sorting {
   property: string;
-  direction: string;
+  direction: 'DESC' | 'ASC';
+  nulls?: 'NULLS FIRST' | 'NULLS LAST';
 }
