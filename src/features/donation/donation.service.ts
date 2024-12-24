@@ -37,11 +37,8 @@ export class DonationService {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
 
-    private readonly rollService: RollingPaperService,
-
     private readonly g2gException: GiftogetherExceptions,
 
-    private eventEmitter: EventEmitter2,
     private readonly validCheck: ValidCheck,
 
     private readonly createProvisionalDonation: CreateProvisionalDonationUseCase,
